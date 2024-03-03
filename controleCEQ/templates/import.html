@@ -1,0 +1,5 @@
+<form method='POST' enctype="multipart/form-data" action="{%url 'importexcel'%}">{% csrf_token %}
+    <label for="excel">Selecione um arquivo Excel (.xlsx):</label>
+    <input type="file" name="excel" accept=".xlsx, .xls">
+    <button type="submit">Enviar</button>
+  </form>  

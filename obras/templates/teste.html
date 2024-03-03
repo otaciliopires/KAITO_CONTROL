@@ -1,0 +1,47 @@
+{% extends 'base_obra.html' %}
+
+{% load static %}
+{% block 'head' %}
+    <link rel="stylesheet" href="{% static 'autenticacao/css/login.css' %}">
+{%endblock%}
+{% block 'titulo' %}painel_obras{% endblock %}
+
+
+{%block 'plataforma'%}
+<div>ok</div>
+{%endblock%}
+
+
+
+
+<nav class="navbar bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'home'%}">
+        <img src="https://static.wikia.nocookie.net/hunterxhunter/images/0/05/Hunter_Association_logo.png/revision/latest?cb=20180405075402" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+        KAITO
+      </a>
+      <div class='dropdown-center user-drop'> 
+        <a class='dropdown-toggle' data-bs-toggle="dropdown" aria-expanded="false" role="button"><img src=""><span class="user">{{user}}</span></a> 
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+          <li class='dropdown-header'><h5>{{obra_user}}</h5>
+            <span>ENDEREÇO DA OBRA</span>
+          </li>
+          <hr>
+          <li class='sair'><a class="dropdown-item sair" href="{%url 'sair'%}"> Sair</a></li>
+        </ul>
+      </div>
+  </nav>
+
+
+      <div class="col-lg-10">{% block 'plataforma' %}mensagem{% endblock  %}</div>
+    </div>
+    </div>
+  </div>
+  {%endif%}  
+  <script src = "{%static 'autenticacao/javascript/base.js'%}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js" ></script>
+
+ 
+</body>
+</html>

@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block 'head' %}
+    <link rel="stylesheet" href="{% static 'autenticacao/css/login.css' %}">
+
+{%endblock%}
+{% block 'titulo' %}Transferências{% endblock %}
+
+
+
+{%block 'body'%}
+
+<main id="main" class="main">
+  <div class="pagetitle">
+     <h1 style="font-size: 50px;">Transferências</h1>
+     <nav>
+        
+     </nav>
+     <nav>
+        <ol class="breadcrumb">
+           <li style="margin-top: 10px; margin-right: 10px;"><a href="index.html">Filtrar Transferências:</a></li>
+           <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#basicModal"> Filtro Transferencias </button>
+           <div  class="modal fade" id="basicModal" tabindex="-1">
+            <form method='POST' action="{% url 'transferencias' %}"> {% csrf_token %}
+              <div  class="modal-dialog">
+                 <div style="width: 650px; padding-left: 40px; padding-right: 40px;" class="modal-content">
+                    <div class="modal-header">
+                       <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="row mb-3">
+                       <label for="inputDate" class="col-sm-2 col-form-label">Start Date:</label>
+                       <div class="col-sm-10"> <input style="width:150px" name='data' type="date" class="form-control"></div>
+                    </div>          
+                    <div class="row mb-3">
+                       <label for="inputDate" class="col-sm-2 col-form-label">End Date:</label>
+                       <div class="col-sm-10"> <input style="width:150px" name='data_fim' type="date" class="form-control"></div>
+                    </div>
+                    <div class="row mb-3">
+                       <label class="col-sm-2 col-form-label">Tanques:</label>
+                       <div class="col-sm-10">
+                          
+          <div class="mb-3">
+            <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Tanque:
+            </button>
+            <ul style='width:300px' class="dropdown-menu">
+              {%for tanque in tanque_fixo%}
+                <li>
+                    <div style='margin-left:20px' class="mb-3 form-check">
+                        <input name='tanque_fixo' type="checkbox" class="form-check-input" id="exampleCheck1" value="{{tanque.id}}">
+                        <label class="form-check-label" for="exampleCheck1">{{tanque}}</label>
+                    </div>
+                </li>
+                {%endfor%}
+            </ul>
+          </div>
+        </div>
+
+
+        <div class="mb-3">
+          <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Comboio
+          </button>
+          <ul style='width:300px' class="dropdown-menu">
+            {%for tanque in tanque_movel%}
+              <li>
+                  <div style='margin-left:20px' class="mb-3 form-check">
+                      <input name='tanque_movel' type="checkbox" class="form-check-input" id="exampleCheck1" value="{{tanque.id}}">
+                      <label class="form-check-label" for="exampleCheck1">{{tanque}}</label>
+                  </div>
+              </li>
+              {%endfor%}
+          </ul>
+        </div>
+      </div>
+
+                                                       
+                    <div class="modal-footer"><input type="submit" class="btn btn-primary" value='ENVIAR'></input></div>
+                 </div>
+              </div>
+            </form>
+           </div>
+        </ol>
+     </nav>
+
+
+
+
+  </div>
+  <section class="section dashboard">
+     <div class="row">
+        <div class="col-lg-12">
+           <div class="row">
+
+              <div class="col-xxl-4 col-xl-12">
+                 <table class="table table-striped table-bordered">
+                    <thead style="font-size:10px" >
+                      <tr>
+                        <th class='okok' scope='col'>Nº</th>
+                        <th class='okok' scope="col">TANQUE</th>
+                        <th class='okok' scope="col">DESTINO</th>
+                        <th class='okok' scope="col">QUANTIDADE</th>
+                        <th class='okok' scope="col">DATA</th>
+                        <th class='okok' scope="col">TOTALIZADOR TANQUE</th>
+                        <th class='okok' scope="col">TOTALIZADOR COMBOIO</th>
+                        <th class='okok' scope="col">colaborador</th>
+                        
+                      </tr>
+                    </thead>
+                    <tbody style="font-size:10px" >
+                    {%for transferencia in transferencias%}    
+                      <tr>
+                        <th  scope="row">{{transferencia.id}}</th>
+                        <td class='okok'>{{transferencia.fixo}}</td>
+                        <td class='okok'>{{transferencia.movel}}</td>
+                        <td class='okok'>{{transferencia.litros}}</td>
+                        <td class='okok'>{{transferencia.data}}</td>
+                        <td class='okok'>{{transferencia.contador_fim}}</td>
+                        <td class='okok'>{{transferencia.contador_comboio}}</td>
+                      </tr>
+                      {%endfor%}
+                       </tbody>
+                  </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+        
+             
+</main>
+<footer id="footer" class="footer">
+  <div class="copyright"> &copy; Copyright <strong><span>Kaito Control</span></strong>. All Rights Reserved</div>
+  
+</footer>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>  
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="assets/js/apexcharts.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/chart.min.js"></script>
+<script src="assets/js/echarts.min.js"></script>
+<script src="assets/js/quill.min.js"></script>
+<script src="assets/js/simple-datatables.js"></script>
+<script src="assets/js/tinymce.min.js"></script>
+<script src="assets/js/validate.js"></script>
+<script src="assets/js/main.js"></script> 
+
+
+
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+
+ {% endblock%}

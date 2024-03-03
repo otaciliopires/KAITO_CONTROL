@@ -1,0 +1,612 @@
+{%extends 'base.html'%}
+
+{%load static%}
+
+{%block 'head'%}
+<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{%endblock%}
+
+{%block 'body'%}
+
+
+<main id="main" class="main">
+  <div class="pagetitle">
+    {% if messages %}
+      {%for i in messages%}
+        <div class="{{i.tags}}" role='alert'>
+            {{i}}
+        </div>
+      {%endfor%}
+    {%endif%}    
+
+
+     <h1>Home</h1>
+     <nav>
+        <ol class="breadcrumb">
+           <li class="breadcrumb-item" ><a style='margin-top:30px' >Controle de diesel - Upload arquivo em excel (.xlsx):</a></li>
+           <li ><div style="margin-left:0"><div class="row mb-3">
+              <form method='POST'  enctype="multipart/form-data" action="{%url 'importexcel'%}">{% csrf_token %}
+              
+              <label  class="col-sm-2 col-form-label"></label>
+              <div class="col-sm-10"> <input name='excel' class="form-control" type="file" id="formFile"></div>
+              </div></div></li>
+           <li ><div style="margin-left:10px"><button style="margin-left:20px; margin-top:20px" type="submit"  class="btn btn-primary">Enviar</button></div></li>
+
+        </ol>
+     </nav>
+  </div>
+  <section class="section dashboard">
+     <div class="row">
+        <div class="col-lg-8">
+           <div class="row">
+              <div class="col-xxl-4 col-xl-12">
+                 <div class="card info-card customers-card">
+                    <div class="card-body">
+                       <h5 class="card-title" style='font-size:30px'>Estoque de Diesel <span>| Atual</span></h5>
+                       <div class="d-flex align-items-center">
+                          <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-database"></i></div>
+                          <div class="ps-3">
+                             <h6>{{estoque_total|floatformat:"2g"}} </h6>
+                             <span class="text-danger small pt-1 fw-bold">{{porcent_estoque}}%</span> <span class="text-muted small pt-2 ps-1">decrease</span>
+                          </div>
+                          <div style='margin-left:100px'>
+                            
+                            <div id="bordas" class="col-md-4">
+                              <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-success btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_entradas" >ENTRADA</button>
+                            </div>
+                            <div id="bordas" class="col-md-4">
+                              <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-danger btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_saidas">ABASTECIMENTO</button>
+                            </div>
+                            <div id="bordas" class="col-md-4">
+                              <button style='margin-left:0px; margin-bottom: 5px'   class="btn btn-warning btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_transferencias">TRANSFERÊNCIA</button>
+                            </div>
+                          </div> 
+
+
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+
+
+
+
+
+
+              
+              <div class="col-xxl-4 col-md-6">
+                 <div class="card info-card sales-card">
+                    <div class="card-body">
+                       <h5 class="card-title">TC-01 <span>| Tanque 15.000 litros</span></h5>
+                       <div class="d-flex align-items-c enter">
+                          <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
+                          <div class="ps-3">
+                             <h6>{{tc01.0|floatformat:"2g"}}</h6>
+                             <span class="text-success small pt-1 fw-bold">{{tc01.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+              
+              <div class="col-xxl-4 col-md-6">
+                 <div class="card info-card revenue-card">
+                    <div class="card-body">
+                       <h5 class="card-title">TC-02 <span>| Tanque 30.000 litros</span></h5>
+                       <div class="d-flex align-items-center">
+                          <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
+                          <div class="ps-3">
+                             <h6>{{tc02.0|floatformat:"2g"}}</h6>
+                             <span class="text-success small pt-1 fw-bold">{{tc02.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              <div class="col-xxl-4 col-md-6">
+                 <div class="card info-card revenue-card">
+                    <div class="card-body">
+                       <h5 class="card-title">CA-01.1 <span>| Tanque 4500 litros</span></h5>
+                       <div class="d-flex align-items-center">
+                          <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-truck"></i></div>
+                          <div class="ps-3">
+                             <h6>{{ca01.0|floatformat:"2g"}}</h6>
+                             <span class="text-success small pt-1 fw-bold">{{ca01.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              <div class="col-xxl-4 col-md-6">
+                 <div class="card info-card revenue-card">
+                    <div class="card-body">
+                       <h5 class="card-title">CA-02.1 <span>| Tanque 4500 litros</span></h5>
+                       <div class="d-flex align-items-center">
+                          <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-truck"></i></div>
+                          <div class="ps-3">
+                             <h6>{{ca02.0|floatformat:"2g"}}</h6>
+                             <span class="text-success small pt-1 fw-bold">{{ca02.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+
+              
+              
+
+              
+              <div class="col-12">
+                 <div class="card">
+                    <div class="filter">
+                       <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                       <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                          <li class="dropdown-header text-start">
+                             <h6>Filtro</h6>
+                             <form method='POST' action="{%url 'home'%}">{% csrf_token %}
+                              <input type='hidden' name='form_data' value='form_data'>
+                              <select name='mes'>
+                                {%for mes in meses%}
+                                  <option value="{{mes}}">{{mes}}</option>
+                                {%endfor%}
+                              </select>
+                              <input type="submit" class="btn btn-primary" value='Ir'>
+                            </form>
+                       </ul>
+                    </div>
+                    <div class="card-body">
+                       <h5 class="card-title">Consumo semanal <span>{{mes_atual}}</span></h5>
+                       <canvas id="reportsChart"></canvas>
+                       <script>
+                          // Dados para o gráfico
+                          var daysOfWeek = ['1ª Sem', '2ª Sem', '3ª Sem', '4ª Sem'];
+                          var values = {{entradas}};
+                          var additionalValues = {{saidas}};
+                  
+                          // Criando o contexto do gráfico
+                          var ctx = document.getElementById('reportsChart').getContext('2d');
+                  
+                          // Criando o gráfico de barras empilhadas
+                          var barChart = new Chart(ctx, {
+                              type: 'bar',
+                              data: {
+                                  labels: daysOfWeek,
+                                  datasets: [
+                                      {
+                                          label: 'Diesel Recebido',
+                                          data: values,
+                                          backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                                          borderColor: 'rgba(75, 192, 192, 1)',
+                                          borderWidth: 1
+                                      },
+                                      {
+                                          label: 'Diesel consumido',
+                                          data: additionalValues,
+                                          backgroundColor: 'rgba(255, 99, 132, 0.7)', // Barra vermelha
+                                          borderColor: 'rgba(217, 5, 12, 1)',
+                                          borderWidth: 1
+                                      }
+                                  ]
+                              },
+                              options: {
+                                  scales: {
+                                      y: {
+                                          beginAtZero: true,
+                                          max: 60000
+                                      }
+                                  }
+                              }
+                          });
+                      </script>
+                    </div>
+                 </div>
+              </div>
+
+              
+           </div>
+        </div>
+        <div class="col-lg-4">
+           <div class="card">
+
+              <div class="card-body">
+                 <h5 class="card-title" style='font-size:25px'>Equipamentos maior consumo - {{mes_atual}}</h5>
+                 <div class="activity">
+
+
+                  <table class="table table-striped table-bordered">
+                    <thead style="font-size:10px" >
+                      <tr>
+                        <th scope='col'>Equipamento</th>
+                        <th scope="col">Litros</th>
+   
+                        
+                      </tr>
+                    </thead>
+                    <tbody style="font-size:10px" >
+                    {%for key, value in sort_dict.items%}    
+                      <tr>
+                        <th scope="row">{{key}}</th>
+                        <td style='font-size:12px; font-weight:bold'>{{value|floatformat:"2g"}}</td>
+
+                      {%endfor%}
+                       </tbody>
+                  </table>
+                    
+                 </div>
+              </div>
+           </div>
+
+           <div class="card">
+
+  
+              <div class="card-body pb-0">
+                 <h5 class="card-title" style='font-size:25px; align-text:center'>Consumo Obras - {{mes_atual}}</h5>
+                
+                 <div class="chart-container" style="position: relative; height:300px;">
+                    <canvas id="EquipChart"></canvas>
+                  </div>
+                  <script>
+                    // Dados para o gráfico
+                    var data = {
+                       labels: {{list_obras|safe}},
+                       datasets: [{
+                       data: {{list_consumo}},   
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#33FF99', '#ed3c0d']
+                      }]
+                    };
+                    
+                    // Configuração do gráfico
+                    var options = {
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: {
+                          display: false
+                        }
+                      }
+                    };
+                    
+                    // Criando o gráfico de rosca
+                    var ctx = document.getElementById('EquipChart').getContext('2d');
+                    var myDoughnutChart = new Chart(ctx, {
+                      type: 'doughnut',
+                      data: data,
+                      options: options
+                    });
+                    
+                    // Criando o rótulo com cores ao lado do gráfico
+                    var legendContainer = document.getElementById('legend');
+                    data.labels.forEach(function(label, index) {
+                      var colorBox = '<span class="color-box" style="background-color:' + data.datasets[0].backgroundColor[index] + '"></span>';
+                      var labelWithColor = '<div class="label-with-color">' + colorBox + label + '</div>';
+                      legendContainer.innerHTML += labelWithColor;
+                    });
+                    </script>
+              </div>
+           </div>
+        </div>
+     </div>
+  </section>
+</main>
+<footer id="footer" class="footer">
+  <div class="copyright"> &copy; Copyright <strong><span>KAITO Solutions</span></strong>. All Rights Reserved</div>
+  
+</footer>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>  
+
+
+
+      
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+<br>
+<br>
+<br>
+ 
+
+<section class="container">
+    
+
+
+
+
+      <div>
+        <canvas id="despesas_mensal" width="250" height="200"></canvas>
+      </div>  
+
+
+      <div class="modal fade" id="modal_saidas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">ABASTECIMENTOS</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
+                <input type='hidden' name='form_saidas' value='form_saidas'>
+                <div class="container text-left">
+                    <div class="row">
+                        <div class='col-md-6'>
+                            <div class='col'>
+                                <label for='tanque'>Tanque:</label> 
+                                <select name='tanque_id'>
+                                  {%for tanque in tanques%}
+                                    <option value="{{tanque.id}}">{{tanque}}</option>
+                                    {%endfor%}
+                                </select>
+                            </div>
+
+                            <div class='col' >
+                                <label for='obra'>Obra:</label> 
+                                <select name='obra'>
+                                  {%for obra in obras%}
+                                    <option value="{{obra.id}}">{{obra}}</option>
+                                  {%endfor%}
+                                </select>
+                            </div>
+                            <div class='col' >
+                                <label for='equipamento'>Equipamento:</label> 
+                                <select name='equipamento'>
+                                  {%for equipamento in equipamentos%}
+                                    <option value="{{equipamento.id}}">{{equipamento}}</option>
+                                  {%endfor%}
+                                </select>
+                            </div>
+                        </div>
+
+                      <div class='col-md-6'>123</div>
+                    </div>
+
+                    <hr>
+
+                    <div class='row'>
+                      <div class='col-md-6'>
+                          <div class='col'>
+                            <label for='contador_inicial'>Contador inicial:</label>
+                            <input type='text' name='contador_inicial' placeholder='Contador Inicial'>
+                          </div>
+                          <div class='col'>
+                            <label for='contador_final'>Contador final:</label>
+                            <input type='text' name='contador_final' placeholder='Contador Final'>
+                          </div>
+                          <div class='col'>__________________________
+                          </div>
+                          <div class='col'>
+                            <label for='horímetro'>Horímetro:</label>
+                            <input type='text' name='horimetro' placeholder='Horímetro'>
+                          </div>
+                      </div>
+                      <div class='col-md-6'>
+                          <div class='col'>
+                            <label for='saida_litros'>Litros:</label>
+                            <input type='text' name='saida_litros' placeholder='Litros'> 
+                          </div>
+                          <div class='col'>
+                            <label for='operador'>Operador:</label>
+                            <input type='text' name='operador' placeholder='Operador/Motorista'> 
+                          </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value='Salvare'>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
+      
+      
+      
+      <div class="modal fade" id="modal_entradas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">ENTRADAS</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
+                <input type='hidden' name='form_entradas' value='form_entradas'>
+                <div class="container text-left">
+                    <div class="row">
+                        <div class='col-md-6'>
+                            <div class='col'>
+                                <label for='tanque'>Tanque:</label> 
+                                <select name='tanque_id'>                                 
+                                  {%for tanque in tanques%}
+                                    {%if tanque.tipo == 'F'%}
+                                      <option value="{{tanque.id}}">{{tanque}}</option>
+                                    {%endif%}
+                                  {%endfor%}
+                                </select>
+                            </div>
+
+                            <div class='col' >
+                                <label for='obra'>Obra:</label> 
+                                <select name='obra_id'>
+                                  {%for obra in obras%}
+                                    <option value="{{obra.id}}">{{obra}}</option>
+                                  {%endfor%}
+                                </select>
+                            </div>
+                            <div class='col' >
+                                <label for='data_nf'>Data Emissão NF:</label> 
+                                <input type='date' name='data_nf'>
+                            </div>
+                        </div>
+
+                      <div class='col-md-6'>
+                        <div class='col'>
+                          <label for='fornecedor'>Fornecedor:</label>
+                          <input type='text' name='fornecedor' placeholder='Fornecedor'>
+                        </div>
+                          <div class='col'>
+                            <label for='NF'>Nota Fiscal:</label>
+                            <input type='text' name='NF' placeholder='Nota Fiscal'>
+                          </div>
+                          <div class='col' >
+                            <label for='data_entrega'>Data Entrega:</label> 
+                            <input type='date' name='data_entrega'>
+                        </div>
+
+
+                      </div>
+                    </div>
+
+                    <hr>
+
+                    <div class='row'>
+                      <div class='col-md-6'>
+                          <div class='col'>
+                            <label for='valor_litro'>Valor Litro:</label>
+                            <input type='text' name='valor_litro' placeholder='Valor_litro'>
+                          </div>
+                          <div class='col'>
+                            <label for='quantidade'>Quantidade:</label>
+                            <input type='text' name='quantidade' placeholder='Quantidade'>
+                          </div>
+                      </div>
+                      <div class='col-md-6'>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value='Salvare'>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="modal fade" id="modal_transferencias" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">TRANSFERÊNCIAS</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
+                <input type='hidden' name='form_transferencias' value='form_transferencias'>
+                <div class="container text-left">
+                    <div class="row">
+                        <div class='col-md-6'>
+                            <div class='col'>
+                                <label for='tanque'>Tanque Fixo:</label> 
+                                <select name='tanque_fixo_id'>                                 
+                                  {%for tanque in tanques%}
+                                    {%if tanque.tipo == 'F'%}
+                                      <option value="{{tanque.id}}">{{tanque}}</option>
+                                    {%endif%}
+                                  {%endfor%}
+                                </select>
+                            </div>
+
+                            <div class='col'>
+                              <label for='tanque'>Tanque Móvel:</label> 
+                              <select name='tanque_movel_id'>                                 
+                                {%for tanque in tanques%}
+                                  {%if tanque.tipo == 'M'%}
+                                    <option value="{{tanque.id}}">{{tanque}}</option>
+                                  {%endif%}
+                                {%endfor%}
+                              </select>
+                          </div>
+
+                            <div class='col' >
+                                <label for='contador_inicio'>Contador Inicial:</label>
+                                <input type='text' name='contador_inicio' placeholder='Contador Inicio'>
+                            </div>
+                            <div class='col' >
+                              <label for='contador_fim'>Contador Final:</label>
+                              <input type='text' name='contador_fim' placeholder='Contador Final'>
+                          </div>
+                            
+                        </div>
+
+                      <div class='col-md-6'>
+                        <div class='col'>
+                          <label for='contador_comboio'>Contador Melosa:</label>
+                          <input type='text' name='contador_comboio' placeholder='Contador'>
+                        </div>
+                          <div class='col' >
+                            <label for='motorista'>Motorista:</label> 
+                            <input type='text' name='motorista' placeholder='motorista'>
+                        </div>
+
+
+                      </div>
+                    </div>
+
+                    <hr>
+
+                    <div class='row'>
+                      <div class='col-md-6'>
+                          <div class='col'>
+
+                          <div class='col'>
+
+                          </div>
+                      </div>
+                      <div class='col-md-6'>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value='Salvare'>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+
+
+
+{%endblock%}

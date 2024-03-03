@@ -1,0 +1,117 @@
+{% extends 'base_obra.html' %}
+
+{% load static %}
+{% block 'titulo' %}painel_obras{% endblock %}
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+{%block 'head'%}
+<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{%endblock%}
+
+
+
+{%block 'plataforma' %}
+
+<main style='margin-left:0  ' id="main" class="main">
+    <div class="pagetitle">
+       <h1 style='font-size:40px; margin-bottom:40px'>Obras:</h1>
+       <nav>
+    {%for obra, consumo_mes in zipped_segments%}      
+    <section class="section dashboard">
+       <div class="row">
+          <div class="col-lg-10">
+             <div class="row">
+                <div class="col-xxl-4 col-xl-12">
+                   <div class="card info-card customers-card">
+                      <div class="card-body">
+                         <h5 class="card-title" style='font-size:22px'><a href="/obra/{{obra.id}}" style='text-decoration:none; color:#00008B'>{{obra.nome}} </h5>
+                         <div class="d-flex align-items-center">
+                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i style='color:#00008B;' class="bi bi-building"></i>
+                            </div>
+                            <div class="ps-3">
+                               <h6>{{obra.saldo|floatformat:"2g"}} </h6>
+                            </div>
+                            <div style='margin-left:50px; ' class="ps-3">
+                                <div style='' class="card-body">
+                                    <h5 class="card-title">Consumo Mensal</h5>
+                                    <canvas  id="{{obra.id}}ok" width="500" height="150"></canvas>
+                                        <script>
+                                        var ctx = document.getElementById('{{obra.id}}ok').getContext('2d');
+                                        var myChart = new Chart(ctx, {
+                                            type: 'bar',
+                                            data: {
+                                                labels: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGT', 'SET', 'OUT', 'NOV', 'DEZ'],
+                                                datasets: [{
+                                                    label: 'Saidas em litros',
+                                                    data: {{consumo_mes}},
+                                                    
+                                                    borderWidth: 1
+                                                }]
+                                            },
+                                            options: {
+                                                
+                                                scales: {
+                                                    yAxes: [{
+                                                        ticks: {
+                                                            beginAtZero: true
+                                                        }
+                                                    }]
+                                                }
+                                            }
+                                        });
+                                        </script>
+                                 </div>
+                             </div>
+
+                            
+                            <div style='margin-left:100px'>
+
+                            </div>
+                        </div>
+
+
+
+                        
+                   </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+{%endfor%}
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+  
+  
+  
+  
+  {%endblock%}
+
+
+
