@@ -243,9 +243,12 @@ def lista_obras(request):
             else:pass
             consumo_mes.append(saida)
         consumo_meses.append(consumo_mes)
+        consumo_mes = []
+
 
     
     zipped_segments = zip(obras, consumo_meses)
+    print(consumo_meses)
     
 
     return render(request, 'lista_obras.html', {'obras':obras, 'consumo_meses':consumo_meses, 'zipped_segments':zipped_segments})
