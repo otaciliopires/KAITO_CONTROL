@@ -7,12 +7,12 @@ from ativos.models import Equipamentos, Obras
 # class Ordem_Oficina(models.Model):
 #     equipamento = models.ForeignKey(Equipamentos)
 #     data_inicio = models.DateField()
-#     data_fim = models.DateField()
-#     tempo_aguardo_peca = models.FloatField()
-#     tempo_aguardo_servico = models.FloatField()S
-#     tempo_em_servico = models.FloatField()
+#     data_fim = models.DateField(null=True)
+#     tempo_aguardo_peca = models.FloatField(null=True)
+#     tempo_aguardo_servico = models.FloatField(null=True)
+#     tempo_em_servico = models.FloatField(null=True)
 #     tipo_status = (("AP", "Aguardando Peças"), ("AS", "Aguardando Serviço"), ("ES", "Em Serviço"))
-#     status = models.CharField(max_length=5, choices = tipo_status, default="Aguardando Peças")
+#     status = models.CharField(max_length=5, choices = tipo_status, default="Aguardando Serviço")
 #     numero = models.IntegerField()
 #     horimetro = models.FloatField()
 
