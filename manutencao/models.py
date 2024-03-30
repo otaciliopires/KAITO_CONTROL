@@ -4,22 +4,22 @@ from ativos.models import Equipamentos, Obras
 # Create your models here.
 
 
-# class Ordem_Oficina(models.Model):
-#     equipamento = models.ForeignKey(Equipamentos)
-#     data_inicio = models.DateField()
-#     data_fim = models.DateField()
-#     tempo_aguardo_peca = models.FloatField()
-#     tempo_aguardo_servico = models.FloatField()S
-#     tempo_em_servico = models.FloatField()
-#     tipo_status = (("AP", "Aguardando Peças"), ("AS", "Aguardando Serviço"), ("ES", "Em Serviço"))
-#     status = models.CharField(max_length=5, choices = tipo_status, default="Aguardando Peças")
-#     numero = models.IntegerField()
-#     horimetro = models.FloatField()
+class Ordem_Oficina(models.Model):
+    equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING)
+    data_inicio = models.DateField()
+    data_fim = models.DateField()
+    tempo_aguardo_peca = models.FloatField()
+    tempo_aguardo_servico = models.FloatField()
+    tempo_em_servico = models.FloatField()
+    tipo_status = (("AP", "Aguardando Peças"), ("AS", "Aguardando Serviço"), ("ES", "Em Serviço"))
+    status = models.CharField(max_length=5, choices = tipo_status, default="Aguardando Peças")
+    numero = models.IntegerField()
+    horimetro = models.FloatField()
 
 
 
-#     def __str__(self):
-#         return self.equipamento
+    def __str__(self):
+        return self.equipamento
     
 # class Funcionario(models.Model):
 
