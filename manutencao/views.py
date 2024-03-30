@@ -14,6 +14,8 @@ def home_manutencao(request):
 
         if form_osoficina:
             #adquirir as informações dos forms da OS oficina.
+
+            #adicionar o form da oficina,o de criação de da O.S.
             
 
 
