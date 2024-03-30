@@ -10,6 +10,191 @@
 
 {%endblock%}
 
+
 {%block 'body'%}
+  <!-- MENSAGENS -->
+  <main id="main" class="main">
+    <div class="pagetitle">
+      {% if messages %}
+        {%for i in messages%}
+          <div class="{{i.tags}}" role='alert'>
+              {{i}}
+          </div>
+        {%endfor%}
+      {%endif%}  
+ <!-- MENSAGENS --> 
+
+
+
+ <section class="section dashboard">
+    <div class="row">
+       <div class="col-lg-8">
+          <div class="row">
+             <div class="col-xxl-4 col-xl-12">
+                <div class="card info-card customers-card">
+                   <div class="card-body">
+                      <h5 class="card-title" style='font-size:30px'>ABRIR ORDEM DE SERVIÇO <span>| Atual</span></h5>
+                      <div class="d-flex align-items-center">
+
+                         <div style='margin-left:100px'>
+                           
+                           <div id="bordas" class="col-md-4">
+                             <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-success btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_entradas" >ENTRADA</button>
+                           </div>
+                           <div id="bordas" class="col-md-4">
+                             <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-danger btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_saidas">ABASTECIMENTO</button>
+                           </div>
+                           <div id="bordas" class="col-md-4">
+                             <button style='margin-left:0px; margin-bottom: 5px'   class="btn btn-warning btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_transferencias">TRANSFERÊNCIA</button>
+                           </div>
+                         </div> 
+
+
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+
+
+
+
+
+
+             
+             <div class="col-xxl-4 col-md-6">
+                <div class="card info-card sales-card">
+                   <div class="card-body">
+                      <h5 class="card-title">TC-01 <span>| Tanque 15.000 litros</span></h5>
+                      <div class="d-flex align-items-c enter">
+                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
+                         <div class="ps-3">
+                            <h6>{{tc01.0|floatformat:"2g"}}</h6>
+                            <span class="text-success small pt-1 fw-bold">{{tc01.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             
+             <div class="col-xxl-4 col-md-6">
+                <div class="card info-card revenue-card">
+                   <div class="card-body">
+                      <h5 class="card-title">TC-02 <span>| Tanque 30.000 litros</span></h5>
+                      <div class="d-flex align-items-center">
+                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
+                         <div class="ps-3">
+                            <h6>{{tc02.0|floatformat:"2g"}}</h6>
+                            <span class="text-success small pt-1 fw-bold">{{tc02.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+             <div class="col-xxl-4 col-md-6">
+                <div class="card info-card revenue-card">
+                   <div class="card-body">
+                      <h5 class="card-title">CA-01.1 <span>| Tanque 4500 litros</span></h5>
+                      <div class="d-flex align-items-center">
+                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-truck"></i></div>
+                         <div class="ps-3">
+                            <h6>{{ca01.0|floatformat:"2g"}}</h6>
+                            <span class="text-success small pt-1 fw-bold">{{ca01.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+             <div class="col-xxl-4 col-md-6">
+                <div class="card info-card revenue-card">
+                   <div class="card-body">
+                      <h5 class="card-title">CA-02.1 <span>| Tanque 4500 litros</span></h5>
+                      <div class="d-flex align-items-center">
+                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-truck"></i></div>
+                         <div class="ps-3">
+                            <h6>{{ca02.0|floatformat:"2g"}}</h6>
+                            <span class="text-success small pt-1 fw-bold">{{ca02.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+
+             
+             
+
+             
+            
+             
+          </div>
+       </div>
+      
+          </div>
+
+          
+          </div>
+       </div>
+    </div>
+ </section>
+
+
+  <!-- MODAL OS CORRETIVA OFICINA -->
+  <button style="margin-left:300px" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    O.S. Corretiva Oficina
+  </button>
+  
+  <!-- MODAL OS CORRETIVA OFICINA -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form>
+                <div class="mb-3">
+                    <label class="form-label">Equipamento:</label>
+                    <select name='equipamentos'>
+                        {%for equipamento in equipamentos%}
+                        <option value={{equipamento.id}}>{{equipamento}}</option>
+                        {%endfor%}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Data Início:</label>
+                    <input style='width:300px' type="date" name="data_inicio"></input>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Hora Início:</label>
+                    <input style='width:300px' type="time" name="hora_inicio"></input>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Horímetro:</label>
+                    <input style='width:300px' type="number" name="horimetro"></input>
+                </div>
+
+            </form>
+
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
 
 {%endblock%}
