@@ -61,16 +61,7 @@ def home(request):
         #     )
 
         #     cadastro_equipamentoss.save()
-        # x =Equipamentos(prefixo='AB-01',
-        #                 descricao='AUTOBETONEIRA',
-        #                 tipo='T',
-        #                 proprietario='CONTRUTORA ROCHA',
-        #                 horímetro=0)
 
-        # x.save()
-                    
-        # x = Equipamentos.objects.all()
-        # x.delete()
         
 
 

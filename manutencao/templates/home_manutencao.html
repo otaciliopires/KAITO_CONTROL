@@ -28,25 +28,27 @@
 
  <section class="section dashboard">
     <div class="row">
-       <div class="col-lg-8">
+       <div class="col-lg-12">
           <div class="row">
              <div class="col-xxl-4 col-xl-12">
                 <div class="card info-card customers-card">
                    <div class="card-body">
                       <h5 class="card-title" style='font-size:30px'>ABRIR ORDEM DE SERVIÇO <span>| Atual</span></h5>
-                      <div class="d-flex align-items-center">
+                      <div class="d-flex align-items-left">
 
-                         <div style='margin-left:100px'>
+                         <div style='margin-left:50px'>
                            
-                           <div id="bordas" class="col-md-4">
-                             <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-success btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_entradas" >ENTRADA</button>
-                           </div>
-                           <div id="bordas" class="col-md-4">
-                             <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-danger btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_saidas">ABASTECIMENTO</button>
-                           </div>
-                           <div id="bordas" class="col-md-4">
-                             <button style='margin-left:0px; margin-bottom: 5px'   class="btn btn-warning btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_transferencias">TRANSFERÊNCIA</button>
-                           </div>
+                             <!-- MODAL OS CORRETIVA OFICINA -->
+                        <button style="margin-bottom:5px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                           O.S. Corretiva Oficina
+                        </button>
+
+                        <button style="margin-bottom:5px" type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                           O.S. Socorro
+                        </button>
+                        <button style="margin-bottom:5px" type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                           O.S. Corretiva Oficina
+                        </button>
                          </div> 
 
 
@@ -62,14 +64,14 @@
 
 
              
-             <div class="col-xxl-4 col-md-6">
+             <div class="col-xxl-6 col-md-12">
                 <div class="card info-card sales-card">
                    <div class="card-body">
-                      <h5 class="card-title">TC-01 <span>| Tanque 15.000 litros</span></h5>
+                      <h5 class="card-title">ORDEM DE SERVIÇO CORRETIVA OFICINA <span>|EM ABERTO</span></h5>
                       <div class="d-flex align-items-c enter">
                          <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
                          <div class="ps-3">
-                            <h6>{{tc01.0|floatformat:"2g"}}</h6>
+                            <h6>LISTAR O.S. CORRETIVAS ABERTAS AQUI - INDICANDO A QUANTIDADE DE SERVIÇOS EM ABERTO</h6>
                             <span class="text-success small pt-1 fw-bold">{{tc01.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
                          </div>
                       </div>
@@ -142,7 +144,7 @@
 
 
   <!-- MODAL OS CORRETIVA OFICINA -->
-  <button style="margin-left:300px" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  <button style="margin-left:300px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
     O.S. Corretiva Oficina
   </button>
   
@@ -156,36 +158,33 @@
         </div>
         <div class="modal-body">
             <!-- FORM AQUI -->
-            <form>
+            <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
+               <input type='hidden' name='form_osoficina' value='form_osoficina'>
                 <div class="mb-3">
                     <label class="form-label">Equipamento:</label>
-                    <select name='equipamentos'>
-                        {%for equipamento in equipamentos%}
+                    <select name='equipamento'>
+                        {%for equipamento in list_equip%} 
                         <option value={{equipamento.id}}>{{equipamento}}</option>
                         {%endfor%}
                     </select>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Data Início:</label>
-                    <input style='width:300px' type="date" name="data_inicio"></input>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Hora Início:</label>
-                    <input style='width:300px' type="time" name="hora_inicio"></input>
+                    <input style='width:300px' type="datetime-local" name="data_inicio"></input>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Horímetro:</label>
                     <input style='width:300px' type="number" name="horimetro"></input>
                 </div>
-
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
             </form>
 
-          ...
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
-        </div>
+
+
       </div>
     </div>
   </div>
