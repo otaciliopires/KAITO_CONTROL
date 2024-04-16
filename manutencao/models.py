@@ -11,6 +11,7 @@ class Ordem_Oficina(models.Model):
     tempo_aguardo_peca = models.FloatField(null=True, blank=True)
     tempo_aguardo_servico = models.FloatField(null=True, blank=True)
     tempo_em_servico = models.FloatField(null=True, blank=True)
+    tempo_total = models.FloatField(null=True, blank=True)
     tipo_status = (("AP", "Aguardando Peças"), ("AS", "Aguardando Serviço"), ("ES", "Em Serviço"))
     status = models.CharField(max_length=5, choices = tipo_status, default="Aguardando Serviço")
     numero = models.IntegerField()
