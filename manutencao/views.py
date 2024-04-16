@@ -14,8 +14,13 @@ def home_manutencao(request):
         equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
         for i in equipamentos_rocha:
             list_equip.append(i)
-            
-        return render(request, 'home_manutencao.html', {'list_equip':list_equip})
+        
+
+        #dados para OS da oficina
+        os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
+        print(os_oficina_aberta)
+        return render(request, 'home_manutencao.html', {'list_equip':list_equip,
+                                                        'os_oficina_aberta':os_oficina_aberta})
 
     elif request.method == 'POST':
         form_osoficina = request.POST.get('form_osoficina')

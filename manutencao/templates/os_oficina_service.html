@@ -71,40 +71,14 @@
                       <div class="d-flex align-items-c enter">
                          <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
                          <div class="ps-3">
-                            <h5>LISTAR O.S. CORRETIVAS ABERTAS AQUI - INDICANDO A QUANTIDADE DE SERVIÇOS EM ABERTO/ tempo em aberto/ status atual</h5>
+                            <h6>LISTAR O.S. CORRETIVAS ABERTAS AQUI - INDICANDO A QUANTIDADE DE SERVIÇOS EM ABERTO</h6>
+                            <span class="text-success small pt-1 fw-bold">LISTAR TAMBÉM</span> <span class="text-muted small pt-2 ps-1">volume</span>
                          </div>
                       </div>
                    </div>
                 </div>
              </div>
              
-            {%for ordem_aberta in os_oficina_aberta %}
-             <div class="col-xxl-6 col-md-12">
-               <div style='margin-bottom:10px' class="card info-card sales-card">
-                  <div class="card-body">
-                     <div class="d-flex align-items-c enter">
-                        <div class="ps-3">
-                           <h5>{{ordem_aberta.equipamento}} // {{ordem_aberta.data_inicio}}</h5>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-            {%endfor%}
-
-            <div class="col-xxl-6 col-md-12">
-               <div style='margin-bottom:10px' class="card info-card sales-card">
-                  <div class="card-body">
-                     <div class="d-flex align-items-c enter">
-                        <div class="ps-3">
-                           <h5>LISTAR O.S. CORRETIVAS ABERTAS AQUI - INDICANDO A QUANTIDADE DE SERVIÇOS EM ABERTO</h5>
-                        </div>
-                     </div>
-                  </div>
-               </div>
-            </div>
-
-
              <div class="col-xxl-4 col-md-6">
                 <div class="card info-card revenue-card">
                    <div class="card-body">
