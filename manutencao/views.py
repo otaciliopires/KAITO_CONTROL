@@ -25,12 +25,8 @@ def home_manutencao(request):
             print(i.status)
 
         #dados para OS da oficina
-<<<<<<< HEAD
         os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
         print(os_oficina_aberta[0].id)
-=======
-        
->>>>>>> 2ac31298924338f50e18eed250104bd26a2a04b7
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                         'os_oficina_aberta':os_oficina_aberta})
 
