@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from .models import Ordem_Oficina
 from .models import Equipamentos
 from django.db.models import Max
+from datetime import datetime
+from manutencao.utils import now
 
 # Create your views here.
 
@@ -14,11 +16,21 @@ def home_manutencao(request):
         equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
         for i in equipamentos_rocha:
             list_equip.append(i)
-        
+
+
+        #atualização de status manutenção
+        list = []
+        os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
+        for i in os_oficina_aberta:
+            print(i.status)
 
         #dados para OS da oficina
+<<<<<<< HEAD
         os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
         print(os_oficina_aberta[0].id)
+=======
+        
+>>>>>>> 2ac31298924338f50e18eed250104bd26a2a04b7
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                         'os_oficina_aberta':os_oficina_aberta})
 
@@ -54,6 +66,8 @@ def servico_oficina(request, id):
 
     ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
     print(ordem_oficina_aberta.equipamento)
+
+    
 
 
     return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta})
