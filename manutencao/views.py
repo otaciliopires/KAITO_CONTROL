@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Ordem_Oficina
+from .models import Ordem_Oficina, Servico_Oficina
 from .models import Equipamentos
 from django.db.models import Max
 from datetime import datetime
@@ -21,12 +21,10 @@ def home_manutencao(request):
         #atualização de status manutenção
         list = []
         os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
-        for i in os_oficina_aberta:
-            print(i.status)
+
 
         #dados para OS da oficina
         os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
-        print(os_oficina_aberta[0].id)
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                         'os_oficina_aberta':os_oficina_aberta})
 
@@ -62,6 +60,9 @@ def servico_oficina(request, id):
 
     ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
     print(ordem_oficina_aberta.equipamento)
+
+    servico_oficina =  Servico_Oficina.objects.filter(ordem_servico=id)
+    print(servico_oficina)
 
     
 

@@ -51,7 +51,7 @@ class Servico_Oficina(models.Model):
     grupo_servico = models.ForeignKey(Grupo_Servico, on_delete=models.DO_NOTHING)
     descricao = models.CharField(max_length = 100)
     data_inicio = models.DateTimeField()
-    data_fim = models.DateTimeField(null=True)
+    data_fim = models.DateTimeField(null=True, blank=True)
     executante_terceiro = models.ForeignKey(Servico_Terceirizado, null=True, blank=True, on_delete=models.DO_NOTHING)
     executante_funcionario = models.ForeignKey(Funcionario, null=True, blank=True, on_delete=models.DO_NOTHING)
 
