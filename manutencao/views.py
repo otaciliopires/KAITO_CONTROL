@@ -65,5 +65,7 @@ def servico_oficina(request, id):
 
     
 
+    
+
 
     return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta})
