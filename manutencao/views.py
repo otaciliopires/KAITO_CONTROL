@@ -18,7 +18,7 @@ def home_manutencao(request):
 
         #dados para OS da oficina
         os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
-        print(os_oficina_aberta)
+        print(os_oficina_aberta[0].id)
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                         'os_oficina_aberta':os_oficina_aberta})
 
@@ -50,7 +50,10 @@ def home_manutencao(request):
 
         return redirect('/manutencao/home_manutencao')
 
-def servico_oficina(request):
+def servico_oficina(request, id):
+
+    ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
+    print(ordem_oficina_aberta.equipamento)
 
 
-    return HttpResponse('okok') 
+    return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta})
