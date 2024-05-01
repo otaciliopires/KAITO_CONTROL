@@ -37,16 +37,21 @@
                   <div class="card-body">
                      <h5 class="card-title">ORDEM DE SERVIÇO CORRETIVA OFICINA <span>|EM ABERTO</span></h5>
                      <div class="d-flex align-items-c enter">
-                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
                         <div class="ps-3">
-                           <h6>{{ordem_oficina_aberta.equipamento}} _____ {{ordem_oficina_aberta.data_inicio}} _____ (colocar aqui tempo parado) </h6>
+                           <h6>{{ordem_oficina_aberta.equipamento}} _____ {{ordem_oficina_aberta.data_inicio}} _____ (colocar aqui tempo parado)  </h6>
 
                         </div>
+                        <div class="d-flex align-items-cleft justify-content-left"> 
+                         <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
+                           <button style="margin-left:50px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                              Adicionar Serviço
+                            </button>
+                        </div>
+
                      </div>
                   </div>
                </div>
             </div>
-
 
 
 
@@ -58,7 +63,10 @@
 
                       <div class="d-flex align-items-c enter">
                          <div class="ps-3">
-                            <div style="font-size:20px">SOF{{servico.numero}}   //   {{servico.grupo_servico}}   //   {{servico.status}} </div>
+                            <div style="font-size:20px">SOF{{servico.numero}}   //   {{servico.grupo_servico}}   //   {{servico.status}} // {{servico.descricao}} // {{servico.data_inicio}} //
+                              <button style="margin-left:50px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#status_servico">
+                              Status Serviço
+                            </button> </div>
 
                          </div>
                       </div>
@@ -71,7 +79,7 @@
 
            
              
-             
+
 
              
             
@@ -88,10 +96,8 @@
  </section>
 
 
-  <!-- MODAL OS CORRETIVA OFICINA -->
-  <button style="margin-left:300px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    O.S. Corretiva Oficina
-  </button>
+
+
   
   <!-- MODAL OS CORRETIVA OFICINA -->
   <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -103,24 +109,145 @@
         </div>
         <div class="modal-body">
             <!-- FORM AQUI -->
-            <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
-               <input type='hidden' name='form_osoficina' value='form_osoficina'>
+            <form method='POST' action="{%url 'servico_oficina' id=id_OS_oficina%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_servico' value='form_osoficina'>
                 <div class="mb-3">
-                    <label class="form-label">Equipamento:</label>
-                    <select name='equipamento'>
-                        {%for equipamento in list_equip%} 
-                        <option value={{equipamento.id}}>{{equipamento}}</option>
+                    <label class="form-label">Tipo Serviço:</label>
+                    <select name='grupo_servico'>
+                        {%for tipo in grupo_servico%} 
+                        <option value={{tipo.id}}>{{tipo}}</option>
                         {%endfor%}
                     </select>
                 </div>
+
+
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="status_executante" id="flexRadioDefault1" value='funcionario'>
+                  <label class="form-check-label" for="flexRadioDefault1">
+                    Funcionário
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="status_executante" id="flexRadioDefault2" value='terceirizado' checked>
+                  <label class="form-check-label" for="flexRadioDefault2">
+                    Terceirizado
+                  </label>
+                </div>
+
+
+                <div class="mb-3">
+                  <label class="form-label">Executante:</label>
+                  <select name='executante_funcionario'>
+                      {%for executante in executantes%} 
+                      <option value={{executante.id}}>{{executante}}</option>
+                      {%endfor%}
+                  </select>
+              </div>
+
+              <div class="mb-3">
+               <label class="form-label">Terceirizado:</label>
+               <select name='executante_terceiro'>
+                   {%for terceiro in terceiros%} 
+                   <option value={{terceiro.id}}>{{terceiro}}</option>
+                   {%endfor%}
+               </select>
+              </div>
+
+              <div class='mb-3'></div>
+
                 <div class="mb-3">
                     <label class="form-label">Data Início:</label>
                     <input style='width:300px' type="datetime-local" name="data_inicio"></input>
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Horímetro:</label>
-                    <input style='width:300px' type="number" name="horimetro"></input>
+                  <label for="exampleFormControlTextarea1" class="form-label">Descrição do serviço:</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
                 </div>
+  
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- MODAL status serviço -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="status_servico" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'servico_oficina' id=id_OS_oficina%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_servico' value='form_osoficina'>
+                <div class="mb-3">
+                    <label class="form-label">Tipo Serviço:</label>
+                    <select name='grupo_servico'>
+                        {%for tipo in grupo_servico%} 
+                        <option value={{tipo.id}}>{{tipo}}</option>
+                        {%endfor%}
+                    </select>
+                </div>
+
+
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="status_executante" id="flexRadioDefault1" value='funcionario'>
+                  <label class="form-check-label" for="flexRadioDefault1">
+                    Funcionário
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="status_executante" id="flexRadioDefault2" value='terceirizado' checked>
+                  <label class="form-check-label" for="flexRadioDefault2">
+                    Terceirizado
+                  </label>
+                </div>
+
+
+                <div class="mb-3">
+                  <label class="form-label">Executante:</label>
+                  <select name='executante_funcionario'>
+                      {%for executante in executantes%} 
+                      <option value={{executante.id}}>{{executante}}</option>
+                      {%endfor%}
+                  </select>
+              </div>
+
+              <div class="mb-3">
+               <label class="form-label">Terceirizado:</label>
+               <select name='executante_terceiro'>
+                   {%for terceiro in terceiros%} 
+                   <option value={{terceiro.id}}>{{terceiro}}</option>
+                   {%endfor%}
+               </select>
+              </div>
+
+              <div class='mb-3'></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Data Início:</label>
+                    <input style='width:300px' type="datetime-local" name="data_inicio"></input>
+                </div>
+
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">Descrição do serviço:</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
+                </div>
+  
+
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                   <input type="submit" class="btn btn-primary"></input>

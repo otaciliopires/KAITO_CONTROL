@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Ordem_Oficina, Servico_Oficina
+from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado
 from .models import Equipamentos
 from django.db.models import Max
 from datetime import datetime
@@ -57,17 +57,61 @@ def home_manutencao(request):
         return redirect('/manutencao/home_manutencao')
 
 def servico_oficina(request, id):
+    if request.method == 'GET':
+        ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
+        print(ordem_oficina_aberta.equipamento)
 
-    ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
-    print(ordem_oficina_aberta.equipamento)
+        servico_oficina =  Servico_Oficina.objects.filter(ordem_servico=id)
+        print(servico_oficina)
 
-    servico_oficina =  Servico_Oficina.objects.filter(ordem_servico=id)
-    print(servico_oficina)
+        grupo_servico = Grupo_Servico.objects.all()
+        executantes = Funcionario.objects.all()
+        terceiros = Servico_Terceirizado.objects.all()
+    
+        return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
+                                                       'servico_oficina': servico_oficina,
+                                                       'grupo_servico': grupo_servico,
+                                                       'executantes':executantes,
+                                                       'terceiros': terceiros,
+                                                       'id_OS_oficina':id})
+    
+    elif request.method == 'POST':
+        form_servico = request.POST.get('form_servico')
 
+        if form_servico:
+            numero = Servico_Oficina.objects.aggregate(Max('numero'))['numero__max']
+            ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
+            grupo_servico_id = request.POST.get('grupo_servico')
+            grupo_servico = Grupo_Servico.objects.get(id=grupo_servico_id)
+            data_inicio = request.POST.get('data_inicio')
+            status_executante = request.POST.get('status_executante')
+            descricao_servico = request.POST.get('descricao')
+            if status_executante == 'funcionario':
+                funcionario_id = request.POST.get('executante_funcionario')
+                terceiro = None
+                funcionario = Funcionario.objects.get(id=funcionario_id)
+            else:
+                funcionario= None
+                terceiro_id = request.POST.get('executante_terceiro')
+                terceiro = Servico_Terceirizado.objects.get(id=terceiro_id)
+            
+
+        servico_oficina = Servico_Oficina(numero=numero+1,
+                                          ordem_servico=ordem_oficina_aberta,
+                                          grupo_servico=grupo_servico,
+                                          data_inicio=data_inicio,
+                                          descricao = descricao_servico,
+                                          executante_terceiro=terceiro,
+                                          executante_funcionario=funcionario)
+        
+        servico_oficina.save()
+
+
+                
+        print(grupo_servico_id, data_inicio, status_executante, funcionario, terceiro, descricao_servico)
     
 
     
 
-
-    return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
-                                                       'servico_oficina': servico_oficina})
+ 
+    return HttpResponse(f'Serviço cadastrado com sucesso :D  {grupo_servico, data_inicio, status_executante, descricao_servico}')

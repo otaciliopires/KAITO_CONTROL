@@ -34,6 +34,9 @@ class Servico_Terceirizado(models.Model):
     nome = models.CharField(max_length=50)
     descricao = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.nome
+
     
 class Grupo_Servico(models.Model):
 
