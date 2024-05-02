@@ -64,7 +64,7 @@
                       <div class="d-flex align-items-c enter">
                          <div class="ps-3">
                             <div style="font-size:20px">SOF{{servico.numero}}   //   {{servico.grupo_servico}}   //   {{servico.status}} // {{servico.descricao}} // {{servico.data_inicio}} //
-                              <button style="margin-left:50px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#status_servico">
+                              <button style="margin-left:50px" type="button" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#status_servico{{servico.id}}">
                               Status Serviço
                             </button> </div>
 
@@ -73,6 +73,89 @@
                    </div>
                 </div>
              </div>
+
+
+
+  <!-- MODAL status serviço // colocar o modal dentro do for loop, para que ele funcione em cada item gerado pelo for -->
+  <div class="modal fade" id="status_servico{{servico.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'servico_oficina' id=id_OS_oficina%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_status_servico' value='form_osoficina'>
+ 
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault1" value='aguardando_servico' checked>
+                  <label class="form-check-label" for="flexRadioDefault1">
+                    Aguardando Serviço
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2" value='aguardando_peca'>
+                  <label class="form-check-label" for="flexRadioDefault2">
+                    Aguardando Peças
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3" value='em_servico' checked>
+                  <label class="form-check-label" for="flexRadioDefault3">
+                    Em Serviço
+                  </label>
+                </div>
+
+                {%if servico.executante == 'Funcionario'%}
+                <div class="mb-3">
+                  <label class="form-label">Executante:</label>
+                  <select name='executante_funcionario'>
+                      {%for executante in executantes%} 
+                      <option value={{executante.id}}>{{executante}}</option>
+                      {%endfor%}
+                  </select>
+              </div>
+              {%else%}
+              <div class="mb-3">
+               <label class="form-label">Terceirizado:</label>
+               <select name='executante_terceiro'>
+                   {%for terceiro in terceiros%} 
+                   <option value={{terceiro.id}}>{{terceiro}}</option>
+                   {%endfor%}
+               </select>
+              </div>
+              {%endif%}
+
+              <div class='mb-3'></div>
+
+
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">Adicionar descrição:</label>
+                  <label for="exampleFormControlTextarea1" class="form-label">{{servico.descricao}}</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Data fim:</label>
+                  <input style='width:300px' type="datetime-local" name="data_fim"></input>
+                </div>
+ 
+  
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
 
              {%endfor%}
 
@@ -181,85 +264,7 @@
 
 
 
-  <!-- MODAL status serviço -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="status_servico" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <!-- FORM AQUI -->
-            <form method='POST' action="{%url 'servico_oficina' id=id_OS_oficina%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
-               <input type='hidden' name='form_servico' value='form_osoficina'>
-                <div class="mb-3">
-                    <label class="form-label">Tipo Serviço:</label>
-                    <select name='grupo_servico'>
-                        {%for tipo in grupo_servico%} 
-                        <option value={{tipo.id}}>{{tipo}}</option>
-                        {%endfor%}
-                    </select>
-                </div>
-
-
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="status_executante" id="flexRadioDefault1" value='funcionario'>
-                  <label class="form-check-label" for="flexRadioDefault1">
-                    Funcionário
-                  </label>
-                </div>
-                <div class="form-check">
-                  <input class="form-check-input" type="radio" name="status_executante" id="flexRadioDefault2" value='terceirizado' checked>
-                  <label class="form-check-label" for="flexRadioDefault2">
-                    Terceirizado
-                  </label>
-                </div>
-
-
-                <div class="mb-3">
-                  <label class="form-label">Executante:</label>
-                  <select name='executante_funcionario'>
-                      {%for executante in executantes%} 
-                      <option value={{executante.id}}>{{executante}}</option>
-                      {%endfor%}
-                  </select>
-              </div>
-
-              <div class="mb-3">
-               <label class="form-label">Terceirizado:</label>
-               <select name='executante_terceiro'>
-                   {%for terceiro in terceiros%} 
-                   <option value={{terceiro.id}}>{{terceiro}}</option>
-                   {%endfor%}
-               </select>
-              </div>
-
-              <div class='mb-3'></div>
-
-                <div class="mb-3">
-                    <label class="form-label">Data Início:</label>
-                    <input style='width:300px' type="datetime-local" name="data_inicio"></input>
-                </div>
-
-                <div class="mb-3">
-                  <label for="exampleFormControlTextarea1" class="form-label">Descrição do serviço:</label>
-                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
-                </div>
-  
-
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <input type="submit" class="btn btn-primary"></input>
-                </div>  
-            </form>
-
-        </div>
-
-
-      </div>
-    </div>
-  </div>
+ 
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

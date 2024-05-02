@@ -67,6 +67,9 @@ def servico_oficina(request, id):
         grupo_servico = Grupo_Servico.objects.all()
         executantes = Funcionario.objects.all()
         terceiros = Servico_Terceirizado.objects.all()
+        servicos = Servico_Oficina.objects.all()
+        for servico in servicos:
+            print(servico.executante)
     
         return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
                                                        'servico_oficina': servico_oficina,
@@ -77,6 +80,7 @@ def servico_oficina(request, id):
     
     elif request.method == 'POST':
         form_servico = request.POST.get('form_servico')
+        form_status_servico = request.POST.get('form_status_servico')
 
         if form_servico:
             numero = Servico_Oficina.objects.aggregate(Max('numero'))['numero__max']
@@ -106,6 +110,7 @@ def servico_oficina(request, id):
         
         servico_oficina.save()
 
+    elif form_status_servico:
 
                 
         print(grupo_servico_id, data_inicio, status_executante, funcionario, terceiro, descricao_servico)

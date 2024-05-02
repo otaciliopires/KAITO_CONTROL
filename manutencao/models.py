@@ -58,6 +58,8 @@ class Servico_Oficina(models.Model):
     tempo_em_servico = models.FloatField(null=True, blank=True)
     data_inicio = models.DateTimeField()
     data_fim = models.DateTimeField(null=True, blank=True)
+    tipo_executante = (("F", "Funcionario"),("T", "Terceirizado"))
+    executante = models.CharField(max_length=50, choices=tipo_executante, default="Funcionario")
     executante_terceiro = models.ForeignKey(Servico_Terceirizado, null=True, blank=True, on_delete=models.DO_NOTHING)
     executante_funcionario = models.ForeignKey(Funcionario, null=True, blank=True, on_delete=models.DO_NOTHING)
 
