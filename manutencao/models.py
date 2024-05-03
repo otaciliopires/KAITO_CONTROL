@@ -65,6 +65,14 @@ class Servico_Oficina(models.Model):
 
     def __str__(self):
         return self.grupo_servico.grupo
+    
+class Registro_Funcionario(models.Model):
+    funcionario = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING)
+    tempo_servico = models.FloatField(null=True, blank=True)
+    servico_oficina = models.ForeignKey(Servico_Oficina, on_delete = models.DO_NOTHING)
+    
+    def __str__(self):
+        return self.funcionario.nome
 
     
 

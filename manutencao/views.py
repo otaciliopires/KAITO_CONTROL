@@ -100,23 +100,47 @@ def servico_oficina(request, id):
                 terceiro = Servico_Terceirizado.objects.get(id=terceiro_id)
             
 
-        servico_oficina = Servico_Oficina(numero=numero+1,
+            servico_oficina = Servico_Oficina(numero=numero+1,
                                           ordem_servico=ordem_oficina_aberta,
                                           grupo_servico=grupo_servico,
                                           data_inicio=data_inicio,
                                           descricao = descricao_servico,
+                                          executante = status_executante,
                                           executante_terceiro=terceiro,
                                           executante_funcionario=funcionario)
         
-        servico_oficina.save()
+            servico_oficina.save()
 
-    elif form_status_servico:
+        if form_status_servico:
+
+            data_fim = request.POST.get('data_fim')
+            status_servico = request.POST.get('status_servico')
+            executante_funcionario_id = request.POST.get('executante_funcionario')
+            if executante_funcionario_id == None:
+                executante_funcionario = None
+            else:
+                executante_funcionario = Funcionario.objects.get(id=executante_funcionario_id)
+            
+            executante_terceiro_id = request.POST.get('executante_terceiro')
+            if executante_terceiro_id == None:
+                executante_terceiro = None
+            else:
+                executante_terceiro = Servico_Terceirizado.objects.get(id=executante_terceiro_id)
+            descricao = request.POST.get('descricao')
+
+            id_servico = request.POST.get("id_servico")
+
+            servico_oficina = Servico_Oficina.objects.get(id=id_servico)
+
+        #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, serpa considerado o horário da mudança atual.
+        #com esse datetime, calcular o tempo em no status selecionado. Talvez seja necessário adicionar mais uma variável no models, o datetime de mudança de status, para que
+        #quando for necessário calcular o tempo em cada status, se basear o horário inicial no ultimo datetime cadastrado.
 
                 
-        print(grupo_servico_id, data_inicio, status_executante, funcionario, terceiro, descricao_servico)
+            print(data_fim, status_servico, executante_funcionario, executante_terceiro, descricao, id_servico)
     
 
     
 
  
-    return HttpResponse(f'Serviço cadastrado com sucesso :D  {grupo_servico, data_inicio, status_executante, descricao_servico}')
+            return HttpResponse(f'Serviço cadastrado com sucesso :D ')
