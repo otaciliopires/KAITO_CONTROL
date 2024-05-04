@@ -98,11 +98,12 @@
                     Aguardando Serviço
                   </label>
                 </div>
-                <div class="form-check">
+                <div style='width:200px' class="form-check">
                   <input class="form-check-input" type="radio" name="status_servico" id="flexRadioDefault2" value='aguardando_peca'>
                   <label class="form-check-label" for="flexRadioDefault2">
                     Aguardando Peças
                   </label>
+
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="radio" name="status_servico" id="flexRadioDefault3" value='em_servico' checked>
@@ -110,6 +111,13 @@
                     Em Serviço
                   </label>
                 </div>
+                <hr>
+                <div class="mb-3">
+                  <label class="form-label"> Data mudança de status:</label>
+                  <input style='width:300px' type="datetime-local" name="data_status"></input>
+                </div>
+
+                <hr>
 
               {%if servico.executante == 'Funcionario'%}
                 <div class="mb-3">

@@ -62,7 +62,7 @@ def servico_oficina(request, id):
         print(ordem_oficina_aberta.equipamento)
 
         servico_oficina =  Servico_Oficina.objects.filter(ordem_servico=id)
-        print(servico_oficina)
+        print(now)
 
         grupo_servico = Grupo_Servico.objects.all()
         executantes = Funcionario.objects.all()
@@ -112,8 +112,11 @@ def servico_oficina(request, id):
             servico_oficina.save()
 
         if form_status_servico:
-
+            id_servico = request.POST.get("id_servico")
+            servico_oficina = Servico_Oficina.objects.get(id=id_servico)
+            
             data_fim = request.POST.get('data_fim')
+            data_status = request.POST.get('data_status')
             status_servico = request.POST.get('status_servico')
             executante_funcionario_id = request.POST.get('executante_funcionario')
             if executante_funcionario_id == None:
@@ -126,21 +129,34 @@ def servico_oficina(request, id):
                 executante_terceiro = None
             else:
                 executante_terceiro = Servico_Terceirizado.objects.get(id=executante_terceiro_id)
-            descricao = request.POST.get('descricao')
+           
+            descricao_atual = Servico_Oficina.objects.get(id=id_servico).descricao
+            descricao = descricao_atual + " - " + request.POST.get('descricao')   #descrição funcionando
+           
+            servico_oficina.descricao = descricao
+            servico_oficina.executante_funcionario = executante_funcionario
+            servico_oficina.executante_terceiro = executante_terceiro
+            if data_fim == "":
+                pass
+            else:
+                servico_oficina.data_fim = data_fim
 
-            id_servico = request.POST.get("id_servico")
+            #início do calculo acumulado de tempo status
 
-            servico_oficina = Servico_Oficina.objects.get(id=id_servico)
+            servico_oficina.status = status_servico
 
-        #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, serpa considerado o horário da mudança atual.
+            if status1:
+                tempo_acumulado_status1 = data_status
+
+            
+            servico_oficina.save()
+
+        #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, será considerado o horário da mudança atual.
         #com esse datetime, calcular o tempo em no status selecionado. Talvez seja necessário adicionar mais uma variável no models, o datetime de mudança de status, para que
         #quando for necessário calcular o tempo em cada status, se basear o horário inicial no ultimo datetime cadastrado.
 
                 
-            print(data_fim, status_servico, executante_funcionario, executante_terceiro, descricao, id_servico)
-    
+            print(data_fim, status_servico, executante_funcionario, executante_terceiro, descricao, id_servico, data_fim)
+            print(type(data_fim), data_status)
 
-    
-
- 
-            return HttpResponse(f'Serviço cadastrado com sucesso :D ')
+            return redirect(f'/manutencao/osoficina/{id}')
