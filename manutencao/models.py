@@ -57,6 +57,7 @@ class Servico_Oficina(models.Model):
     tempo_aguardo_servico = models.FloatField(null=True, blank=True)
     tempo_em_servico = models.FloatField(null=True, blank=True)
     data_inicio = models.DateTimeField()
+    data_mudanca_status = models.DateTimeField(null=True, blank=True)
     data_fim = models.DateTimeField(null=True, blank=True)
     tipo_executante = (("F", "Funcionario"),("T", "Terceirizado"))
     executante = models.CharField(max_length=50, choices=tipo_executante, default="Funcionario")

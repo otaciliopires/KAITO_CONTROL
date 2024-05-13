@@ -61,15 +61,28 @@ def servico_oficina(request, id):
         ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
         print(ordem_oficina_aberta.equipamento)
 
-        servico_oficina =  Servico_Oficina.objects.filter(ordem_servico=id)
-        print(now)
+        #verificar nessa lista os status, se houver 1 serviço com status em serviço, contabilizar tempo em serviço
+        #se houver 1 aguardando peça mas nenhum em serviço, contabiliza aguardando peça
+        #não havendo nenhum em serviço nem aguardando peças, contabilizar aguardando serviço.
+        servico_oficina =  Servico_Oficina.objects.filter(ordem_servico=id, data_fim=None)
+        
+        serv_ap = []
+        serv_as = []
+        serv_es = []
+        for service in servico_oficina:
+
+            if service.status == "em_servico":
+                print("em servico")
+                break
+            elif service.status == "Aguardando Peças": # de todos os aguardando peças, somar o com a data mais antiga.
+                print(service.data_mudanca_status) 
+        
 
         grupo_servico = Grupo_Servico.objects.all()
         executantes = Funcionario.objects.all()
         terceiros = Servico_Terceirizado.objects.all()
         servicos = Servico_Oficina.objects.all()
-        for servico in servicos:
-            print(servico.executante)
+
     
         return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
                                                        'servico_oficina': servico_oficina,
@@ -136,6 +149,8 @@ def servico_oficina(request, id):
             servico_oficina.descricao = descricao
             servico_oficina.executante_funcionario = executante_funcionario
             servico_oficina.executante_terceiro = executante_terceiro
+            servico_oficina.status = status_servico
+            servico_oficina.data_mudanca_status = data_status
             if data_fim == "":
                 pass
             else:
@@ -143,10 +158,10 @@ def servico_oficina(request, id):
 
             #início do calculo acumulado de tempo status
 
-            servico_oficina.status = status_servico
+            # servico_oficina.status = status_servico
 
-            if status1:
-                tempo_acumulado_status1 = data_status
+            # if status1:
+            #     tempo_acumulado_status1 = data_status
 
             
             servico_oficina.save()
