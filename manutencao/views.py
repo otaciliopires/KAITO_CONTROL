@@ -18,9 +18,19 @@ def home_manutencao(request):
             list_equip.append(i)
 
 
-        #atualização de status manutenção
-        list = []
+
+        #ATUALIZAÇÃO TEMPO EM SERVIÇO
         os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
+        for os_aberta in os_oficina_aberta:
+            servicos_oficina = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
+            for servico in servicos_oficina:
+                if servico.status == 'Em Serviço':
+                    (os_aberta.numero)
+                    
+                    data_antiga = (now.timestamp()-servico.data_mudanca_status.timestamp())/3600
+                    print(data_antiga)
+
+
 
 
         #dados para OS da oficina
@@ -61,7 +71,12 @@ def servico_oficina(request, id):
         ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
         print(ordem_oficina_aberta.equipamento)
 
-        #verificar nessa lista os status, se houver 1 serviço com status em serviço, contabilizar tempo em serviço
+        #verificar nessa lista os status, se houver 1 serviço com status em serviço, contabilizar tempo em serviço 
+        #contabilizar calculando da seguinte forma, no momento da criação do serviço
+        #criação do primeiro serviço    
+
+
+
         #se houver 1 aguardando peça mas nenhum em serviço, contabiliza aguardando peça
         #não havendo nenhum em serviço nem aguardando peças, contabilizar aguardando serviço.
         servico_oficina =  Servico_Oficina.objects.filter(ordem_servico=id, data_fim=None)
@@ -95,7 +110,7 @@ def servico_oficina(request, id):
         form_servico = request.POST.get('form_servico')
         form_status_servico = request.POST.get('form_status_servico')
 
-        if form_servico:
+        if form_servico: #FORMULÁRIO DE ADIÇÃO DE SERVIÇO
             numero = Servico_Oficina.objects.aggregate(Max('numero'))['numero__max']
             ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
             grupo_servico_id = request.POST.get('grupo_servico')
@@ -117,6 +132,7 @@ def servico_oficina(request, id):
                                           ordem_servico=ordem_oficina_aberta,
                                           grupo_servico=grupo_servico,
                                           data_inicio=data_inicio,
+                                          data_mudanca_status=data_inicio,
                                           descricao = descricao_servico,
                                           executante = status_executante,
                                           executante_terceiro=terceiro,
@@ -124,7 +140,7 @@ def servico_oficina(request, id):
         
             servico_oficina.save()
 
-        if form_status_servico:
+        if form_status_servico:#FORMULÁRIO DE ALTERAÇÃO DE STATUS DE SERVIÇO
             id_servico = request.POST.get("id_servico")
             servico_oficina = Servico_Oficina.objects.get(id=id_servico)
             
