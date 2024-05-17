@@ -19,17 +19,7 @@ def home_manutencao(request):
 
 
 
-        #ATUALIZAÇÃO TEMPO EM SERVIÇO
-        os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
-        for os_aberta in os_oficina_aberta:
-            servicos_oficina = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
-            for servico in servicos_oficina:
-                if servico.status == 'Em Serviço':
-                    (os_aberta.numero)
-                    
-                    data_antiga = (now.timestamp()-servico.data_mudanca_status.timestamp())/3600
-                    print(data_antiga)
-
+        
 
 
 
@@ -97,6 +87,32 @@ def servico_oficina(request, id):
         executantes = Funcionario.objects.all()
         terceiros = Servico_Terceirizado.objects.all()
         servicos = Servico_Oficina.objects.all()
+
+
+
+        #ATUALIZAÇÃO TEMPO EM SERVIÇO
+        os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
+        for os_aberta in os_oficina_aberta:
+            servicos_oficina = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
+            for servico in servicos_oficina:
+                if servico.status == 'Em Serviço':
+                    data_recente = Servico_Oficina.objects.filter(data_fim=None, ordem_servico=os_aberta).aggregate(Max('data_mudanca_status'))['data_mudanca_status__max']
+                    tempo_acumulado = (now.timestamp()-data_recente.timestamp())/3600
+                    print(os_aberta.tempo_em_servico)
+                    break    
+
+                    #verificar quando alguma data_mudança_status é alterada, sempre que for, 
+                    #criar um objeto na OS que seja mudança de status
+                    #e sempre que um status mudar ele é substituido e o valor do tempo é acumulado
+                    #quando o status não mmudar, o valor continua contado.
+
+                    #ou
+
+                    #tempo em serviço  = now - mudança de status
+                    #os.tempo_servico = os.tempo_servico(no início é zero) + tempo em serviço
+                    #quando houver uma criação ou mudança de status no serviço, 
+                    #
+
 
     
         return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,

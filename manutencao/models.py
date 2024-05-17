@@ -8,14 +8,16 @@ class Ordem_Oficina(models.Model):
     equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING)
     data_inicio = models.DateTimeField()
     data_fim = models.DateTimeField(null=True, blank=True)
-    tempo_aguardo_peca = models.FloatField(null=True, blank=True)
-    tempo_aguardo_servico = models.FloatField(null=True, blank=True)
-    tempo_em_servico = models.FloatField(null=True, blank=True)
+    data_status = models.DateTimeField(null=True, blank=True)
+    tempo_aguardo_peca = models.FloatField(null=True, blank=True, default=0.0)
+    tempo_aguardo_servico = models.FloatField(null=True, blank=True, default=0.0)
+    tempo_em_servico = models.FloatField(null=True, blank=True, default=0.0)
     tempo_total = models.FloatField(null=True, blank=True)
     tipo_status = (("AP", "Aguardando Peças"), ("AS", "Aguardando Serviço"), ("ES", "Em Serviço"))
     status = models.CharField(max_length=5, choices = tipo_status, default="Aguardando Serviço")
     numero = models.IntegerField()
     horimetro = models.FloatField()
+    data_status = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.equipamento.prefixo
