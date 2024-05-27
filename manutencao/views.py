@@ -4,7 +4,7 @@ from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, 
 from .models import Equipamentos
 from django.db.models import Max
 from datetime import datetime
-from manutencao.utils import now
+from manutencao.utils import now, att_tempo_2, att_tempo_1
 
 # Create your views here.
 
@@ -17,16 +17,15 @@ def home_manutencao(request):
         for i in equipamentos_rocha:
             list_equip.append(i)
 
-
-
         
 
-
-
         #dados para OS da oficina
-        os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
+        os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)
+
+        att_tempo_2()   
+
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
-                                                        'os_oficina_aberta':os_oficina_aberta})
+                                                    'os_oficina_aberta':os_oficina_abertas})
 
     elif request.method == 'POST':
         form_osoficina = request.POST.get('form_osoficina')
@@ -43,7 +42,10 @@ def home_manutencao(request):
             print(equipamento, data_inicio, horimetro)
         
         #adquirir o maior numero na lista de O.S.
-        numero = Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max']
+        if Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max'] == None:
+            numero = 0
+        else:
+            numero = Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max']
 
         #adicionar o form da oficina,o de criação de da O.S.
         osoficina = Ordem_Oficina(equipamento=equipamento,
@@ -58,22 +60,12 @@ def home_manutencao(request):
 
 def servico_oficina(request, id):
     if request.method == 'GET':
-        ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
-        print(ordem_oficina_aberta.equipamento)
+        if Ordem_Oficina.objects.all().exists():
+            ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
+        else:
+            return redirect("/manutencao/home_manutencao") 
 
-        #verificar nessa lista os status, se houver 1 serviço com status em serviço, contabilizar tempo em serviço 
-        #contabilizar calculando da seguinte forma, no momento da criação do serviço
-        #criação do primeiro serviço    
-
-
-
-        #se houver 1 aguardando peça mas nenhum em serviço, contabiliza aguardando peça
-        #não havendo nenhum em serviço nem aguardando peças, contabilizar aguardando serviço.
-        servico_oficina =  Servico_Oficina.objects.filter(ordem_servico=id, data_fim=None)
-        
-        serv_ap = []
-        serv_as = []
-        serv_es = []
+        servico_oficina = Servico_Oficina.objects.filter(ordem_servico = id)
         for service in servico_oficina:
 
             if service.status == "em_servico":
@@ -89,45 +81,19 @@ def servico_oficina(request, id):
         servicos = Servico_Oficina.objects.all()
 
 
-
-        #ATUALIZAÇÃO TEMPO EM SERVIÇO
-        os_oficina_aberta = Ordem_Oficina.objects.filter(data_fim=None)
-        for os_aberta in os_oficina_aberta:
-            servicos_oficina = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
-            for servico in servicos_oficina:
-                if servico.status == 'Em Serviço':
-                    data_recente = Servico_Oficina.objects.filter(data_fim=None, ordem_servico=os_aberta).aggregate(Max('data_mudanca_status'))['data_mudanca_status__max']
-                    tempo_acumulado = (now.timestamp()-data_recente.timestamp())/3600
-                    print(os_aberta.tempo_em_servico)
-                    break    
-
-                    #verificar quando alguma data_mudança_status é alterada, sempre que for, 
-                    #criar um objeto na OS que seja mudança de status
-                    #e sempre que um status mudar ele é substituido e o valor do tempo é acumulado
-                    #quando o status não mmudar, o valor continua contado.
-
-                    #ou
-
-                    #tempo em serviço  = now - mudança de status
-                    #os.tempo_servico = os.tempo_servico(no início é zero) + tempo em serviço
-                    #quando houver uma criação ou mudança de status no serviço, 
-                    #
-
-
-    
         return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
                                                        'servico_oficina': servico_oficina,
                                                        'grupo_servico': grupo_servico,
                                                        'executantes':executantes,
                                                        'terceiros': terceiros,
                                                        'id_OS_oficina':id})
+
     
     elif request.method == 'POST':
         form_servico = request.POST.get('form_servico')
         form_status_servico = request.POST.get('form_status_servico')
 
         if form_servico: #FORMULÁRIO DE ADIÇÃO DE SERVIÇO
-            numero = Servico_Oficina.objects.aggregate(Max('numero'))['numero__max']
             ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
             grupo_servico_id = request.POST.get('grupo_servico')
             grupo_servico = Grupo_Servico.objects.get(id=grupo_servico_id)
@@ -143,7 +109,10 @@ def servico_oficina(request, id):
                 terceiro_id = request.POST.get('executante_terceiro')
                 terceiro = Servico_Terceirizado.objects.get(id=terceiro_id)
             
-
+            numero = Servico_Oficina.objects.aggregate(Max('numero'))['numero__max']
+            if numero == None:
+                numero = 0
+            else:pass
             servico_oficina = Servico_Oficina(numero=numero+1,
                                           ordem_servico=ordem_oficina_aberta,
                                           grupo_servico=grupo_servico,
@@ -155,6 +124,12 @@ def servico_oficina(request, id):
                                           executante_funcionario=funcionario)
         
             servico_oficina.save()
+            ordem_oficina_aberta.data_status = data_inicio
+            ordem_oficina_aberta.save()
+
+            #atualizar a data_status da OS.
+
+            att_tempo_1(id, data_inicio)
 
         if form_status_servico:#FORMULÁRIO DE ALTERAÇÃO DE STATUS DE SERVIÇO
             id_servico = request.POST.get("id_servico")
@@ -182,21 +157,17 @@ def servico_oficina(request, id):
             servico_oficina.executante_funcionario = executante_funcionario
             servico_oficina.executante_terceiro = executante_terceiro
             servico_oficina.status = status_servico
+            print(servico_oficina.status)
             servico_oficina.data_mudanca_status = data_status
             if data_fim == "":
                 pass
             else:
                 servico_oficina.data_fim = data_fim
 
-            #início do calculo acumulado de tempo status
-
-            # servico_oficina.status = status_servico
-
-            # if status1:
-            #     tempo_acumulado_status1 = data_status
-
+            
             
             servico_oficina.save()
+            att_tempo_1(id, data_status)
 
         #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, será considerado o horário da mudança atual.
         #com esse datetime, calcular o tempo em no status selecionado. Talvez seja necessário adicionar mais uma variável no models, o datetime de mudança de status, para que
