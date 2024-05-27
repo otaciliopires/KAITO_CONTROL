@@ -54,26 +54,34 @@ def att_tempo_1(id, data_status):
 def att_tempo_2():
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)
         for os_aberta in os_oficina_abertas:
+
             servicos = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
             if servicos.exists(): #verifica se a ordem tem algum serviço cadastrado
-                for servico in servicos:
-                        if servico.status == "Em Serviço":
-                               os_aberta.tempo_em_servico = os_aberta.tempo_em_servico + (now.timestamp() - os_aberta.data_status.timestamp())/3600
+                  in_service = Servico_Oficina.objects.filter(status="Em Serviço", ordem_servico=os_aberta.id)
+                  waiting_parts = Servico_Oficina.objects.filter(status="Aguardando Peças", ordem_servico=os_aberta.id)
+                  waiting_service = Servico_Oficina.objects.filter(status="Aguardando Serviço", ordem_servico=os_aberta.id)
+                  if in_service.exists():
+                               os_aberta.tempo_em_servico = os_aberta.tempo_em_servico + (now.timestamp() - os_aberta.data_status.timestamp())/3600 
                                os_aberta.data_status = now
+                               os_aberta.status = "Em Serviço"
                                os_aberta.save()
-                               break
-                        elif servico.status == "Aguardando Peças":
+                               pass
+                  elif waiting_parts.exists():
                                os_aberta.tempo_aguardo_peca = os_aberta.tempo_aguardo_peca + (now.timestamp() - os_aberta.data_status.timestamp())/3600
                                os_aberta.data_status = now
+                               os_aberta.status = "Aguardando Peças"
                                os_aberta.save()
-                               break
-                        elif servico.status == "Aguardando Serviço":
+                               pass
+                  elif waiting_service.exists():
                                os_aberta.tempo_aguardo_servico = os_aberta.tempo_aguardo_servico + (now.timestamp() - os_aberta.data_status.timestamp())/3600
                                os_aberta.data_status = now
+                               os_aberta.status = "Aguardando Serviço"
                                os_aberta.save()
-                               break
+                               pass
+                  print(os_aberta.id, os_aberta.equipamento, os_aberta.status)
             else:pass
-        return None
+
+        return 
                 
                     
 

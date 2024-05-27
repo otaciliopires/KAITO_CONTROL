@@ -21,6 +21,7 @@ def home_manutencao(request):
 
         #dados para OS da oficina
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)
+        
 
         att_tempo_2()   
 
@@ -50,6 +51,7 @@ def home_manutencao(request):
         #adicionar o form da oficina,o de criação de da O.S.
         osoficina = Ordem_Oficina(equipamento=equipamento,
                                      data_inicio=data_inicio,
+                                     data_status = data_inicio,
                                      horimetro=horimetro,
                                      numero=numero+1)
         osoficina.save()
@@ -129,7 +131,7 @@ def servico_oficina(request, id):
 
             #atualizar a data_status da OS.
 
-            att_tempo_1(id, data_inicio)
+            # att_tempo_1(id, data_inicio)
 
         if form_status_servico:#FORMULÁRIO DE ALTERAÇÃO DE STATUS DE SERVIÇO
             id_servico = request.POST.get("id_servico")
@@ -167,7 +169,7 @@ def servico_oficina(request, id):
             
             
             servico_oficina.save()
-            att_tempo_1(id, data_status)
+            # att_tempo_1(id, data_status)
 
         #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, será considerado o horário da mudança atual.
         #com esse datetime, calcular o tempo em no status selecionado. Talvez seja necessário adicionar mais uma variável no models, o datetime de mudança de status, para que
@@ -177,4 +179,4 @@ def servico_oficina(request, id):
             print(data_fim, status_servico, executante_funcionario, executante_terceiro, descricao, id_servico, data_fim)
             print(type(data_fim), data_status)
 
-            return redirect(f'/manutencao/osoficina/{id}')
+        return redirect(f'/manutencao/osoficina/{id}')
