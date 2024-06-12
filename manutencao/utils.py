@@ -78,7 +78,7 @@ def att_tempo_2():
                                os_aberta.status = "Aguardando Serviço"
                                os_aberta.save()
                                pass
-                  print(os_aberta.id, os_aberta.equipamento, os_aberta.status)
+                  print(os_aberta.id, os_aberta.equipamento, os_aberta.status, os_aberta.data_status)
             else:pass
 
         return 
