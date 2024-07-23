@@ -21,7 +21,7 @@ class Ordem_Oficina(models.Model):
 
     def __str__(self):
         return self.equipamento.prefixo
-    
+        
 class Funcionario(models.Model):
 
     nome = models.CharField(max_length=50)

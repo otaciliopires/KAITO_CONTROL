@@ -76,6 +76,7 @@ def att_tempo_2():
                                os_aberta.tempo_aguardo_servico = os_aberta.tempo_aguardo_servico + (now.timestamp() - os_aberta.data_status.timestamp())/3600
                                os_aberta.data_status = now
                                servico.data_mudanca_status = now
+
                                os_aberta.save()
                                break
             else:pass
