@@ -20,9 +20,7 @@ def home_manutencao(request):
         
 
         #dados para OS da oficina
-        os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)
-
-        att_tempo_2()   
+        os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)  
 
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                     'os_oficina_aberta':os_oficina_abertas})
@@ -50,6 +48,7 @@ def home_manutencao(request):
         #adicionar o form da oficina,o de criação de da O.S.
         osoficina = Ordem_Oficina(equipamento=equipamento,
                                      data_inicio=data_inicio,
+                                     data_status=data_inicio,
                                      horimetro=horimetro,
                                      numero=numero+1)
         osoficina.save()
@@ -78,7 +77,7 @@ def servico_oficina(request, id):
         grupo_servico = Grupo_Servico.objects.all()
         executantes = Funcionario.objects.all()
         terceiros = Servico_Terceirizado.objects.all()
-        servicos = Servico_Oficina.objects.all()
+
 
 
         return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
@@ -113,6 +112,7 @@ def servico_oficina(request, id):
             if numero == None:
                 numero = 0
             else:pass
+            
             servico_oficina = Servico_Oficina(numero=numero+1,
                                           ordem_servico=ordem_oficina_aberta,
                                           grupo_servico=grupo_servico,
@@ -122,14 +122,16 @@ def servico_oficina(request, id):
                                           executante = status_executante,
                                           executante_terceiro=terceiro,
                                           executante_funcionario=funcionario)
-        
+            
+            att_tempo_1(ordem_oficina_aberta.id, data_inicio)        
             servico_oficina.save()
-            ordem_oficina_aberta.data_status = data_inicio
-            ordem_oficina_aberta.save()
+            print(type(data_inicio), data_inicio)
+
+            return redirect(f"/manutencao/osoficina/{ordem_oficina_aberta.id}")
 
             #atualizar a data_status da OS.
 
-            att_tempo_1(id, data_inicio)
+
 
         if form_status_servico:#FORMULÁRIO DE ALTERAÇÃO DE STATUS DE SERVIÇO
             id_servico = request.POST.get("id_servico")
@@ -157,17 +159,19 @@ def servico_oficina(request, id):
             servico_oficina.executante_funcionario = executante_funcionario
             servico_oficina.executante_terceiro = executante_terceiro
             servico_oficina.status = status_servico
-            print(servico_oficina.status)
-            servico_oficina.data_mudanca_status = data_status
             if data_fim == "":
+                servico_oficina.data_mudanca_status = data_status                
                 pass
             else:
                 servico_oficina.data_fim = data_fim
+                servico_oficina.data_mudanca_status = data_fim
+                data_status = data_fim
 
             
-            
+            att_tempo_1(id, data_status) #colocar a função antes de salvar as informações no BD garante que o valor calculado de
+                                         #tempo seja contabilizado para o status anterior(correto)                                   
             servico_oficina.save()
-            att_tempo_1(id, data_status)
+
 
         #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, será considerado o horário da mudança atual.
         #com esse datetime, calcular o tempo em no status selecionado. Talvez seja necessário adicionar mais uma variável no models, o datetime de mudança de status, para que
@@ -178,3 +182,8 @@ def servico_oficina(request, id):
             print(type(data_fim), data_status)
 
             return redirect(f'/manutencao/osoficina/{id}')
+
+def atualizacao_horarios():
+
+    att_tempo_2()
+    return redirect('/manutencao/home_manutencao')

@@ -25,25 +25,28 @@ def att_tempo(data_status, id_os_atual):
             
 
 def att_tempo_1(id, data_status):
+      data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")
       os_aberta = Ordem_Oficina.objects.get(id=id)
+      if os_aberta.data_status.timestamp() > data_status.timestamp():
+            data_status = os_aberta.data_status
       servicos = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
       for servico in servicos:
-            if servico.status == 'Em Serviço':
-                  os_aberta.tempo_em_servico = os_aberta.tempo_em_servico + (now.timestamp() - os_aberta.data_status.timestamp())/3600
+            if Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status="Em Serviço").exists():
+                  os_aberta.tempo_em_servico = os_aberta.tempo_em_servico + (data_status.timestamp() - os_aberta.data_status.timestamp())/3600
                   servico.data_mudanca_status = data_status
                   os_aberta.data_status = data_status
                   os_aberta.status = "Em Serviço"
                   os_aberta.save()
                   break
-            elif servico.status == 'Aguardando Peças':
-                  os_aberta.tempo_aguardo_peca = os_aberta.tempo_aguardo_peca + (now.timestamp() - os_aberta.data_status.timestamp())/3600
+            elif Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status='Aguardando Peças').exists():
+                  os_aberta.tempo_aguardo_peca = os_aberta.tempo_aguardo_peca + (data_status.timestamp() - os_aberta.data_status.timestamp())/3600
                   servico.data_mudanca_status = data_status
                   os_aberta.data_status = data_status
                   os_aberta.status = "Aguardando Peças"
                   os_aberta.save()
                   break
-            elif os_aberta.status == 'Aguardando Serviço':
-                  os_aberta.tempo_aguardo_servico = os_aberta.tempo_aguardo_servico + (now.timestamp() - os_aberta.data_status.timestamp())/3600
+            elif Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status='Aguardando Serviço').exists():
+                  os_aberta.tempo_aguardo_servico = os_aberta.tempo_aguardo_servico + (data_status.timestamp() - os_aberta.data_status.timestamp())/3600
                   servico.data_mudanca_status =data_status
                   os_aberta.data_status = data_status
                   os_aberta.status = "Aguardando Serviço"
@@ -57,19 +60,22 @@ def att_tempo_2():
             servicos = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
             if servicos.exists(): #verifica se a ordem tem algum serviço cadastrado
                 for servico in servicos:
-                        if servico.status == "Em Serviço":
+                        if Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status="Em Serviço").exists():
                                os_aberta.tempo_em_servico = os_aberta.tempo_em_servico + (now.timestamp() - os_aberta.data_status.timestamp())/3600
                                os_aberta.data_status = now
+                               servico.data_mudanca_status = now                              
                                os_aberta.save()
                                break
-                        elif servico.status == "Aguardando Peças":
+                        elif Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status='Aguardando Peças').exists():
                                os_aberta.tempo_aguardo_peca = os_aberta.tempo_aguardo_peca + (now.timestamp() - os_aberta.data_status.timestamp())/3600
                                os_aberta.data_status = now
+                               servico.data_mudanca_status = now
                                os_aberta.save()
                                break
-                        elif servico.status == "Aguardando Serviço":
+                        elif Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status='Aguardando Serviço').exists():
                                os_aberta.tempo_aguardo_servico = os_aberta.tempo_aguardo_servico + (now.timestamp() - os_aberta.data_status.timestamp())/3600
                                os_aberta.data_status = now
+                               servico.data_mudanca_status = now
                                os_aberta.save()
                                break
             else:pass

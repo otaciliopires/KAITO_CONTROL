@@ -33,7 +33,12 @@
              <div class="col-xxl-4 col-xl-12">
                 <div class="card info-card customers-card">
                    <div class="card-body">
-                      <h5 class="card-title" style='font-size:30px'>ABRIR ORDEM DE SERVIÇO <span>| Atual</span></h5>
+                      <h5 class="card-title" style='font-size:30px'>ABRIR ORDEM DE SERVIÇO <span>|
+                        <form action="{%url 'atualizacao_horarios'%}" method='POST'>{%csrf_token%}
+                        <button style="margin-bottom:5px; margin-left:380px" type="button" class="btn btn-danger btn-sm">Atualizar horário</button>
+                        </form>
+                     </h5>
+
                       <div class="d-flex align-items-left">
 
                          <div style='margin-left:50px'>
