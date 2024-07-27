@@ -17,6 +17,11 @@ def home_manutencao(request):
         for i in equipamentos_rocha:
             list_equip.append(i)
 
+        ordens = Ordem_Oficina.objects.all()
+        for ordem in ordens:
+            print(ordem.data_status)
+            print(now)
+
         
 
         #dados para OS da oficina
@@ -183,7 +188,8 @@ def servico_oficina(request, id):
 
             return redirect(f'/manutencao/osoficina/{id}')
 
-def atualizacao_horarios():
+def atualizacao_horarios(request):
 
-    att_tempo_2()
+    # att_tempo_2()
+    print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
     return redirect('/manutencao/home_manutencao')

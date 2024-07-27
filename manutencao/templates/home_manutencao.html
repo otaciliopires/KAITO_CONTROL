@@ -33,11 +33,20 @@
              <div class="col-xxl-4 col-xl-12">
                 <div class="card info-card customers-card">
                    <div class="card-body">
-                      <h5 class="card-title" style='font-size:30px'>ABRIR ORDEM DE SERVIÇO <span>|
+                     <div class='row'>
+                      <div class="col-lg-6" style='margin-left:50px'>
+                        <h5 class="card-title" style='font-size:30px'>ABRIR ORDEM DE SERVIÇO</h5>
+                      </div>
+                      <div class="col-lg-5">
                         <form action="{%url 'atualizacao_horarios'%}" method='POST'>{%csrf_token%}
-                        <button style="margin-bottom:5px; margin-left:380px" type="button" class="btn btn-danger btn-sm">Atualizar horário</button>
+                           <input style="margin-bottom:5px; margin-left:250  px" type="submit" value='Atualizar horários' class="btn btn-danger btn-sm">
                         </form>
-                     </h5>
+                     </div>
+                  </div>
+
+
+
+                     
 
                       <div class="d-flex align-items-left">
 
