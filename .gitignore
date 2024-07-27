@@ -1,8 +1,8 @@
 venv
 teste.py
 #Django
-media/
-static/
+media
+static
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
