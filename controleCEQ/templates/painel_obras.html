@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block 'head' %}
+    <link rel="stylesheet" href="{% static 'autenticacao/css/login.css' %}">
+{%endblock%}
+{% block 'titulo' %}painel_obras{% endblock %}
+
+{%block 'body'%}
+
+
+<main id="main" class="main">
+  <div class="pagetitle">
+     <h1 style="font-size: 50px;">Saldo Obras</h1>
+     <nav>
+        
+     </nav>
+    
+
+
+
+  <section class="section dashboard">
+     <div class="row">
+        <div class="col-lg-12">
+           <div class="row">
+
+              <div class="col-xxl-4 col-xl-12">
+                <h2 style='color: red'> Abastecimentos</h2>
+                 <table class="table table-striped table-bordered">
+                    <thead style="font-size:10px" >
+                      <tr>
+                        <th class='okok' scope='col'>Nº</th>
+                        <th class='okok' scope="col">TANQUE</th>
+                        <th class='okok' scope="col">DATA</th>
+                        <th class='okok' scope="col">OBRA</th>
+                        <th class='okok' scope="col">EQUIPAMENTO</th>
+                        <th class='okok' scope="col">DESCRIÇÃO</th>
+                        <th class='okok' scope="col">PROPRIEDADE</th>
+                        <th class='okok' scope="col">QUANTIDADE</th>
+                        <th class='okok' scope="col">HORÍMETRO/KM</th>
+                        <th class='okok' scope="col">OPERADOR/MOTORISTA</th>
+                        <th class='okok' scope="col">STATUS</th>
+                        <th class='okok' scope='col'>ADICIONAR COMENTÁRIO</th>
+                        <th class='okok' scope='col'>COMENTÁRIO
+                        
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {%for saida in saidas%}    
+                        <tr>
+                          <th scope="row">{{saida.id}}</th>
+                          <td class='okok'>{{saida.tanque}}</td>
+                          <td class='okok'>{{saida.data}}</td>
+                          <td class='okok'>{{saida.obra}}</td>
+                          <td class='okok'>{{saida.equipamento}}</td>
+                          <td class='okok'>{{saida.equipamento.descricao}}</td>
+                          <td class='okok'>{{saida.equipamento.proprietario}}</td>
+                          <td class='okok'>{{saida.litros}}</td>
+                          <td class='okok'>{{saida.horimetro}}</td>
+                          <td class='okok'>{{saida.operador}}</td>
+                          <td class='okok'><span><a href="{% url 'status' saida.id %}"><img src="{% if saida.status %} {%static '/ceq/img/check.png'%}
+                                                                                            {%else%} {%static '/ceq/img/exit.png'%}
+                                                                                            {%endif%}"></a></span></td>
+                          {%if not saida.status%}                                                                 
+                          <td class='okok'><form action="{% url 'comentario' saida.id%}" method="POST"> {% csrf_token %}
+                                <input style='width:92px; height:50px' type='text' name='comentario'>  
+                                <br>
+                                <input style="width: 92px; " type="submit" class="botao-principal" value="Adicionar">
+                          </form>
+                          </td>
+                          <td class='okok'>{{saida.observacao}}</td>
+                          {%else%}
+                          <td class='okok'></td>
+                          <td class='okok'></td>
+                          {%endif%}                                                              
+                  
+                        {%endfor%}
+                         </tbody>
+                  </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+        
+             
+</main>
+<footer id="footer" class="footer">
+  <div class="copyright"> &copy; Copyright <strong><span>Kaito Control</span></strong>. All Rights Reserved</div>
+  
+</footer>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>  
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="assets/js/apexcharts.min.js"></script>
+<script src="assets/js/bootstrap.bundle.min.js"></script>
+<script src="assets/js/chart.min.js"></script>
+<script src="assets/js/echarts.min.js"></script>
+<script src="assets/js/quill.min.js"></script>
+<script src="assets/js/simple-datatables.js"></script>
+<script src="assets/js/tinymce.min.js"></script>
+<script src="assets/js/validate.js"></script>
+<script src="assets/js/main.js"></script> 
+
+
+
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+  {%endblock%}
