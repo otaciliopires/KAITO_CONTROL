@@ -10,4 +10,4 @@ urlpatterns = [
     path('ceq/', include('controleCEQ.urls')),
     path('obra/', include('obras.urls')),
     path('manutencao/', include('manutencao.urls'))
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 
