@@ -33,6 +33,11 @@ def home(request):
         obras = Obras.objects.all()
         equipamentos = Equipamentos.objects.all()
 
+
+        """Esse script serve para verificar dentro de um excel todos os equipamentos e cadastrá-los
+        Utilizar esse código mas transformando o excel em um dictionary e cadastrando os dados do dict
+        assim ficará masis fácil o cadastro dentro do servidor
+        realizar uma verificação para se o equipamento já for cadastrado, não cadastrar mais"""
         # delete_all = Entrada.objects.all()
         # delete_all.delete()
         

@@ -46,6 +46,8 @@
                 <div class="row justify-content-center">
                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
                       <div class="d-flex justify-content-center py-4"> <a href="index.html" class="logo d-flex align-items-center w-auto"> <img src="assets/img/logo.png" alt=""> <span class="d-none d-lg-block">KAITO CONTROL</span> </a></div>
+                      <div style='padding-top:0px' class="d-flex justify-content-center py-4"><span style="color:orange; font-size:30px" class="d-none d-lg-block">Construtora Rocha Cavalcante</span></div>
+
                         
                       {% if messages %}
                         {%for i in messages%}
@@ -60,7 +62,7 @@
                          <div class="card-body">
                             <div class="pt-4 pb-2">
                                <h5 class="card-title text-center pb-0 fs-4">Acessar sua conta</h5>
-                               <p class="text-center small">Iserir usuário & senha para acessar</p>
+                               <p class="text-center small"></p>
                             </div>
                             <form method='POST' class="row g-3 needs-validation" novalidate> {% csrf_token %}
                                <div class="col-12">

@@ -10,7 +10,12 @@ from django.contrib.messages import constants
 def login(request):
     
     if request.method == 'GET':
-        return render(request,'login.html')
+        if request.user.is_authenticated and request.user.status == 'c':
+            return redirect('/ceq/home/')
+        elif request.user.is_authenticated and request.user.status == 'o':
+            return redirect('/obra/lista_obras/')
+        else:
+            return render(request,'login.html')
 
     if request.method == 'POST':
         username = request.POST.get('username')
