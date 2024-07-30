@@ -114,6 +114,7 @@ def home(request):
         #criação de gráfico semanal no frontend
         ano = datetime.today().year
         mes = datetime.today().month
+        print(mes)
         meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
         mes_atual = request.POST.get('mes')
@@ -129,14 +130,15 @@ def home(request):
         data_inicio_3 = datetime(ano,mes,17)
         data_fim_3 = datetime(ano, mes, 24)
         data_inicio_4 = datetime(ano,mes,25)
-        if mes == 'Janeiro' or mes =='Março' or mes =='Maio' or mes =='Julho' or mes =='Agosto' or mes =='Outubro' or mes =='Dezembro':
+        if mes == 1 or mes == 3 or mes == 5 or mes == 7 or mes == 8 or mes == 10 or mes == 12:
             data_fim_4 = datetime(ano, mes, 31)
-        if mes == 'Abril' or mes =='Junho' or mes =='Setembro' or mes =='Novembro':
+        elif mes == 4 or mes == 6 or mes == 9 or mes == 11:
             data_fim_4 = datetime(ano, mes, 30)
         else:
             data_fim_4 = datetime(ano, mes, 28)
 
-
+        print(type(mes))
+        print(data_fim_4)
 
         entradas_1 = Entrada.objects.filter(data_entrega__range=[data_inicio_1, data_fim_1]).aggregate(Sum('quantidade'))['quantidade__sum']
         entradas_2 = Entrada.objects.filter(data_entrega__range=[data_inicio_2, data_fim_2]).aggregate(Sum('quantidade'))['quantidade__sum']
@@ -149,6 +151,7 @@ def home(request):
         saidas_3 = Abastecimento.objects.filter(data__range=[data_inicio_3, data_fim_3]).aggregate(Sum('litros'))['litros__sum']
         saidas_4 = Abastecimento.objects.filter(data__range=[data_inicio_4, data_fim_4]).aggregate(Sum('litros'))['litros__sum']
         saidas = json.dumps([saidas_1, saidas_2, saidas_3, saidas_4])   
+
 
         lista_obras = []
         lista_consumo = []
@@ -498,19 +501,28 @@ def obras(request):
     obras = Obras.objects.all()
     saidas = []
     entradas = []
+
+    ceq_obra = Obras.objects.get(nome='CENTRAL DE EQUIPAMENTOS')
+    ceq_obra.saldo = Entrada.objects.filter(obra=ceq_obra.id).aggregate(Sum('quantidade'))['quantidade__sum']
     
     for obra in obras:
         metodo_saidas = Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
+        print(metodo_saidas, obra)
         metodo_entradas = Entrada.objects.filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']
         if metodo_saidas == None:
             metodo_saidas = 0
         if metodo_entradas == None:
             metodo_entradas = 0
-
-        obra.saldo = metodo_entradas - metodo_saidas
-        obra.save()
+        
+        if obra.status == 'M':
+            ceq_obra.saldo = ceq_obra.saldo - metodo_saidas
+            ceq_obra.save()
+        else:
+            obra.saldo = metodo_entradas - metodo_saidas
+            obra.save()
         saidas.append(metodo_saidas)
         entradas.append(metodo_entradas)
+        print(ceq_obra.saldo)
 
     my_list = zip(obras, saidas, entradas)
     return render(request, 'obras.html', {'my_list': my_list})
