@@ -349,7 +349,7 @@
                         <div class='col-md-6'>
                             <div class='col'>
                                 <label for='tanque'>Tanque:</label> 
-                                <select name='tanque_id'>
+                                <select style="lenght:30px" name='tanque_id'>
                                   {%for tanque in tanques%}
                                     <option value="{{tanque.id}}">{{tanque}}</option>
                                     {%endfor%}
@@ -372,6 +372,11 @@
                                   {%endfor%}
                                 </select>
                             </div>
+                            <div class='col' >
+                              <label for='data_'>Data:</label> 
+                              <input type='date' name='data'>
+                          </div>
+  
                         </div>
 
                       <div class='col-md-6'>123</div>

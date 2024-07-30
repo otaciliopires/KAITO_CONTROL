@@ -226,7 +226,7 @@ def home(request):
             litros = request.POST.get('saida_litros')
             horimetro = request.POST.get('horimetro')
             operador = request.POST.get('operador')
-            data = date.today()
+            data = request.POST.get('data')
             num_saida = Abastecimento.objects.aggregate(Max('numero'))
             num_saida = (num_saida['numero__max'] + 1)
 
