@@ -43,32 +43,63 @@ def home(request):
         
         #Método para cadastrar os equipamentos
 
-        # excel = "media/fotos/equipamentos2.xlsx"
-        # workbooks = openpyxl.load_workbook(excel)
-        # equipamentss = workbooks['Equipamentos']
-        # total_list_x=[]
-        # list_x = []
-        # for i in equipamentss.iter_rows(min_row=2,values_only=True):
-        #         equip = i[:4]
-        #         print(equip)
-        #         if equip[0] == None:
-        #                 break
-        #         else:
-        #             total_list_x.append(equip) 
-        # for i in total_list_x:
-        #     print(i[3]) 
+        excel = "media/fotos/equipamentos2.xlsx"
+        workbooks = openpyxl.load_workbook(excel)
+        equipamentss = workbooks['Equipamentos']
+        total_list_x=[]
+        list_x = []
+        for i in equipamentss.iter_rows(min_row=2,values_only=True):
+                equip = i[:4]
+                print(equip)
+                if equip[0] == None:
+                        break
+                else:
+                    total_list_x.append(equip) 
+        for i in total_list_x:
+            print(i[3]) 
 
-        # lista_equipamentos = []
+        lista_equipamentos = [('RE-02 BRASIL LOCAÇÕES', 'RETROESCAVADEIRA', 'BRASIL LOCAÇÕES', 'T'),
+                                ('RLU-7625', 'CAÇAMBA', 'RAMINHO', 'T'),
+                                ('MN-01 COSAMPA', 'MOTONIVELADORA', 'COSAMPA', 'T'),
+                                ('POX-3E32', 'FIAT TORO', 'MAZINHO', 'T'),
+                                ('KLZ-0C11', 'FRETE TERCEIRIZADO', None, 'T'),
+                                ('KAO-4455', 'FRETE TERCEIRIZADO', None, 'T'),
+                                ('EH-01 MX CONSTRUÇÕES', 'ESCAVADEIRA HIDRÁULICA', 'MX CONSTRUÇÕES', 'T'),
+                                ('RE-01 MX CONSTRUÇÕES', 'RETROESCAVADEIRA', 'MX CONSTRUÇÕES', 'T'),
+                                ('RETRO ANCHIETA', 'RETROESCAVADEIRA', 'ANCHIETA', 'T'),
+                                ('MIF-0636', 'FRETE TERCEIRIZADO', None, 'T'),
+                                ('JJZ-1B82', 'FRETE TERCEIRIZADO', None, 'T'),
+                                ('MNB-7C69', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
+                                ('RLS-6B96', 'FRETE TERCEIRIZADO', None, 'T'),
+                                ('ROLO LOCADO', 'ROLO COMPACTADOR VIBRATÓRIO', 'LOCADO', 'T'),
+                                ('NPW-1B68', 'CAMINHÃO MUNCK', 'INTERBLOCK ', 'T'),
+                                ('POX-3C62', 'CAMINHÃO CARROCERIA 3X4', 'FAZENDA ARIMATE', 'T'),
+                                ('MEIO FIO', 'MEIO FIO OBRA', None, 'T'),
+                                ('KXJ-3C40', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
+                                ('BALDE PARA TRATOR', 'RESERVATÓRIO NA FAZENDA', None, 'T'),
+                                ('WE TRANSPORTES', 'ACERTO WE LOCAÇÕES E OBRA', 'EDGLEY', 'T'),
+                                ('RLS-8J35', 'FRETE TERCEIRIZADO', None, 'T'),
+                                ('PEU-5344', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
+                                ('RESERVATÓRIO PARA TRATOR', 'RESERVATÓRIO PARA TRATOR DE ESTEIRA', None, 'T'),
+                                ('EH-02 REALMAQ', 'ESCAVADEIRA HIDRÁULICA', 'REALMAQ', 'T'),
+                                ('NTS-2338', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
+                                ('MOB-3F89', 'FRETE TERCEIRIZADO', None, 'T'),
+                                ('MOTONIVELADORA LOCADA', 'MOTONIVELADORA', None, 'T'),
+                                ('NQG-3442', 'CAMINHÃO CARROCERIA 3X4', None, 'T'),
+                                ('OHH-4I33', 'FRETE TERCEIRIZADO', None, 'T'),
+                                ('SERVIÇO SILO', 'SERVIÇO SILO', None, 'T'),
+                                ('CARVALHO LOCAÇÕES', 'CARVALHO', 'CARVALHO LOCAÇÕES', 'T'),
+                                ('PC-01 MINERAÇÃO PAULISTA', 'PÁ CARREGADEIRA', 'MINERAÇÃO PAULISTA', 'T')]
 
-        # for i in lista_equipamentos:
+        for i in lista_equipamentos:
 
-        #     cadastro_equipamentoss = Equipamentos(prefixo=i[0],
-        #                                             descricao=i[0],
-        #                                             tipo=i[3],
-        #                                             proprietario=i[2],
-        #                                             horímetro=0)
+            cadastro_equipamentoss = Equipamentos(prefixo=i[0],
+                                                    descricao=i[0],
+                                                    tipo=i[3],
+                                                    proprietario=i[2],
+                                                    horímetro=0)
 
-        #     cadastro_equipamentoss.save()
+            cadastro_equipamentoss.save()
 
         
 
