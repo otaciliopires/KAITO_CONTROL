@@ -11,7 +11,7 @@ admin.site.register(Tanque)
 
 @admin.register(Abastecimento)
 class AbastecimentoAdmin(admin.ModelAdmin):
-    list_display=('equipamento','obra', 'litros', 'data', )
+    list_display=('equipamento','obra', 'litros', 'data', 'observacao')
 admin.site.register(Transferencia)
 admin.site.register(Entrada)
 admin.site.register(Saldo)

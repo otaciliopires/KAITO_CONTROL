@@ -720,7 +720,7 @@ def importexcel(request):
                         transferencia.save()
 
             for i in saidas.iter_rows(min_row=3,values_only=True):
-                    sds = i[:10]
+                    sds = i[:11]
                     print(sds)
 
                     if sds[0] == None:
@@ -758,7 +758,7 @@ def importexcel(request):
                                             operador=sds[9],
                                             colaborador=user_id,
                                             status=True,
-                                            observacao="",
+                                            observacao=sds[10],
                                             numero = num_saida
                                             )
                         
