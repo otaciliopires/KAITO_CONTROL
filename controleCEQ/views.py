@@ -538,14 +538,14 @@ def obras(request):
     
     for obra in obras:
         metodo_saidas = Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
-        print(metodo_saidas, obra)
+        # print(metodo_saidas, obra)
         metodo_entradas = Entrada.objects.filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']
         if metodo_saidas == None:
             metodo_saidas = 0
         if metodo_entradas == None:
             metodo_entradas = 0
         
-        if obra.status == 'M':
+        if obra.status == 'M' or obra.nome == 'CENTRAL DE EQUIPAMENTOS':
             ceq_obra.saldo = ceq_obra.saldo - metodo_saidas
             ceq_obra.save()
         else:
@@ -553,8 +553,8 @@ def obras(request):
             obra.save()
         saidas.append(metodo_saidas)
         entradas.append(metodo_entradas)
-        print(ceq_obra.saldo)
-
+        print(ceq_obra.saldo,obra.nome)
+    
     my_list = zip(obras, saidas, entradas)
     return render(request, 'obras.html', {'my_list': my_list})
  else: return HttpResponse("<h1>Acesso Negado</h1>")
