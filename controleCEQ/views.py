@@ -43,20 +43,20 @@ def home(request):
         
         #Método para cadastrar os equipamentos
 
-        excel = "media/fotos/equipamentos2.xlsx"
-        workbooks = openpyxl.load_workbook(excel)
-        equipamentss = workbooks['Equipamentos']
-        total_list_x=[]
-        list_x = []
-        for i in equipamentss.iter_rows(min_row=2,values_only=True):
-                equip = i[:4]
-                print(equip)
-                if equip[0] == None:
-                        break
-                else:
-                    total_list_x.append(equip) 
-        for i in total_list_x:
-            print(i[3]) 
+        # excel = "media/fotos/equipamentos2.xlsx"
+        # workbooks = openpyxl.load_workbook(excel)
+        # equipamentss = workbooks['Equipamentos']
+        # total_list_x=[]
+        # list_x = []
+        # for i in equipamentss.iter_rows(min_row=2,values_only=True):
+        #         equip = i[:4]
+        #         print(equip)
+        #         if equip[0] == None:
+        #                 break
+        #         else:
+        #             total_list_x.append(equip) 
+        # for i in total_list_x:
+        #     print(i[3]) 
 
         lista_equipamentos = [('RE-02 BRASIL LOCAÇÕES', 'RETROESCAVADEIRA', 'BRASIL LOCAÇÕES', 'T'),
                                 ('RLU-7625', 'CAÇAMBA', 'RAMINHO', 'T'),
