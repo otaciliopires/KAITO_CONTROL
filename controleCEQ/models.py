@@ -28,7 +28,7 @@ class Entrada(models.Model):
     data_nf = models.DateField(default=date(2022,1,1))
     data_entrega = models.DateField(default=date(2022,1,1))
     obra = models.ForeignKey(Obras, on_delete=models.DO_NOTHING)
-    quantidade = models.IntegerField(default=0)
+    quantidade = models.FloatField(default=0)
     preco_unitario = models.FloatField()
     preco_total = models.FloatField()
     colaborador = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING, null=True)
