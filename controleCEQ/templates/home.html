@@ -348,7 +348,7 @@
                     <div class="row">
                         <div class='col-md-8'>
                             <div class='col'>
-                                <label style='width:100px' for='tanque'>Tanque:</label> 
+                                <label style='width:120px' for='tanque'>Tanque:</label> 
                                 <select style="lenght:30px" name='tanque_id'>
                                   {%for tanque in tanques%}
                                     <option value="{{tanque.id}}">{{tanque}}</option>
@@ -357,7 +357,7 @@
                             </div>
 
                             <div class='col' >
-                                <label style='width: 100px' for='obra'>Obra:</label> 
+                                <label style='width: 120px' for='obra'>Obra:</label> 
                                 <select name='obra'>
                                   {%for obra in obras%}
                                     <option value="{{obra.id}}">{{obra}}</option>
@@ -365,7 +365,7 @@
                                 </select>
                             </div>
                             <div class='col' >
-                                <label style='width: 100px' for='equipamento'>Equipamento:</label> 
+                                <label style='width: 120px' for='equipamento'>Equipamento:</label> 
                                 <select name='equipamento'>
                                   {%for equipamento in equipamentos%}
                                     <option value="{{equipamento.id}}">{{equipamento}}</option>
@@ -373,7 +373,7 @@
                                 </select>
                             </div>
                             <div class='col' >
-                              <label style='width: 100px' for='data_'>Data:</label> 
+                              <label style='width: 120px' for='data_'>Data:</label> 
                               <input type='date' name='data'>
                           </div>
   
@@ -385,27 +385,26 @@
                     <div class='row'>
                       <div class='col-md-6'>
                           <div class='col'>
-                            <label for='contador_inicial'>Contador inicial:</label>
+                            <label style='width:120px' for='contador_inicial'>Contador inicial:</label>
                             <input type='text' name='contador_inicial' placeholder='Contador Inicial'>
                           </div>
                           <div class='col'>
-                            <label for='contador_final'>Contador final:</label>
+                            <label style='width:120px' for='contador_final'>Contador final:</label>
                             <input type='text' name='contador_final' placeholder='Contador Final'>
                           </div>
-                          <div class='col'>__________________________
-                          </div>
+
                           <div class='col'>
-                            <label for='horímetro'>Horímetro:</label>
+                            <label style='width:120px' for='horímetro'>Horímetro:</label>
                             <input type='text' name='horimetro' placeholder='Horímetro'>
                           </div>
                       </div>
                       <div class='col-md-6'>
                           <div class='col'>
-                            <label for='saida_litros'>Litros:</label>
+                            <label style='width:120px' for='saida_litros'>Litros:</label>
                             <input type='text' name='saida_litros' placeholder='Litros'> 
                           </div>
                           <div class='col'>
-                            <label for='operador'>Operador:</label>
+                            <label style='width:120px' for='operador'>Operador:</label>
                             <input type='text' name='operador' placeholder='Operador/Motorista'> 
                           </div>
                       </div>
@@ -440,7 +439,7 @@
                     <div class="row">
                         <div class='col-md-6'>
                             <div class='col'>
-                                <label for='tanque'>Tanque:</label> 
+                                <label style='width:80px' for='tanque'>Tanque:</label> 
                                 <select name='tanque_id'>                                 
                                   {%for tanque in tanques%}
                                     {%if tanque.tipo == 'F'%}
@@ -451,7 +450,7 @@
                             </div>
 
                             <div class='col' >
-                                <label for='obra'>Obra:</label> 
+                                <label style='width:80px' for='obra'>Obra:</label> 
                                 <select name='obra_id'>
                                   {%for obra in obras%}
                                     <option value="{{obra.id}}">{{obra}}</option>
@@ -459,22 +458,22 @@
                                 </select>
                             </div>
                             <div class='col' >
-                                <label for='data_nf'>Data Emissão NF:</label> 
+                                <label style='width:80px' for='data_nf'>Data NF:</label> 
                                 <input type='date' name='data_nf'>
                             </div>
                         </div>
 
                       <div class='col-md-6'>
                         <div class='col'>
-                          <label for='fornecedor'>Fornecedor:</label>
+                          <label style='width:100px' for='fornecedor'>Fornecedor:</label>
                           <input type='text' name='fornecedor' placeholder='Fornecedor'>
                         </div>
                           <div class='col'>
-                            <label for='NF'>Nota Fiscal:</label>
+                            <label style='width:100px' for='NF'>Nota Fiscal:</label>
                             <input type='text' name='NF' placeholder='Nota Fiscal'>
                           </div>
                           <div class='col' >
-                            <label for='data_entrega'>Data Entrega:</label> 
+                            <label style='width:100px' for='data_entrega'>Data Entrega:</label> 
                             <input type='date' name='data_entrega'>
                         </div>
 
@@ -487,11 +486,11 @@
                     <div class='row'>
                       <div class='col-md-6'>
                           <div class='col'>
-                            <label for='valor_litro'>Valor Litro:</label>
+                            <label style='width:85px' for='valor_litro'>Valor Litro:</label>
                             <input type='text' name='valor_litro' placeholder='Valor_litro'>
                           </div>
                           <div class='col'>
-                            <label for='quantidade'>Quantidade:</label>
+                            <label style='width:85px' for='quantidade'>Quantidade:</label>
                             <input type='text' name='quantidade' placeholder='Quantidade'>
                           </div>
                       </div>
@@ -527,7 +526,7 @@
                     <div class="row">
                         <div class='col-md-6'>
                             <div class='col'>
-                                <label for='tanque'>Tanque Fixo:</label> 
+                                <label style='width:130px' for='tanque'>Tanque Fixo:</label> 
                                 <select name='tanque_fixo_id'>                                 
                                   {%for tanque in tanques%}
                                     {%if tanque.tipo == 'F'%}
@@ -538,7 +537,7 @@
                             </div>
 
                             <div class='col'>
-                              <label for='tanque'>Tanque Móvel:</label> 
+                              <label style='width:130px' for='tanque'>Tanque Móvel:</label> 
                               <select name='tanque_movel_id'>                                 
                                 {%for tanque in tanques%}
                                   {%if tanque.tipo == 'M'%}
@@ -549,11 +548,11 @@
                           </div>
 
                             <div class='col' >
-                                <label for='contador_inicio'>Contador Inicial:</label>
+                                <label style='width:130px' for='contador_inicio'>Contador Inicial:</label>
                                 <input type='text' name='contador_inicio' placeholder='Contador Inicio'>
                             </div>
                             <div class='col' >
-                              <label for='contador_fim'>Contador Final:</label>
+                              <label style='width:130px' for='contador_fim'>Contador Final:</label>
                               <input type='text' name='contador_fim' placeholder='Contador Final'>
                           </div>
                             
@@ -561,11 +560,11 @@
 
                       <div class='col-md-6'>
                         <div class='col'>
-                          <label for='contador_comboio'>Contador Melosa:</label>
+                          <label style='width:130px' for='contador_comboio'>Contador Melosa:</label>
                           <input type='text' name='contador_comboio' placeholder='Contador'>
                         </div>
                           <div class='col' >
-                            <label for='motorista'>Motorista:</label> 
+                            <label style='width:130px' for='motorista'>Motorista:</label> 
                             <input type='text' name='motorista' placeholder='motorista'>
                         </div>
 
