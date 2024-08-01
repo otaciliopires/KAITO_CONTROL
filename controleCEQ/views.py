@@ -102,10 +102,10 @@ def home(request):
         #     cadastro_equipamentoss.save()
 
         
-        saidas = Abastecimento.objects.all()
-        for saida in saidas:
-            saida.observacao = ""
-            saida.save()
+        # saidas = Abastecimento.objects.all()
+        # for saida in saidas:
+        #     saida.observacao = ""
+        #     saida.save()
 
 
 
