@@ -346,9 +346,9 @@
                 <input type='hidden' name='form_saidas' value='form_saidas'>
                 <div class="container text-left">
                     <div class="row">
-                        <div class='col-md-6'>
+                        <div class='col-md-8'>
                             <div class='col'>
-                                <label for='tanque'>Tanque:</label> 
+                                <label style='width:100px' for='tanque'>Tanque:</label> 
                                 <select style="lenght:30px" name='tanque_id'>
                                   {%for tanque in tanques%}
                                     <option value="{{tanque.id}}">{{tanque}}</option>
@@ -357,7 +357,7 @@
                             </div>
 
                             <div class='col' >
-                                <label for='obra'>Obra:</label> 
+                                <label style='width: 100px' for='obra'>Obra:</label> 
                                 <select name='obra'>
                                   {%for obra in obras%}
                                     <option value="{{obra.id}}">{{obra}}</option>
@@ -365,7 +365,7 @@
                                 </select>
                             </div>
                             <div class='col' >
-                                <label for='equipamento'>Equipamento:</label> 
+                                <label style='width: 100px' for='equipamento'>Equipamento:</label> 
                                 <select name='equipamento'>
                                   {%for equipamento in equipamentos%}
                                     <option value="{{equipamento.id}}">{{equipamento}}</option>
@@ -373,13 +373,11 @@
                                 </select>
                             </div>
                             <div class='col' >
-                              <label for='data_'>Data:</label> 
+                              <label style='width: 100px' for='data_'>Data:</label> 
                               <input type='date' name='data'>
                           </div>
   
                         </div>
-
-                      <div class='col-md-6'>123</div>
                     </div>
 
                     <hr>

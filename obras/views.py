@@ -23,7 +23,7 @@ def obra(request,id):  #Recebi o id da página html lista_obra: href="/obra/{{ob
     entradas = Entrada.objects.filter(obra=obra_name)
     obras = Obras.objects.filter(nome=obra_name)
     user = request.user
-
+    print(request.user.first_name) 
 
 
     return render(request, 'obra.html', {'obra': obra, 
@@ -34,6 +34,7 @@ def obra(request,id):  #Recebi o id da página html lista_obra: href="/obra/{{ob
                                          'obra_user':obra})
 
 def status(request, id):
+
     # obra = Obra.objects.get(id=id)
     abastecimento = Abastecimento.objects.get(id=id)
     obra = Obras.objects.get(nome=abastecimento.obra)
@@ -42,7 +43,7 @@ def status(request, id):
     id_user = request.user.id
     if str(request.user.status) == 'c':
         return redirect("/ceq/painel_obras")
-    else:      
+    else:     
         return redirect(f"/obra/{obra.id}")
 
 def comentario(request, id):
@@ -51,7 +52,7 @@ def comentario(request, id):
     obra = Obras.objects.get(nome=abastecimento.obra)
     comment = request.POST.get('comentario')
 
-    abastecimento.observacao = comment
+    abastecimento.observacao = request.user.first_name + ":" + abastecimento.observacao + "-" + comment
 
     abastecimento.save() 
     
