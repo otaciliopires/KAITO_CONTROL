@@ -23,9 +23,25 @@
       {%endfor%}
     {%endif%}    
 
+    <div class='row' style="float: right;">
+      <form method='GET' id="monthform" action="{%url 'home'%}">
+        <label for='monthselector'>MÊS:</label>
+        <select id='monthselector' name='month'>
+          {%for mes in meses%}
+            <option value="{{mes}}">{{mes}}</option>
+          {%endfor%}
+        </select>
+        <input type="submit" class="btn btn-primary" value='Ir'>
+      </form>
+    </div>
+  </div>  
 
-     <h1>Home</h1>
-     <nav>
+  <div class='row'>     
+  <div><h1>Home</h1></div>
+             
+
+
+    <nav> 
         <ol class="breadcrumb">
            <li class="breadcrumb-item" ><a style='margin-top:30px' >Controle de diesel - Upload arquivo em excel (.xlsx):</a></li>
            <li ><div style="margin-left:0"><div class="row mb-3">
@@ -38,6 +54,8 @@
 
         </ol>
      </nav>
+
+
   </div>
   <section class="section dashboard">
      <div class="row">
@@ -148,19 +166,19 @@
                  <div class="card">
                     <div class="filter">
                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                       <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                       {% comment %} <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                           <li class="dropdown-header text-start">
                              <h6>Filtro</h6>
-                             <form method='POST' action="{%url 'home'%}">{% csrf_token %}
-                              <input type='hidden' name='form_data' value='form_data'>
-                              <select name='mes'>
+                             <form method='GET' id="monthform" action="{%url 'home'%}">
+                              <label for='monthselector'>mês:</label>
+                              <select id='monthselector' name='month'>
                                 {%for mes in meses%}
                                   <option value="{{mes}}">{{mes}}</option>
                                 {%endfor%}
                               </select>
                               <input type="submit" class="btn btn-primary" value='Ir'>
                             </form>
-                       </ul>
+                       </ul> {% endcomment %}
                     </div>
                     <div class="card-body">
                        <h5 class="card-title">Consumo semanal <span>{{mes_atual}}</span></h5>
@@ -597,7 +615,6 @@
           </div>
         </div>
       </div>
-
 
 
 

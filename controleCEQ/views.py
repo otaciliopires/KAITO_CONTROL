@@ -146,16 +146,22 @@ def home(request):
             equipamento.save()
 
         #criação de gráfico semanal no frontend
+        form_data = request.GET.get('mes')
         ano = datetime.today().year
         mes = datetime.today().month
         print(mes)
         meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
-        mes_atual = request.POST.get('mes')
+        mes_atual = request.GET.get('month')
+        print(mes_atual, mes, 'xxxxxxxxxxxxxxx') 
         if mes_atual == None:
             mes_atual = meses[mes-1]
-        mes = meses.index(mes_atual)+1
-        print(mes_atual, mes)        
+        else:
+            mes = meses.index(mes_atual)+1
+
+            
+
+       
 
         data_inicio_1 = datetime(ano,mes,1)
         data_fim_1 = datetime(ano, mes, 8)
@@ -243,8 +249,10 @@ def home(request):
         form_transferencias = request.POST.get('form_transferencias')
         form_entradas = request.POST.get('form_entradas')
         form_test = request.POST.get('form_test')
+        form_data = request.POST.get('form_data')
 
 # método acima é para quando for necessário selecionar um form específico em um html com mais de um form
+        
 
         if form_saidas:
 
