@@ -42,7 +42,7 @@
                         <td style='font-size:17px'>{{obra.nome}}</td>
                         <td style='font-size:17px'>{{entrada|floatformat:"g"}}</td>
                         <td style='font-size:17px'>{{saida|floatformat:"g"}}</td>
-                        <td style='font-size:20px; font-style:bold'>{{obra.saldo|floatformat:"g"}}</td>
+                        <td class="{% if obra.saldo < 0 %} text-danger {% endif%} fw-bold" style='font-size:20px; font-style:bold'>{{obra.saldo|floatformat:"g"}}</td>
                 
                       </tr>
                       {%endfor%}

@@ -540,7 +540,8 @@ def transferencias(request):
 def obras(request):
 
  if request.user.status == "c":
-    obras = Obras.objects.all()
+    obras = Obras.objects.filter(status="S").order_by('saldo')
+    obras_medicao = Obras.objects.filter(status='M').order_by('saldo')
     saidas = []
     entradas = []
 
