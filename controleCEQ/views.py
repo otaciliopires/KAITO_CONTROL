@@ -544,6 +544,7 @@ def obras(request):
     obras_medicao = Obras.objects.filter(status='M').order_by('saldo')
     saidas = []
     entradas = []
+    saidas_medicao = []
 
     ceq_obra = Obras.objects.get(nome='CENTRAL DE EQUIPAMENTOS')
     ceq_obra.saldo = Entrada.objects.filter(obra=ceq_obra.id).aggregate(Sum('quantidade'))['quantidade__sum']
@@ -566,9 +567,16 @@ def obras(request):
         saidas.append(metodo_saidas)
         entradas.append(metodo_entradas)
         print(ceq_obra.saldo,obra.nome)
+
+    for obra_medicao in obras_medicao:
+        metodo_saida = Abastecimento.objects.filter(obra=obra_medicao).aggregate(Sum('litros'))['litros__sum']
+        saidas_medicao.append(metodo_saida)
+   
     
     my_list = zip(obras, saidas, entradas)
-    return render(request, 'obras.html', {'my_list': my_list})
+    metodo_saidas_medicao = zip(obras_medicao, saidas_medicao)
+    return render(request, 'obras.html', {'my_list': my_list,
+                                          'metodo_saidas_medicao': metodo_saidas_medicao})
  else: return HttpResponse("<h1>Acesso Negado</h1>")
 
 def painel_obras(request):
