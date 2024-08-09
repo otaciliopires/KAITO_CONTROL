@@ -550,6 +550,11 @@ def obras(request):
     entradas = []
     saidas_medicao = []
 
+    for obra_medicao in obras_medicao:
+        metodo_saida_med = Abastecimento.objects.filter(obra=obra_medicao).aggregate(Sum('litros'))['litros__sum']
+        saidas_medicao.append(metodo_saida_med)
+    
+
     ceq_obra = Obras.objects.get(nome='CENTRAL DE EQUIPAMENTOS')
     ceq_obra.saldo = Entrada.objects.filter(obra=ceq_obra.id).aggregate(Sum('quantidade'))['quantidade__sum']
     
@@ -562,8 +567,9 @@ def obras(request):
         if metodo_entradas == None:
             metodo_entradas = 0
         
-        if obra.status == 'M' or obra.nome == 'CENTRAL DE EQUIPAMENTOS':
-            ceq_obra.saldo = ceq_obra.saldo - metodo_saidas
+        if obra.nome == 'CENTRAL DE EQUIPAMENTOS':
+            metodo_saidas = metodo_saidas + sum(saidas_medicao)
+            ceq_obra.saldo = ceq_obra.saldo - metodo_saidas - sum(saidas_medicao)
             ceq_obra.save()
         else:
             obra.saldo = metodo_entradas - metodo_saidas
@@ -572,9 +578,7 @@ def obras(request):
         entradas.append(metodo_entradas)
         print(ceq_obra.saldo,obra.nome)
 
-    for obra_medicao in obras_medicao:
-        metodo_saida = Abastecimento.objects.filter(obra=obra_medicao).aggregate(Sum('litros'))['litros__sum']
-        saidas_medicao.append(metodo_saida)
+
    
     
     my_list = zip(obras, saidas, entradas)
