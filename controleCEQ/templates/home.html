@@ -25,13 +25,12 @@
 
     <div class='row' style="float: right;">
       <form method='GET' id="monthform" action="{%url 'home'%}">
-        <label for='monthselector'>MÊS:</label>
-        <select id='monthselector' name='month'>
+        <select id='monthselector' name='month' onchange="this.form.submit()">
+          <option value="" disable select>Selecione um mês</option>
           {%for mes in meses%}
             <option value="{{mes}}">{{mes}}</option>
           {%endfor%}
         </select>
-        <input type="submit" class="btn btn-primary" value='Ir'>
       </form>
     </div>
   </div>  

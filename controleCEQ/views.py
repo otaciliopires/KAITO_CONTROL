@@ -457,20 +457,24 @@ def entradas(request):
     filtro_obra = request.POST.getlist('obra')
     data_inicio = request.POST.get('data_inicio')
     data_fim = request.POST.get('data_fim')
+    if request.method == 'POST':
+        print(data_inicio, data_fim, filtro_obra)
 
-    if data_inicio or data_fim or filtro_obra:
-        if not data_inicio:
-            data_inicio = date(2020,1,1)
-        elif data_inicio == None:
-            data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
-        if not data_fim:
-            data_fim = date.today()
-        elif data_fim == None:
-            data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
-        if not filtro_obra:
-            filtro_obra = list_obras
+        if data_inicio or data_fim or filtro_obra:
+            if not data_inicio:
+                data_inicio = date(2020,1,1)
+            elif data_inicio == None:
+                data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+            if not data_fim:
+                data_fim = date.today()
+            elif data_fim == None:
+                data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
+            if not filtro_obra:
+                filtro_obra = list_obras
+        entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
+        total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
 
-    if request.method == "GET":
+    elif request.method == "GET":
         if not data_inicio:
             data_inicio = date(2020,1,1)
         elif data_inicio == None:
@@ -490,11 +494,11 @@ def entradas(request):
         total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
 
 
-    print(f"{filtro_obra} and {type(filtro_obra)}")
-    print(f"{data_inicio} and {type(data_inicio)}")
+    # print(f"{filtro_obra} and {type(filtro_obra)}")
+    # print(f"{data_inicio} and {type(data_inicio)}")
     user = request.user
     obra_user=Obras.objects.filter(usuario=user.id)
-    print(entradas)
+    # print(entradas)
 
     return render(request, 'entradas.html', {'entradas':entradas, 
                                              'obras': obras, 
