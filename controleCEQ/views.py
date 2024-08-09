@@ -568,8 +568,9 @@ def obras(request):
             metodo_entradas = 0
         
         if obra.nome == 'CENTRAL DE EQUIPAMENTOS':
-            metodo_saidas = metodo_saidas + sum(saidas_medicao)
             ceq_obra.saldo = ceq_obra.saldo - metodo_saidas - sum(saidas_medicao)
+            metodo_saidas = metodo_saidas + sum(saidas_medicao)
+
             ceq_obra.save()
         else:
             obra.saldo = metodo_entradas - metodo_saidas
