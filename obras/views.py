@@ -23,7 +23,7 @@ def obra(request,id):  #Recebi o id da página html lista_obra: href="/obra/{{ob
     entradas = Entrada.objects.filter(obra=obra_name)
     obras = Obras.objects.filter(nome=obra_name)
     user = request.user
-    print(request.user.first_name) 
+    print(request.user.first_name, id) 
 
 
     return render(request, 'obra.html', {'obra': obra, 
@@ -65,10 +65,11 @@ def comentario(request, id):
         return redirect((f"/obra/{obra.id}"))
 
 
-def exportexcel(request):
+def exportexcel(request, id):
     id_user = request.user.id
+    print(id)
 
-    obra = Obras.objects.filter(usuario=id_user)#objeto - obra do usuario logado
+    obra = Obras.objects.filter(id=id)#objeto - obra do usuario logado
     obra_name = obra[0] #Nome da obra para filtrar nas demais classes.
     saidas = Abastecimento.objects.filter(obra=obra_name)
     entradas = Entrada.objects.filter(obra=obra_name)
