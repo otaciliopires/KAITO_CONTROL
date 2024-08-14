@@ -193,3 +193,13 @@ def atualizacao_horarios(request):
     # att_tempo_2()
     print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
     return redirect('/manutencao/home_manutencao')
+
+
+
+
+
+#criar uma classe chamada tempo funcionário-terceiro
+
+#Nessa classe serão contabilizados os tempos em serviço de cada funcionário ou terceiro. Toda vez que houver uma mudança de status em um serviço será contabilizado o tempo desse funcionário 
+#no serviço, o tempo no tipo de serviço
+#nessa classe serão registrados todas as mudanças de serviço e contabilizados os tempos unicamente em serviço, preservando att_tempo_01, pois o att_tempo_01 contabiliza o tempo de mudança de status.

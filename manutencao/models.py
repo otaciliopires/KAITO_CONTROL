@@ -52,7 +52,7 @@ class Servico_Oficina(models.Model):
     numero = models.IntegerField() 
     ordem_servico = models.ForeignKey(Ordem_Oficina, on_delete=models.DO_NOTHING)
     tipo_status = (("AP", "Aguardando Peças"), ("AS", "Aguardando Serviço"), ("ES", "Em Serviço"))
-    status = models.CharField(max_length=5, choices = tipo_status, default="Aguardando Peças")
+    status = models.CharField(max_length=5, choices = tipo_status, default="Em Serviço")
     grupo_servico = models.ForeignKey(Grupo_Servico, on_delete=models.DO_NOTHING)
     descricao = models.CharField(max_length = 100)
     tempo_aguardo_peca = models.FloatField(null=True, blank=True, default=0)
@@ -69,13 +69,14 @@ class Servico_Oficina(models.Model):
     def __str__(self):
         return self.grupo_servico.grupo
     
-class Registro_Funcionario(models.Model):
+class Registro_Tempo_Servico(models.Model):
+    servico_oficina = models.ForeignKey(Servico_Oficina, on_delete=models.DO_NOTHING)
     funcionario = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING)
+    tercerizado = models.ForeignKey(Servico_Terceirizado, on_delete=models.DO_NOTHING)
     tempo_servico = models.FloatField(null=True, blank=True)
-    servico_oficina = models.ForeignKey(Servico_Oficina, on_delete = models.DO_NOTHING)
     
     def __str__(self):
-        return self.funcionario.nome
+        return self.servico_oficina
 
     
 

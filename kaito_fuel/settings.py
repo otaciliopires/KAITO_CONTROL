@@ -18,7 +18,11 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool, default=False)
 
-ALLOWED_HOSTS = ['kaitocontrol.vps-kinghost.net', '191.252.214.99', 'http://kaitocontrol.vps-kinghost.net','127.0.0.1' ]
+ALLOWED_HOSTS = ['kaitocontrol.vps-kinghost.net', 
+                 '191.252.214.99', 
+                 'http://kaitocontrol.vps-kinghost.net',
+                 '127.0.0.1', 'http://kaitocs.com.br', 
+                 'www.kaitocs.com.br' ]
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
 
 # Application definition
