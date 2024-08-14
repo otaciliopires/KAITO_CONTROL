@@ -153,3 +153,11 @@ MESSAGE_TAG = {
     constants.INFO: "alert alert-info",
     constants.WARNING: "alert alert-warning"
 }
+
+#HTTPS/SSL
+
+if not DEBUG:
+	SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+	SECURE_SSL_REDIRECT = True
+	SESSION_COOKIE_SECURE = True
+	CSRF_COOKIE_SECURE = True
