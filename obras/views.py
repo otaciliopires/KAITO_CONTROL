@@ -20,14 +20,18 @@ def obra(request,id):  #Recebi o id da página html lista_obra: href="/obra/{{ob
     obra = Obras.objects.get(id=id)#objeto - obra do usuario logado
     obra_name = obra
     saidas = Abastecimento.objects.filter(obra=obra_name)
+    saidasx = Abastecimento.objects.filter(obra=obra_name, status=False)
     entradas = Entrada.objects.filter(obra=obra_name)
     obras = Obras.objects.filter(nome=obra_name)
     user = request.user
-    print(request.user.first_name, id) 
+    print()
 
-
+    if request.method == 'POST':
+        data_inicio = request.POST.get('data_inicio')
+        data_fim = request.POST.get('data_fim') 
     return render(request, 'obra.html', {'obra': obra, 
-                                         'saidas':saidas, 
+                                         'saidas':saidas,
+                                         'saidasx':saidasx, 
                                          'entradas':entradas, 
                                          'obras':obras, 
                                          'user':user, 
