@@ -24,7 +24,6 @@ def obra(request,id):  #Recebi o id da página html lista_obra: href="/obra/{{ob
     entradas = Entrada.objects.filter(obra=obra_name)
     obras = Obras.objects.filter(nome=obra_name)
     user = request.user
-    print()
 
     if request.method == 'POST':
         data_inicio = request.POST.get('data_inicio')

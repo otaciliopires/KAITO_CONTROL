@@ -72,7 +72,7 @@ def servico_oficina(request, id):
         servico_oficina = Servico_Oficina.objects.filter(ordem_servico = id)
         for service in servico_oficina:
 
-            if service.status == "em_servico":
+            if service.status == "Em Serviço":
                 print("em servico")
                 break
             elif service.status == "Aguardando Peças": # de todos os aguardando peças, somar o com a data mais antiga.
@@ -119,6 +119,7 @@ def servico_oficina(request, id):
             else:pass
             
             servico_oficina = Servico_Oficina(numero=numero+1,
+                                          status= 'Em Serviço',
                                           ordem_servico=ordem_oficina_aberta,
                                           grupo_servico=grupo_servico,
                                           data_inicio=data_inicio,
