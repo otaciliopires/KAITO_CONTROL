@@ -141,6 +141,8 @@ def home(request):
         estoque_total = tc01[0]+tc02[0]+ca01[0]+ca02[0]
         porcent_estoque = round(100*(estoque_total/(15000+30000+4200+4500)),1)
         #Alterações horímetro equipamento
+
+        tc_total = tc01[0]+tc02[0]
         for equipamento in equipamentos:
 
             equipamento.save()
@@ -231,6 +233,7 @@ def home(request):
                                             #  'obra_user':obra_user[0], 
                                              'tc01':tc01,
                                              'tc02':tc02,
+                                             'tc_total':tc_total,
                                              'ca01':ca01,
                                              'ca02':ca02,
                                              'estoque_total':estoque_total,
