@@ -35,18 +35,30 @@
             <div class="col-xxl-6 col-md-12">
                <div class="card info-card sales-card">
                   <div class="card-body">
-                     <h5 class="card-title">ORDEM DE SERVIÇO CORRETIVA OFICINA <span>|EM ABERTO</span></h5>
+                     <div class='card-title'>ORDEM DE SERVIÇO CORRETIVA OFICINA <span>|EM ABERTO</span>
+
+
+
+
+                     </div>
+
+                     
                      <div class="d-flex align-items-c enter">
                         <div class="ps-3">
                            <h6>{{ordem_oficina_aberta.equipamento}} _____ {{ordem_oficina_aberta.data_inicio}} _____ (colocar aqui tempo parado)  </h6>
 
                         </div>
-                        <div class="d-flex align-items-cleft justify-content-left"> 
+                        <div class="d-flex align-items-left justify-content-left"> 
                          <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
-                           <button style="margin-left:50px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#adicao_os">
                               Adicionar Serviço
                             </button>
                         </div>
+
+                        <div class='align-items-right justify-content-right'><button type="button" class="btn btn-danger btn-lg" data-bs-toggle="modal" data-bs-target="#finalizar_os">
+                          Finalizar O.S.
+                        </button>
+                      </div>
 
                      </div>
                   </div>
@@ -194,11 +206,11 @@
 
   
   <!-- MODAL OS CORRETIVA OFICINA -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="adicao_os" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Adição Serviço</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -258,6 +270,44 @@
                   <label for="exampleFormControlTextarea1" class="form-label">Descrição do serviço:</label>
                   <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
                 </div>
+  
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <!-- MODAL FINALIZAR OS -->
+  <div class="modal fade" id="finalizar_os" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Finalizar O.S</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'servico_oficina' id=id_OS_oficina%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_fim_os' value='form_osoficina_fim'>
+
+              <div class='mb-3'></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Data Fim:</label>
+                    <input style='width:300px' type="datetime-local" name="data_fim"></input>
+                </div>
+
   
 
                 <div class="modal-footer">

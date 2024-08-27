@@ -17,12 +17,7 @@ def home_manutencao(request):
         for i in equipamentos_rocha:
             list_equip.append(i)
 
-        ordens = Ordem_Oficina.objects.all()
-        for ordem in ordens:
-            print(ordem.data_status)
-            print(now)
-
-        
+        ordens = Ordem_Oficina.objects.all()        
 
         #dados para OS da oficina
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)  
@@ -96,6 +91,7 @@ def servico_oficina(request, id):
     elif request.method == 'POST':
         form_servico = request.POST.get('form_servico')
         form_status_servico = request.POST.get('form_status_servico')
+        form_fim_os = request.POST.get('form_fim_os')
 
         if form_servico: #FORMULÁRIO DE ADIÇÃO DE SERVIÇO
             ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
@@ -188,12 +184,26 @@ def servico_oficina(request, id):
             print(type(data_fim), data_status)
 
             return redirect(f'/manutencao/osoficina/{id}')
+        
+        if form_fim_os:
+
+            data_fim = request.POST.get('data_fim')
+            os_oficina = Ordem_Oficina.objects.get(id=id)
+            servicos_oficina = Servico_Oficina.objects.get(os_oficina=id)
+            
+
+            #verificar se tem algum serviço em aberto, caso sim, não salvar a data e fornecer uma mensagem de erro
+            os_oficina.data_fim = data_fim
+            print(data_fim)
+            os_oficina.save()
+            return redirect('/manutencao/home_manutencao/')
+            
 
 def atualizacao_horarios(request):
 
     # att_tempo_2()
     print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
-    return redirect('/manutencao/home_manutencao')
+    return redirect('/manutencao/home_manutencao/')
 
 
 

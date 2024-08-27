@@ -149,11 +149,10 @@ def home(request):
         form_data = request.GET.get('mes')
         ano = datetime.today().year
         mes = datetime.today().month
-        print(mes)
         meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
         mes_atual = request.GET.get('month')
-        print(mes_atual, mes, 'xxxxxxxxxxxxxxx') 
+
         if mes_atual == None:
             mes_atual = meses[mes-1]
         else:
@@ -177,8 +176,7 @@ def home(request):
         else:
             data_fim_4 = datetime(ano, mes, 28)
 
-        print(type(mes))
-        print(data_fim_4)
+
 
         entradas_1 = Entrada.objects.filter(data_entrega__range=[data_inicio_1, data_fim_1]).aggregate(Sum('quantidade'))['quantidade__sum']
         entradas_2 = Entrada.objects.filter(data_entrega__range=[data_inicio_2, data_fim_2]).aggregate(Sum('quantidade'))['quantidade__sum']
@@ -245,14 +243,15 @@ def home(request):
                                              'sort_dict':sort_d,})
     
     if request.method == 'POST':
-        form_saidas = request.POST.get('form_saidas')
+
         form_transferencias = request.POST.get('form_transferencias')
         form_entradas = request.POST.get('form_entradas')
         form_test = request.POST.get('form_test')
         form_data = request.POST.get('form_data')
+        form_saidas = request.POST.get('form_saidas')
 
 # método acima é para quando for necessário selecionar um form específico em um html com mais de um form
-        
+        print(form_saidas)
 
         if form_saidas:
 
@@ -272,7 +271,7 @@ def home(request):
             num_saida = Abastecimento.objects.aggregate(Max('numero'))
             num_saida = (num_saida['numero__max'] + 1)
 
-
+            print('deu certo')
 
             #lançamento abastecimentos:
             abastecimento = Abastecimento(litros=litros,
@@ -288,10 +287,12 @@ def home(request):
                                           numero=num_saida)
             try:
                 abastecimento.save()
+                print('deu certo')
 
                 messages.add_message(request, constants.SUCCESS, "Abastecimento laçado com sucesso!" )
                 return redirect("/ceq/home")
             except:
+                print('deu errado')
                 messages.add_message(request, constants.ERROR, "ERRO AO LANÇAR O ABASTECIMENTO" )
                 return redirect("/ceq/home")
 
@@ -317,6 +318,8 @@ def home(request):
             valor_total = float(valor_litro) * int(quantidade_litros)
             num_entrada = Entrada.objects.aggregate(Max('numero'))
             num_entrada = num_entrada['numero__max']+1
+
+            print('deucerto')
 
             #lançamento entradas:
             entrada = Entrada(tanque=tanque,
