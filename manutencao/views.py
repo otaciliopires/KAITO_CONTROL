@@ -4,7 +4,7 @@ from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, 
 from .models import Equipamentos
 from django.db.models import Max
 from datetime import datetime
-from manutencao.utils import now, att_tempo_2, att_tempo_1
+from manutencao.utils import now, att_tempo_2, att_tempo_1_os, att_tempo_1_servico
 
 # Create your views here.
 
@@ -68,7 +68,7 @@ def servico_oficina(request, id):
         for service in servico_oficina:
 
             if service.status == "Em Serviço":
-                print("em servico")
+
                 break
             elif service.status == "Aguardando Peças": # de todos os aguardando peças, somar o com a data mais antiga.
                 print(service.data_mudanca_status) 
@@ -79,7 +79,9 @@ def servico_oficina(request, id):
         terceiros = Servico_Terceirizado.objects.all()
 
 
-
+        servicos = Servico_Oficina.object.all()
+        for servico in servicos:
+            print(servico.tempo_aguardo_servico)
         return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
                                                        'servico_oficina': servico_oficina,
                                                        'grupo_servico': grupo_servico,
@@ -125,7 +127,7 @@ def servico_oficina(request, id):
                                           executante_terceiro=terceiro,
                                           executante_funcionario=funcionario)
             
-            att_tempo_1(ordem_oficina_aberta.id, data_inicio)        
+            att_tempo_1_os(ordem_oficina_aberta.id, data_inicio)        
             servico_oficina.save()
             print(type(data_inicio), data_inicio)
 
@@ -168,20 +170,16 @@ def servico_oficina(request, id):
                 servico_oficina.data_fim = data_fim
                 servico_oficina.data_mudanca_status = data_fim
                 data_status = data_fim
-
             
-            att_tempo_1(id, data_status) #colocar a função antes de salvar as informações no BD garante que o valor calculado de
-                                         #tempo seja contabilizado para o status anterior(correto)                                   
-            servico_oficina.save()
+            att_tempo_1_os(id, data_status) #colocar a função antes de salvar as informações no BD garante que o valor calculado de
+                                         #tempo seja contabilizado para o status anterior(correto)  
+            att_tempo_1_servico(id_servico)                                 
 
 
         #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, será considerado o horário da mudança atual.
         #com esse datetime, calcular o tempo em no status selecionado. Talvez seja necessário adicionar mais uma variável no models, o datetime de mudança de status, para que
         #quando for necessário calcular o tempo em cada status, se basear o horário inicial no ultimo datetime cadastrado.
 
-                
-            print(data_fim, status_servico, executante_funcionario, executante_terceiro, descricao, id_servico, data_fim)
-            print(type(data_fim), data_status)
 
             return redirect(f'/manutencao/osoficina/{id}')
         
@@ -189,7 +187,7 @@ def servico_oficina(request, id):
 
             data_fim = request.POST.get('data_fim')
             os_oficina = Ordem_Oficina.objects.get(id=id)
-            servicos_oficina = Servico_Oficina.objects.get(os_oficina=id)
+            # servicos_oficina = Servico_Oficina.objects.get(id=os_oficina)
             
 
             #verificar se tem algum serviço em aberto, caso sim, não salvar a data e fornecer uma mensagem de erro

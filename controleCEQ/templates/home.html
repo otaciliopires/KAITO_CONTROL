@@ -67,10 +67,10 @@
                        <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-database"></i></div>
                           <div class="ps-3">
-                             <h6>{{estoque_total|floatformat:"2g"}} </h6>
+                             <h6>{{estoque_total|floatformat:"2g"}} Litros </h6>
                              <span class="text-danger small pt-1 fw-bold">{{porcent_estoque}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
                           </div>
-                          <div style='margin-left:100px'>
+                          <div style='margin-left:120px'>
                             
                             <div id="bordas" class="col-md-4">
                               <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-success btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_entradas" >ENTRADA</button>
@@ -89,21 +89,14 @@
                  </div>
               </div>
 
-
-
-
-
-
-
-              
               <div class="col-xl-12 col-md-6">
                  <div class="card info-card sales-card">
                     <div class="card-body">
                        <h5 class="card-title">TC-01 & TC-02 <span>| Tanque 45.000 litros</span></h5>
                        <div class="d-flex align-items-c enter">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
-                          <div class="ps-3">
-                             <h6>{{tc_total|floatformat:"2g"}}</h6>
+                          <div style="padding-top:12px; padding-left:8px" class="ps-3">
+                             <h6>{{tc_total|floatformat:"2g"}} Litros</h6>
 
                           </div>
                        </div>
@@ -111,8 +104,6 @@
                  </div>
               </div>
               
-             
-
               <div class="col-xxl-4 col-md-6">
                  <div class="card info-card revenue-card">
                     <div class="card-body">
@@ -120,7 +111,7 @@
                        <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-truck"></i></div>
                           <div class="ps-3">
-                             <h6>{{ca01.0|floatformat:"2g"}}</h6>
+                             <h6>{{ca01.0|floatformat:"2g"}} Litros</h6>
 
                           </div>
                        </div>
@@ -135,7 +126,7 @@
                        <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-truck"></i></div>
                           <div class="ps-3">
-                             <h6>{{ca02.0|floatformat:"2g"}}</h6>
+                             <h6>{{ca02.0|floatformat:"2g"}} Litros</h6>
 
                           </div>
                        </div>

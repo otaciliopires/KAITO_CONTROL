@@ -24,7 +24,7 @@ def att_tempo(data_status, id_os_atual):
                     return None
             
 
-def att_tempo_1(id, data_status):
+def att_tempo_1_os(id, data_status):
       data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")
       os_aberta = Ordem_Oficina.objects.get(id=id)
       if os_aberta.data_status.timestamp() > data_status.timestamp():
@@ -53,7 +53,7 @@ def att_tempo_1(id, data_status):
                   os_aberta.save()
                   break
 
-
+            
 def att_tempo_2():
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)
         for os_aberta in os_oficina_abertas:
@@ -83,5 +83,19 @@ def att_tempo_2():
                 
                     
 
-                  
-      
+def att_tempo_1_servico(id):
+      servico = Servico_Oficina.objects.get(id=id)
+      print(servico.status)
+      if servico.status == "Em Serviço":
+            print(servico.status, (now.timestamp() - servico.data_mudanca_status.timestamp())/3600)
+            servico.tempo_em_servico = servico.tempo_em_servico + (now.timestamp() - servico.data_mudanca_status.timestamp())/3600
+            servico.save()
+      elif servico.status == "Aguardando Peças":
+            print(servico.status, (now.timestamp() - servico.data_mudanca_status.timestamp())/3600)
+            servico.tempo_em_servico = servico.tempo_aguardo_peca + (now.timestamp() - servico.data_mudanca_status.timestamp())/3600
+            servico.save()
+      elif servico.status == 'Aguardando Serviço':
+            print(servico.status, (now.timestamp() - servico.data_mudanca_status.timestamp())/3600)
+            servico.tempo_aguardo_servico = servico.tempo_aguardo_servico + (now.timestamp() - servico.data_mudanca_status.timestamp())/3600
+            print(servico.tempo_aguardo_servico)
+            servico.save()
