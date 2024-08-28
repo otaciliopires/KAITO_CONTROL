@@ -32,7 +32,7 @@ def home(request):
         tanques = Tanque.objects.all()
         obras = Obras.objects.all()
         equipamentos = Equipamentos.objects.all()
-
+        print(user)
 
         """Esse script serve para verificar dentro de um excel todos os equipamentos e cadastrá-los
         Utilizar esse código mas transformando o excel em um dictionary e cadastrando os dados do dict
