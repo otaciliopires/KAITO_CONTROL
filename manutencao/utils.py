@@ -19,6 +19,7 @@ def att_tempo(data_status, id_os_atual):
                         data_recente = Servico_Oficina.objects.filter(data_fim=None, ordem_servico=os_aberta).aggregate(Max('data_mudanca_status'))['data_mudanca_status__max']
                         print(x)
                         pass
+
             # else:
 
                     return None
@@ -37,6 +38,7 @@ def att_tempo_1_os(id, data_status):
                   os_aberta.data_status = data_status
                   os_aberta.status = "Em Serviço"
                   os_aberta.save()
+                  print(os_aberta.status)
                   break
             elif Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status='Aguardando Peças').exists():
                   os_aberta.tempo_aguardo_peca = os_aberta.tempo_aguardo_peca + (data_status.timestamp() - os_aberta.data_status.timestamp())/3600
@@ -44,6 +46,7 @@ def att_tempo_1_os(id, data_status):
                   os_aberta.data_status = data_status
                   os_aberta.status = "Aguardando Peças"
                   os_aberta.save()
+                  print(os_aberta.status)
                   break
             elif Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status='Aguardando Serviço').exists():
                   os_aberta.tempo_aguardo_servico = os_aberta.tempo_aguardo_servico + (data_status.timestamp() - os_aberta.data_status.timestamp())/3600
@@ -51,6 +54,7 @@ def att_tempo_1_os(id, data_status):
                   os_aberta.data_status = data_status
                   os_aberta.status = "Aguardando Serviço"
                   os_aberta.save()
+                  print(os_aberta.status)
                   break
 
             
@@ -85,23 +89,35 @@ def att_tempo_2():
 
 def att_tempo_1_servico(id, data_status):
       data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")
-      print("xcxxxxxxxxxxxxxxx",data_status)
-     
       servico = Servico_Oficina.objects.get(id=id)
-      print("xcxxxxxxxxxxxxxxx",servico.data_mudanca_status) 
+      print(servico.data_mudanca_status, servico.tempo_aguardo_peca, servico.tempo_aguardo_servico, servico.tempo_em_servico)
+
       if servico.status == "Em Serviço":
-            print(servico.status, (now.timestamp() - servico.data_mudanca_status.timestamp())/3600)
+            print("testserv",servico.status, (data_status.timestamp() - servico.data_mudanca_status.timestamp())/3600)
             servico.tempo_em_servico = servico.tempo_em_servico + (data_status.timestamp() - servico.data_mudanca_status.timestamp())/3600
             servico.data_mudanca_status = data_status
-            servico.save()
+            try:
+                  servico.save()
+                  print('deu certo')
+            except:
+                  print('deu errado')
       elif servico.status == "Aguardando Peças":
-            print(servico.status, (now.timestamp() - servico.data_mudanca_status.timestamp())/3600)
+            print("testeap",servico.status, (now.timestamp() - servico.data_mudanca_status.timestamp())/3600)
             servico.tempo_aguardo_peca= servico.tempo_aguardo_peca + (data_status.timestamp() - servico.data_mudanca_status.timestamp())/3600
             servico.data_mudanca_status = data_status
-            servico.save()
+            try:
+                  servico.save()
+                  print('deu certo')
+            except:
+                  print('deu errado')
+            print("X",servico.data_mudanca_status)
       elif servico.status == 'Aguardando Serviço':
-            print(servico.status, (now.timestamp() - servico.data_mudanca_status.timestamp())/3600)
+            print("testeas",servico.status, (now.timestamp() - servico.data_mudanca_status.timestamp())/3600)
             servico.tempo_aguardo_servico = servico.tempo_aguardo_servico + (data_status.timestamp() - servico.data_mudanca_status.timestamp())/3600
             servico.data_mudanca_status = data_status
-            print(servico.tempo_aguardo_servico)
-            servico.save()
+            try:
+                  servico.save()
+                  print('deu certo')
+            except:
+                  print('deu errado')
+            print("X",servico.data_mudanca_status)

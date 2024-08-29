@@ -143,6 +143,8 @@ def servico_oficina(request, id):
             
             data_fim = request.POST.get('data_fim')
             data_status = request.POST.get('data_status')
+            att_tempo_1_os(id, data_status)
+            att_tempo_1_servico(id_servico,data_status)
             status_servico = request.POST.get('status_servico')
             executante_funcionario_id = request.POST.get('executante_funcionario')
             if executante_funcionario_id == None:
@@ -162,20 +164,21 @@ def servico_oficina(request, id):
             servico_oficina.descricao = descricao
             servico_oficina.executante_funcionario = executante_funcionario
             servico_oficina.executante_terceiro = executante_terceiro
-            servico_oficina.status = status_servico
+            # servico_oficina.status = status_servico
             if data_fim == "":             
                 pass
             else:
                 servico_oficina.data_fim = data_fim
                 servico_oficina.data_mudanca_status = data_fim
                 data_status = data_fim
-            
-            att_tempo_1_os(id, data_status) #colocar a função antes de salvar as informações no BD garante que o valor calculado de tempo seja contabilizado para o status anterior(correto)  
+
+            servico_oficina.save()
+                #colocar a função antes de salvar as informações no BD garante que o valor calculado de tempo seja contabilizado para o status anterior(correto)  
                
-            servico_oficina.save()    
-            att_tempo_1_servico(id_servico,data_status)  
-         
-                         
+    
+              
+
+        
                                 
 
 
