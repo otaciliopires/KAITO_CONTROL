@@ -79,7 +79,7 @@ def servico_oficina(request, id):
         terceiros = Servico_Terceirizado.objects.all()
 
 
-        servicos = Servico_Oficina.object.all()
+        servicos = Servico_Oficina.objects.all()
         for servico in servicos:
             print(servico.tempo_aguardo_servico)
         return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
@@ -163,17 +163,20 @@ def servico_oficina(request, id):
             servico_oficina.executante_funcionario = executante_funcionario
             servico_oficina.executante_terceiro = executante_terceiro
             servico_oficina.status = status_servico
-            if data_fim == "":
-                servico_oficina.data_mudanca_status = data_status                
+            if data_fim == "":             
                 pass
             else:
                 servico_oficina.data_fim = data_fim
                 servico_oficina.data_mudanca_status = data_fim
                 data_status = data_fim
             
-            att_tempo_1_os(id, data_status) #colocar a função antes de salvar as informações no BD garante que o valor calculado de
-                                         #tempo seja contabilizado para o status anterior(correto)  
-            att_tempo_1_servico(id_servico)                                 
+            att_tempo_1_os(id, data_status) #colocar a função antes de salvar as informações no BD garante que o valor calculado de tempo seja contabilizado para o status anterior(correto)  
+               
+            servico_oficina.save()    
+            att_tempo_1_servico(id_servico,data_status)  
+         
+                         
+                                
 
 
         #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, será considerado o horário da mudança atual.
