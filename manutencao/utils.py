@@ -1,6 +1,7 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from manutencao.models import Ordem_Oficina, Servico_Oficina
 from django.db.models import Max
+
 
 #gerar o NOW para importar nos views
 
@@ -121,3 +122,43 @@ def att_tempo_1_servico(id, data_status):
             except:
                   print('deu errado')
             print("X",servico.data_mudanca_status)
+
+def hora_correta(date_init, date_end):
+
+      #função para calcular a hora correta de tempo aguardando serviço e tempo aguardando peças.
+      #Calcula-se a diferença entre dois datetimes, e leva em consideração o dia de 9h para diferentes situações
+      #CASO 3: hora_init>hora_end e dia_init<dia_end
+      #CASO 1: hora init < hora end e datas init e end iguais
+      #CASO2: horas init < hora end e dia init < dia end
+      date_init = date_init - timedelta(hours=3) #ajustado as 3 horas de diferença para object.datetime type
+      date_init = date_init.replace(tzinfo=None) #retirado o timezone. Necessário, pois se permanecesse, as 3 horas eram contabilizadas
+
+      minute_init = date_init.minute
+      hour_init= date_init.hour
+      day_init = date_init.day
+      month_init = date_init.month
+      minute_end = date_end.minute
+      hour_end = date_end.hour
+      day_end = date_end.day
+      month_end = date_end.month
+      print("inicial",day_init,hour_init, date_init)
+      print("final",day_end, hour_end, date_end)
+      date_init = date_init.timestamp()
+      date_end = date_end.timestamp()
+      print((date_end-date_init)/3600)
+      calculated_time = 0
+
+
+      if hour_init <= hour_end and day_init == day_end and month_init == month_end:
+            calculated_time = (date_end - date_init)/3600
+            print('caso1')
+      
+      elif hour_init <= hour_end and day_init < day_end:
+            calculated_time = (day_end - day_init)*9 + ((hour_end + minute_end*0.01666666667) - (hour_init + minute_end*0.01666666667))
+            print('caso2')
+
+      elif hour_init > hour_end and day_init < day_end:
+            calculated_time = (hour_end + minute_end*0.01666666667 - 7) + (17 - hour_init + minute_init*0.01666666667) + (day_end - day_init - 1)*9
+            print('caso3')
+      
+      return calculated_time

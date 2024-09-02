@@ -4,7 +4,7 @@ from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, 
 from .models import Equipamentos
 from django.db.models import Max
 from datetime import datetime
-from manutencao.utils import now, att_tempo_2, att_tempo_1_os, att_tempo_1_servico
+from manutencao.utils import now, att_tempo_2, att_tempo_1_os, att_tempo_1_servico, hora_correta
 
 # Create your views here.
 
@@ -18,6 +18,7 @@ def home_manutencao(request):
             list_equip.append(i)
 
         ordens = Ordem_Oficina.objects.all()        
+        print(Servico_Oficina.objects.all()[0].data_mudanca_status.minute, datetime.today().timestamp())
 
         #dados para OS da oficina
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)  
@@ -174,24 +175,27 @@ def servico_oficina(request, id):
 
             data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")
             if servico_oficina.status == "Em Serviço":
-                    print("testserv",servico_oficina.status, (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
                     servico_oficina.tempo_em_servico = servico_oficina.tempo_em_servico + (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600
+                    print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
+                    print("novo",hora_correta(servico_oficina.data_mudanca_status,data_status))                     
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
             elif servico_oficina.status == "Aguardando Peças":
-                    print("testeap",servico_oficina.status, (now.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
                     servico_oficina.tempo_aguardo_peca= servico_oficina.tempo_aguardo_peca + (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600
+                    print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
+                    print("novo",hora_correta(servico_oficina.data_mudanca_status,data_status)) 
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
 
             elif servico_oficina.status == 'Aguardando Serviço':
-                    print("testeas",servico_oficina.status, (now.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
                     servico_oficina.tempo_aguardo_servico = servico_oficina.tempo_aguardo_servico + (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600
+                    print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
+                    print("novo",hora_correta(servico_oficina.data_mudanca_status,data_status))                     
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
 
             servico_oficina.save()
-            print(Servico_Oficina.objects.get(id=id_servico).status)
+            # print(Servico_Oficina.objects.get(id=id_servico).status)
                         #colocar a função antes de salvar as informações no BD garante que o valor calculado de tempo seja contabilizado para o status anterior(correto)  
                 
         
