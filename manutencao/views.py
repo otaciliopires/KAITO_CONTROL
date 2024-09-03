@@ -18,8 +18,6 @@ def home_manutencao(request):
             list_equip.append(i)
 
         ordens = Ordem_Oficina.objects.all()        
-        print(Servico_Oficina.objects.all()[0].data_mudanca_status.minute, datetime.today().timestamp())
-
         #dados para OS da oficina
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)  
 
@@ -181,14 +179,14 @@ def servico_oficina(request, id):
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
             elif servico_oficina.status == "Aguardando Peças":
-                    servico_oficina.tempo_aguardo_peca= servico_oficina.tempo_aguardo_peca + (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600
+                    servico_oficina.tempo_aguardo_peca= hora_correta(servico_oficina.data_mudanca_status, data_status)
                     print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
                     print("novo",hora_correta(servico_oficina.data_mudanca_status,data_status)) 
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
 
             elif servico_oficina.status == 'Aguardando Serviço':
-                    servico_oficina.tempo_aguardo_servico = servico_oficina.tempo_aguardo_servico + (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600
+                    servico_oficina.tempo_aguardo_servico = hora_correta(servico_oficina.data_mudanca_status, data_status)
                     print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
                     print("novo",hora_correta(servico_oficina.data_mudanca_status,data_status))                     
                     servico_oficina.data_mudanca_status = data_status
