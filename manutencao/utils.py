@@ -17,6 +17,15 @@ def hora_correta(date_init, date_end):
       date_init = date_init - timedelta(hours=3) #ajustado as 3 horas de diferença para object.datetime type
       date_init = date_init.replace(tzinfo=None) #retirado o timezone. Necessário, pois se permanecesse, as 3 horas eram contabilizadas
 
+      #Quantidade de sábados e domingos
+      days_list=[]
+      current_date = date_init
+      while current_date <= date_end:
+            days_list.append(current_date.weekday())
+            current_date += timedelta(days=1)
+      saturdays = days_list.count(5)
+      sundays = days_list.count(6)
+
       minute_init = date_init.minute
       hour_init= date_init.hour
       day_init = date_init.day
@@ -31,17 +40,6 @@ def hora_correta(date_init, date_end):
       date_end = date_end.timestamp()
       print((date_end-date_init)/3600)
       calculated_time = 0
-
-      #Quantidade de sábados e domingos
-      days_list=[]
-      current_date = date_init
-      while current_date <= date_end:
-            days_list.append(current_date.weekday())
-            current_date += timedelta(days=1)
-      saturdays = days_list.count(5)
-      sundays = days_list.count(6)
-
-
 
       if hour_init <= hour_end and day_init == day_end and month_init == month_end:
             calculated_time = (date_end - date_init)/3600
