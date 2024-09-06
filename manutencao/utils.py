@@ -16,7 +16,7 @@ def hora_correta(date_init, date_end):
       #CASO2: horas init < hora end e dia init < dia end
       date_init = date_init - timedelta(hours=3) #ajustado as 3 horas de diferença para object.datetime type
       date_init = date_init.replace(tzinfo=None) #retirado o timezone. Necessário, pois se permanecesse, as 3 horas eram contabilizadas
-
+      date_end = date_end.replace(tzinfo=None)
       #Quantidade de sábados e domingos
       days_list=[]
       current_date = date_init
@@ -83,10 +83,11 @@ def att_tempo(data_status, id_os_atual):
             
 
 def att_tempo_1_os(id, data_status):
-      data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")
       os_aberta = Ordem_Oficina.objects.get(id=id)
-      if os_aberta.data_status.timestamp() > data_status.timestamp():
-            data_status = os_aberta.data_status
+
+      print(data_status, os_aberta.data_status)
+      if os_aberta.data_status.timestamp() < data_status.timestamp():
+            os_aberta.data_status = data_status
       servicos = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
       for servico in servicos:
             if Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status="Em Serviço").exists():

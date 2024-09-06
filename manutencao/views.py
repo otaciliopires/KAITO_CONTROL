@@ -99,6 +99,7 @@ def servico_oficina(request, id):
             grupo_servico_id = request.POST.get('grupo_servico')
             grupo_servico = Grupo_Servico.objects.get(id=grupo_servico_id)
             data_inicio = request.POST.get('data_inicio')
+            data_inicio = datetime.strptime(data_inicio, "%Y-%m-%dT%H:%M")
             status_executante = request.POST.get('status_executante')
             descricao_servico = request.POST.get('descricao')
             if status_executante == 'funcionario':
@@ -141,9 +142,19 @@ def servico_oficina(request, id):
             servico_oficina = Servico_Oficina.objects.get(id=id_servico)
             
             data_fim = request.POST.get('data_fim')
-            data_status = request.POST.get('data_status')
+
+
+
+            if data_fim == "":
+                data_status = request.POST.get('data_status')
+                data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")          
+                pass
+            else:
+                data_fim = datetime.strptime(data_fim, "%Y-%m-%dT%H:%M")
+                servico_oficina.data_fim = data_fim
+                data_status = data_fim
             att_tempo_1_os(id, data_status)
-            status_servico = request.POST.get('status_servico')
+            status_servico = request.POST.get('status_servico')   
             executante_funcionario_id = request.POST.get('executante_funcionario')
             if executante_funcionario_id == None:
                 executante_funcionario = None
@@ -163,15 +174,7 @@ def servico_oficina(request, id):
             servico_oficina.executante_funcionario = executante_funcionario
             servico_oficina.executante_terceiro = executante_terceiro
             # servico_oficina.status = status_servico
-            if data_fim == "":             
-                pass
-            else:
-                servico_oficina.data_fim = data_fim
-                servico_oficina.data_mudanca_status = data_fim
-                data_status = data_fim
 
-
-            data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")
             if servico_oficina.status == "Em Serviço":
                     servico_oficina.tempo_em_servico = servico_oficina.tempo_em_servico + (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600
                     print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
