@@ -84,11 +84,8 @@ def att_tempo(data_status, id_os_atual):
 
 def att_tempo_1_os(id, data_status):
       os_aberta = Ordem_Oficina.objects.get(id=id)
-
-      print(data_status, os_aberta.data_status)
-      if os_aberta.data_status.timestamp() < data_status.timestamp():
-            os_aberta.data_status = data_status
       servicos = Servico_Oficina.objects.filter(ordem_servico=os_aberta.id)
+      print("testeerroda porra", data_status,os_aberta.data_status)
       for servico in servicos:
             if Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status="Em Serviço").exists():
                   os_aberta.tempo_em_servico = os_aberta.tempo_em_servico + (data_status.timestamp() - os_aberta.data_status.timestamp())/3600
