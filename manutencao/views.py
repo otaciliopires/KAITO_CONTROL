@@ -20,9 +20,21 @@ def home_manutencao(request):
         ordens = Ordem_Oficina.objects.all()        
         #dados para OS da oficina
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)  
+        num_servicos_abertos = []
+        num_servicos_finalizados= []
+        status_serv = []
+        for os in os_oficina_abertas:
+            servicos_abertos = Servico_Oficina.objects.filter(ordem_servico=os, data_fim__isnull=False)
+            servicos_finalizados = Servico_Oficina.objects.filter(ordem_servico=os, data_fim=None)
+            num_servicos_abertos.append(servicos_abertos.count())
+            num_servicos_finalizados.append(servicos_finalizados.count())
+            status_serv.append(servicos_abertos.status)
+        dados_zip = zip(os_oficina_abertas, num_servicos_abertos, num_servicos_finalizados)
+        print(status_serv)
 
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
-                                                    'os_oficina_aberta':os_oficina_abertas})
+                                                    'os_oficina_aberta':os_oficina_abertas,
+                                                    'dados_zip':dados_zip})
 
     elif request.method == 'POST':
         form_osoficina = request.POST.get('form_osoficina')

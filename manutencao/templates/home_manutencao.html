@@ -92,7 +92,7 @@
                 </div>
              </div>
              
-            {%for ordem_aberta in os_oficina_aberta %}
+            {%for ordem_aberta, num_abertas, num_fechadas in dados_zip %}
              <div class="col-xxl-6 col-md-12">
                <div style='margin-bottom:10px' class="card info-card sales-card">
                   <div class="card-body">
@@ -100,8 +100,8 @@
                         <div class="row align-items-start">
                            <div class="col">{{ordem_aberta.equipamento}}</div>
                            <div class="col">{{ordem_aberta.data_inicio}}</div>
-                           <div class="col">Quantidade de serviços pendentes</div>
-                           <div class="col">Quantidade de serviços finalizado</div>
+                           <div class="col">{{num_abertas}}</div>
+                           <div class="col">{{num_fechadas}}</div>
                            <div class="col">Status (Em Serviço...)</div>
                            <div class="col"><a href="/manutencao/osoficina/{{ordem_aberta.id}}/">OSF{{ordem_aberta.numero}}</a></div>
                            <div class="col">ícone com modal para apresentar a lista de serviços com status</div>
