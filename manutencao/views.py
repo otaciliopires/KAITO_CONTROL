@@ -24,17 +24,28 @@ def home_manutencao(request):
         num_servicos_finalizados= []
         status_serv = []
         for os in os_oficina_abertas:
-            servicos_abertos = Servico_Oficina.objects.filter(ordem_servico=os, data_fim__isnull=False)
-            servicos_finalizados = Servico_Oficina.objects.filter(ordem_servico=os, data_fim=None)
-            num_servicos_abertos.append(servicos_abertos.count())
+            servicos_finalizados = Servico_Oficina.objects.filter(ordem_servico=os, data_fim__isnull=False)
+            servicos_abertos = Servico_Oficina.objects.filter(ordem_servico=os, data_fim=None)
             num_servicos_finalizados.append(servicos_finalizados.count())
-            status_serv.append(servicos_abertos.status)
-        dados_zip = zip(os_oficina_abertas, num_servicos_abertos, num_servicos_finalizados)
-        print(status_serv)
+            num_servicos_abertos.append(servicos_abertos.count())
+            if Servico_Oficina.objects.filter(ordem_servico=os, data_fim=None, status="Em Serviço").exists():
+                status = "Em Serviço" 
+                status_serv.append(status)
+            elif Servico_Oficina.objects.filter(ordem_servico=os, data_fim=None, status="Aguardando Peças").exists():
+                status = "Aguardando Peças"
+                status_serv.append(status)
+                pass
+            else:
+                status = "Aguardando Serviço"
+                status_serv.append(status)
+            print(status_serv)
+        dados_zip = zip(os_oficina_abertas, num_servicos_finalizados, num_servicos_abertos, status_serv)
+
 
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                     'os_oficina_aberta':os_oficina_abertas,
-                                                    'dados_zip':dados_zip})
+                                                    'dados_zip':dados_zip,
+                                                    'status' :status})
 
     elif request.method == 'POST':
         form_osoficina = request.POST.get('form_osoficina')
