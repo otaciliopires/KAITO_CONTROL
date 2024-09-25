@@ -92,7 +92,7 @@
                 </div>
              </div>
              
-            {%for ordem_aberta, num_abertas, num_finalizadas, status_serv in dados_zip %}
+            {% comment %} {%for ordem_aberta, num_abertas, num_finalizadas, status_serv in dados_zip %}
              <div class="col-xxl-6 col-md-12">
                <div style='margin-bottom:10px' class="card info-card sales-card">
                   <div class="card-body">
@@ -104,13 +104,77 @@
                            <div class="col">{{num_abertas}}</div>
                            <div class="col">Status ({{status_serv}})</div>
                            <div class="col"><a href="/manutencao/osoficina/{{ordem_aberta.id}}/">OSF{{ordem_aberta.numero}}</a></div>
-                           <div class="col">ícone com modal para apresentar a lista de serviços com status</div>
+                           <div class="col"><div class="accordion" id="accordionExample">
+                              <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                  <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ordem_aberta.id}}" aria-expanded="true" aria-controls="collapseOne">
+                                    Accordion Item #1
+                                  </button>
+                                </h2>
+                                <div id="collapse{{ordem_aberta.id}}" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+                                  <div class="accordion-body">teste</div>
+                                </div>
+                              </div></div>
                         </div>
                      </div>
                   </div>
                </div>
             </div>
-            {%endfor%}
+         </div>
+         {%endfor%} {% endcomment %}
+
+         {% for ordem_aberta, num_abertas, num_finalizadas, status_serv, serv_a, serv_f in dados_zip %}
+    <div class="col-xxl-6 col-md-12">
+        <div style='margin-bottom:10px' class="card info-card sales-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="row align-items-start">
+                        <div class="col">{{ ordem_aberta.equipamento }}</div>
+                        <div class="col">{{ ordem_aberta.data_inicio }}</div>
+                        <div class="col">{{ num_finalizadas }}</div>
+                        <div class="col">{{ num_abertas }}</div>
+                        <div class="col"> {{ status_serv }}</div>
+                        <div class="col">{{ordem_aberta.tempo_total}}</div>
+                        <div class="col">
+                            <a href="/manutencao/osoficina/{{ ordem_aberta.id }}/">OSF{{ ordem_aberta.numero }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Accordion colocado após o card-body -->
+            <div class="accordion" id="accordionExample">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ ordem_aberta.id }}" aria-expanded="true" aria-controls="collapse{{ ordem_aberta.id }}">
+                            Serviços
+                        </button>
+                    </h2>
+                    <div id="collapse{{ ordem_aberta.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+                            {%for serv in serv_a%}
+                            <div class="col-xxl-6 col-md-12">
+
+                              <div class="row align-items-start">
+                              <div class="col">{{ serv.data_inicio}}</div>
+                              <div class="col">{{ serv.grupo_servico }}</div>
+                              <div class="col">{{ serv.descricao }}</div>
+                              <div class="col">{{ serv.status }}</div>
+                              <div class="col"> </div>
+                              <div class="col"> Item para comprar</div>
+                              <div class="col"> Prioridade</div>
+
+                           </div>
+                        </div>
+
+                            {%endfor%}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
 
 
             <div class="col-xxl-6 col-md-12">

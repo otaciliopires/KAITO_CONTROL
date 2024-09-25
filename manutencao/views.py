@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado
+from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao
 from .models import Equipamentos
 from django.db.models import Max
 from datetime import datetime
@@ -23,11 +23,15 @@ def home_manutencao(request):
         num_servicos_abertos = []
         num_servicos_finalizados= []
         status_serv = []
+        lista_servicos_a = []
+        lista_servicos_f = []
         for os in os_oficina_abertas:
             servicos_finalizados = Servico_Oficina.objects.filter(ordem_servico=os, data_fim__isnull=False)
             servicos_abertos = Servico_Oficina.objects.filter(ordem_servico=os, data_fim=None)
             num_servicos_finalizados.append(servicos_finalizados.count())
             num_servicos_abertos.append(servicos_abertos.count())
+            lista_servicos_a.append(servicos_abertos)
+            lista_servicos_f.append(servicos_finalizados)
             if Servico_Oficina.objects.filter(ordem_servico=os, data_fim=None, status="Em Serviço").exists():
                 status = "Em Serviço" 
                 status_serv.append(status)
@@ -39,13 +43,17 @@ def home_manutencao(request):
                 status = "Aguardando Serviço"
                 status_serv.append(status)
             print(status_serv)
-        dados_zip = zip(os_oficina_abertas, num_servicos_finalizados, num_servicos_abertos, status_serv)
+        dados_zip = zip(os_oficina_abertas, num_servicos_finalizados, num_servicos_abertos, status_serv, lista_servicos_a, lista_servicos_f)
+        print(lista_servicos_a)
+        print(lista_servicos_f)
 
 
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                     'os_oficina_aberta':os_oficina_abertas,
                                                     'dados_zip':dados_zip,
-                                                    'status' :status})
+                                                    'serv_a':lista_servicos_a,
+                                                    'serv_f':lista_servicos_f
+                                                    })
 
     elif request.method == 'POST':
         form_osoficina = request.POST.get('form_osoficina')
@@ -265,3 +273,54 @@ def atualizacao_horarios(request):
 #Nessa classe serão contabilizados os tempos em serviço de cada funcionário ou terceiro. Toda vez que houver uma mudança de status em um serviço será contabilizado o tempo desse funcionário 
 #no serviço, o tempo no tipo de serviço
 #nessa classe serão registrados todas as mudanças de serviço e contabilizados os tempos unicamente em serviço, preservando att_tempo_01, pois o att_tempo_01 contabiliza o tempo de mudança de status.
+
+
+def solicitacoes(request):
+
+    if request.method == "GET":
+    
+        #informaçoes das solicitações:
+        solicitacoes = Solicitacao.objects.filter(atendida=False)
+        equipamentos = Equipamentos.objects.filter(proprietario='Construtora Rocha')
+        compradores = Funcionario.objects.filter(funcao="Comprador")
+        status = ('Baixa Prioridade', 'Média Prioridade', 'Alta Prioridade', 'Urgente')
+
+
+        return render(request, 'solicitacoes.html', {'solicitacoes_abertas':solicitacoes,
+                                                     'equipamentos':equipamentos,
+                                                     'compradores':compradores,
+                                                     'status':status})
+    
+    elif request.method == "POST":
+        form_add_solicitacao = request.POST.get('form_solicitacao')
+        form_att_solicitacao = request.POST.get('form_att_solicitacao')
+
+        if form_add_solicitacao:
+            insumo = request.POST.get('insumo')
+            equipamento_id = request.POST.get('equipamento')
+            equipamento = Equipamentos.objects.get(id=equipamento_id)
+            comprador_id = request.POST.get('comprador')
+            comprador = Funcionario.objects.get(id=comprador_id)
+            solicitacao = request.POST.get('solicitacao')
+            data_envio = request.POST.get('data_solicitacao')
+            data_envio = datetime.strptime(data_envio, "%Y-%m-%dT%H:%M")  
+            status = request.POST.get('status')
+            previsao = request.POST.get('data_previsao')
+            if previsao == "":
+                previsao="ok"
+            link = request.POST.get('link')
+            observacao = request.POST.get('observacao')
+
+            cadastro_solicitacao = Solicitacao(insumo=insumo,
+                                               equipamento=equipamento,
+                                               comprador=comprador,
+                                               solicitacao=solicitacao,
+                                               data_suprimentos=data_envio,
+                                               status=status,
+                                               data_previsao=previsao,
+                                               link_solicitacao=link,
+                                               observacao=observacao 
+                                               )
+            cadastro_solicitacao.save()
+
+        return redirect('/manutencao/solicitacoes/')

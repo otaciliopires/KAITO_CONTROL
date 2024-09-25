@@ -58,6 +58,7 @@ class Servico_Oficina(models.Model):
     tempo_aguardo_peca = models.FloatField(null=True, blank=True, default=0)
     tempo_aguardo_servico = models.FloatField(null=True, blank=True, default=0)
     tempo_em_servico = models.FloatField(null=True, blank=True, default=0)
+    tempo_total = models.FloatField(null=True, blank=True, default=0)
     data_inicio = models.DateTimeField()
     data_mudanca_status = models.DateTimeField(null=True, blank=True)
     data_fim = models.DateTimeField(null=True, blank=True)
@@ -77,6 +78,20 @@ class Registro_Tempo_Servico(models.Model):
     
     def __str__(self):
         return self.servico_oficina
+
+class Solicitacao(models.Model):
+    insumo = models.CharField(max_length=200)
+    equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING)
+    comprador = models.ForeignKey(Funcionario,  on_delete=models.DO_NOTHING)
+    solicitacao = models.IntegerField()
+    data_suprimentos = models.DateTimeField()
+    tipo_status = (("BP", "Baixa Prioridade"), ("MP", "Média Prioridade"), ("AP", "Alta Prioridade"), ("UR", "Urgente"))
+    status = models.CharField(max_length=50,choices = tipo_status, default="Baixa Prioridade")
+    data_previsao = models.DateField(null=True, blank=True)
+    link_solicitacao= models.CharField(max_length=500, blank=True)
+    observacao = models.CharField(max_length=1000, blank=True)
+    atendida = models.BooleanField(default=False)
+
 
     
 

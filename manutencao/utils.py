@@ -89,6 +89,7 @@ def att_tempo_1_os(id, data_status):
       for servico in servicos:
             if Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status="Em Serviço").exists():
                   os_aberta.tempo_em_servico = os_aberta.tempo_em_servico + (data_status.timestamp() - os_aberta.data_status.timestamp())/3600
+                  os_aberta.tempo_total += (data_status.timestamp() - os_aberta.data_status.timestamp())/3600
                   servico.data_mudanca_status = data_status
                   os_aberta.data_status = data_status
                   os_aberta.status = "Em Serviço"
@@ -97,6 +98,7 @@ def att_tempo_1_os(id, data_status):
                   break
             elif Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status='Aguardando Peças').exists():
                   os_aberta.tempo_aguardo_peca = os_aberta.tempo_aguardo_peca + hora_correta(os_aberta.data_status, data_status)
+                  os_aberta.tempo_total += hora_correta(os_aberta.data_status, data_status)
                   servico.data_mudanca_status = data_status
                   os_aberta.data_status = data_status
                   os_aberta.status = "Aguardando Peças"
@@ -105,6 +107,7 @@ def att_tempo_1_os(id, data_status):
                   break
             elif Servico_Oficina.objects.filter(ordem_servico=os_aberta.id, status='Aguardando Serviço').exists():
                   os_aberta.tempo_aguardo_servico = os_aberta.tempo_aguardo_servico + hora_correta(os_aberta.data_status, data_status)
+                  os_aberta.tempo_total +=  hora_correta(os_aberta.data_status, data_status)
                   servico.data_mudanca_status =data_status
                   os_aberta.data_status = data_status
                   os_aberta.status = "Aguardando Serviço"
