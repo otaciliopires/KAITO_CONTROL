@@ -53,11 +53,11 @@
                          <div style='margin-left:50px'>
                            
                              <!-- MODAL OS CORRETIVA OFICINA -->
-                        <button style="margin-bottom:5px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <button style="margin-bottom:5px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#OSCorretiva">
                            O.S. Corretiva Oficina
                         </button>
 
-                        <button style="margin-bottom:5px" type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <button style="margin-bottom:5px" type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#Socorro">
                            O.S. Socorro
                         </button>
                         <button style="margin-bottom:5px" type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
@@ -71,27 +71,6 @@
                 </div>
              </div>
 
-
-
-
-
-
-
-             
-             <div class="col-xxl-6 col-md-12">
-                <div class="card info-card sales-card">
-                   <div class="card-body">
-                      <h5 class="card-title">ORDEM DE SERVIÇO CORRETIVA OFICINA <span>|EM ABERTO</span></h5>
-                      <div class="d-flex align-items-c enter">
-                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
-                         <div class="ps-3">
-                            <h5>LISTAR O.S. CORRETIVAS ABERTAS AQUI - INDICANDO A QUANTIDADE DE SERVIÇOS EM ABERTO/ tempo em aberto/ status atual</h5>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-             
             {% comment %} {%for ordem_aberta, num_abertas, num_finalizadas, status_serv in dados_zip %}
              <div class="col-xxl-6 col-md-12">
                <div style='margin-bottom:10px' class="card info-card sales-card">
@@ -123,22 +102,42 @@
          </div>
          {%endfor%} {% endcomment %}
 
-         {% for ordem_aberta, num_abertas, num_finalizadas, status_serv, serv_a, serv_f in dados_zip %}
-    <div class="col-xxl-6 col-md-12">
-        <div style='margin-bottom:10px' class="card info-card sales-card">
+         {% comment %}Corretivas oficina{% endcomment %}
+
+            <div class="col-xxl-6 col-md-12 font-weight-bold " style="height:40px" >
+               <div style='margin-bottom:10px;height:40px'class="">
+                  <div class="card-body">
+                        <div class="d-flex">
+
+                              <div class="col-2">Equip.</div>
+                              <div class="col-2">data inicio</div>
+                              <div class="col-2">serv. abertos</div>
+                              <div class="col-2">serv. finalizados</div>
+                              <div class="col-2"> status</div>
+                              <div class="col-1">tempo total</div>
+                              <div class="col-1">
+                                    Link OS
+                              </div>
+                        </div>
+                  </div>
+               </div>
+            </div>
+
+   {% for ordem_aberta, num_abertas, num_finalizadas, status_serv, serv_a, serv_f in dados_zip %}
+    <div class="col-xxl-6 col-md-12 ">
+        <div style='margin-bottom:10px' class="card info-card sales-card  border border-primary">
             <div class="card-body">
                 <div class="d-flex align-items-center">
-                    <div class="row align-items-start">
-                        <div class="col">{{ ordem_aberta.equipamento }}</div>
-                        <div class="col">{{ ordem_aberta.data_inicio }}</div>
-                        <div class="col">{{ num_finalizadas }}</div>
-                        <div class="col">{{ num_abertas }}</div>
-                        <div class="col"> {{ status_serv }}</div>
-                        <div class="col">{{ordem_aberta.tempo_total}}</div>
-                        <div class="col">
+
+                        <div class="col-2 border-right">{{ ordem_aberta.equipamento }}</div>
+                        <div class="col-2 border-right">{{ ordem_aberta.data_inicio|date:"d/m/Y - H:i"  }}</div>
+                        <div class="col-2 border-right">{{ num_finalizadas }}</div>
+                        <div class="col-2 border-right">{{ num_abertas }}</div>
+                        <div class="col-2 border-right"> {{ status_serv }}</div>
+                        <div class="col-1 border-right">{{ordem_aberta.tempo_total}}</div>
+                        <div class="col-1 border-right">
                             <a href="/manutencao/osoficina/{{ ordem_aberta.id }}/">OSF{{ ordem_aberta.numero }}</a>
                         </div>
-                    </div>
                 </div>
             </div>
             <!-- Accordion colocado após o card-body -->
@@ -155,7 +154,7 @@
                             <div class="col-xxl-6 col-md-12">
 
                               <div class="row align-items-start">
-                              <div class="col">{{ serv.data_inicio}}</div>
+                              <div class="col">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
                               <div class="col">{{ serv.grupo_servico }}</div>
                               <div class="col">{{ serv.descricao }}</div>
                               <div class="col">{{ serv.status }}</div>
@@ -175,96 +174,85 @@
     </div>
 {% endfor %}
 
+{% comment %}Socorros{% endcomment %}
 
+<div class="col-xxl-6 col-md-12 font-weight-bold " style="height:40px" >
+   <div style='margin-bottom:10px;height:40px'class="">
+      <div class="card-body">
+            <div class="d-flex">
 
-            <div class="col-xxl-6 col-md-12">
-               <div style='margin-bottom:10px' class="card info-card sales-card">
-                  <div class="card-body">
-                     <div class="d-flex align-items-c enter">
-                        <div class="ps-3">
-                           <h5>LISTAR O.S. CORRETIVAS ABERTAS AQUI - INDICANDO A QUANTIDADE DE SERVIÇOS EM ABERTO</h5>
-                        </div>
-                     </div>
+                  <div class="col-2">Obra</div>
+                  <div class="col-2">data saída</div>
+                  <div class="col-2">Qtd. equipamentos</div>
+                  <div class="col-2">Qtd. serviços</div>
+                  <div class="col-2">
+                        Link OS
                   </div>
+            </div>
+      </div>
+   </div>
+</div>
+
+
+{% for socorro in socorros %}
+<div class="col-xxl-6 col-md-12 ">
+<div style='margin-bottom:10px' class="card info-card sales-card  border border-warning">
+<div class="card-body">
+    <div class="d-flex align-items-center">
+
+            <div class="col-2 border-right">{{ socorro.obra }}</div>
+            <div class="col-2 border-right">{{ socorro.data_saida|date:"d/m/Y - H:i"  }}</div>
+            <div class="col-2 border-right">num_finalizadas </div>
+            <div class="col-2 border-right">num_abertas </div>
+            <div class="col-1 border-right">
+                <a href="/manutencao/socorro/{{ socorro.id }}/">OSS{{ socorro.numero }}</a>
+            </div>
+    </div>
+</div>
+<!-- Accordion colocado após o card-body -->
+<div class="accordion" id="accordionExample">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ ordem_aberta.id }}" aria-expanded="true" aria-controls="collapse{{ ordem_aberta.id }}">
+                Serviços
+            </button>
+        </h2>
+        <div id="collapse{{ ordem_aberta.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+            <div class="accordion-body">
+                {%for serv in serv_a%}
+                <div class="col-xxl-6 col-md-12">
+
+                  <div class="row align-items-start">
+                  <div class="col">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
+                  <div class="col">{{ serv.grupo_servico }}</div>
+                  <div class="col">{{ serv.descricao }}</div>
+                  <div class="col">{{ serv.status }}</div>
+                  <div class="col"> </div>
+                  <div class="col"> Item para comprar</div>
+                  <div class="col"> Prioridade</div>
+
                </div>
             </div>
 
-
-             <div class="col-xxl-4 col-md-6">
-                <div class="card info-card revenue-card">
-                   <div class="card-body">
-                      <h5 class="card-title">TC-02 <span>| Tanque 30.000 litros</span></h5>
-                      <div class="d-flex align-items-center">
-                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
-                         <div class="ps-3">
-                            <h6>{{tc02.0|floatformat:"2g"}}</h6>
-                            <span class="text-success small pt-1 fw-bold">{{tc02.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-
-             <div class="col-xxl-4 col-md-6">
-                <div class="card info-card revenue-card">
-                   <div class="card-body">
-                      <h5 class="card-title">CA-01.1 <span>| Tanque 4500 litros</span></h5>
-                      <div class="d-flex align-items-center">
-                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-truck"></i></div>
-                         <div class="ps-3">
-                            <h6>{{ca01.0|floatformat:"2g"}}</h6>
-                            <span class="text-success small pt-1 fw-bold">{{ca01.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-
-             <div class="col-xxl-4 col-md-6">
-                <div class="card info-card revenue-card">
-                   <div class="card-body">
-                      <h5 class="card-title">CA-02.1 <span>| Tanque 4500 litros</span></h5>
-                      <div class="d-flex align-items-center">
-                         <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-truck"></i></div>
-                         <div class="ps-3">
-                            <h6>{{ca02.0|floatformat:"2g"}}</h6>
-                            <span class="text-success small pt-1 fw-bold">{{ca02.1}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
-                         </div>
-                      </div>
-                   </div>
-                </div>
-             </div>
-
-
-             
-             
-
-             
-            
-             
-          </div>
-       </div>
-      
-          </div>
-
-          
-          </div>
-       </div>
+                {%endfor%}
+            </div>
+        </div>
     </div>
- </section>
+</div>
+</div>
+</div>
+{% endfor %}
+
+
+
 
 
   <!-- MODAL OS CORRETIVA OFICINA -->
-  <button style="margin-left:300px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
-    O.S. Corretiva Oficina
-  </button>
-  
-  <!-- MODAL OS CORRETIVA OFICINA -->
-  <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="OSCorretiva" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">OS Corretiva Oficina</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -292,13 +280,45 @@
                   <input type="submit" class="btn btn-primary"></input>
                 </div>  
             </form>
-
         </div>
-
-
       </div>
     </div>
   </div>
+
+    <!-- MODAL SOCORRO -->
+    <div class="modal fade" id="Socorro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Socorro</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <!-- FORM AQUI -->
+              <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
+                 <input type='hidden' name='form_socorro' value='form_socorro'>
+                  <div class="mb-3">
+                      <label class="form-label">Obra:</label>
+                      <select name='obra'>
+                          {%for obra in obras%} 
+                          <option value={{obra.id}}>{{obra}}</option>
+                          {%endfor%}
+                      </select>
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label">Data Saída:</label>
+                      <input style='width:300px' type="datetime-local" name="data_saida"></input>
+                  </div>
+ 
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <input type="submit" class="btn btn-primary"></input>
+                  </div>  
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 

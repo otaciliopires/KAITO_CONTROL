@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao
-from .models import Equipamentos
+from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro
+from .models import Equipamentos, Obras
 from django.db.models import Max
 from datetime import datetime
 from manutencao.utils import now, att_tempo_2, att_tempo_1_os, att_tempo_1_servico, hora_correta
@@ -13,12 +13,15 @@ def home_manutencao(request):
 
     if request.method == 'GET':
         list_equip=[]
-        equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+        equipamentos_rocha = Equipamentos.objects.filter(proprietario='Construtora Rocha')
+        obras = Obras.objects.all()
+        print("xxxxxxxxxx", obras, equipamentos_rocha)
         for i in equipamentos_rocha:
             list_equip.append(i)
-
+        
+        
+        #TRATAMENTO  OS CORRETIVAS
         ordens = Ordem_Oficina.objects.all()        
-        #dados para OS da oficina
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)  
         num_servicos_abertos = []
         num_servicos_finalizados= []
@@ -44,19 +47,25 @@ def home_manutencao(request):
                 status_serv.append(status)
             print(status_serv)
         dados_zip = zip(os_oficina_abertas, num_servicos_finalizados, num_servicos_abertos, status_serv, lista_servicos_a, lista_servicos_f)
-        print(lista_servicos_a)
-        print(lista_servicos_f)
+    
+        #TRATAMENTO SOCORRO
+        socorros_abertos = Socorro.objects.filter(data_chegada__isnull=True)
+        print(socorros_abertos)
+
 
 
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                     'os_oficina_aberta':os_oficina_abertas,
                                                     'dados_zip':dados_zip,
                                                     'serv_a':lista_servicos_a,
-                                                    'serv_f':lista_servicos_f
+                                                    'serv_f':lista_servicos_f,
+                                                    'obras':obras, 
+                                                    'socorros':socorros_abertos,
                                                     })
 
     elif request.method == 'POST':
         form_osoficina = request.POST.get('form_osoficina')
+        form_socorro = request.POST.get('form_socorro')
 
         #equipamentos da rocha
 
@@ -66,26 +75,44 @@ def home_manutencao(request):
             equipamento = Equipamentos.objects.get(id=equipamento_id)
             data_inicio = request.POST.get('data_inicio')
             horimetro = request.POST.get('horimetro')
-
-            print(equipamento, data_inicio, horimetro)
         
-        #adquirir o maior numero na lista de O.S.
-        if Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max'] == None:
-            numero = 0
-        else:
-            numero = Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max']
+            #adquirir o maior numero na lista de O.S.
+            if Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max'] == None:
+                numero = 0
+            else:
+                numero = Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max']
 
-        #adicionar o form da oficina,o de criação de da O.S.
-        osoficina = Ordem_Oficina(equipamento=equipamento,
-                                     data_inicio=data_inicio,
-                                     data_status=data_inicio,
-                                     horimetro=horimetro,
-                                     numero=numero+1)
-        osoficina.save()
+            #adicionar o form da oficina,o de criação de da O.S.
+            osoficina = Ordem_Oficina(equipamento=equipamento,
+                                        data_inicio=data_inicio,
+                                        data_status=data_inicio,
+                                        horimetro=horimetro,
+                                        numero=numero+1)
+            osoficina.save()
+
+            return redirect('/manutencao/home_manutencao')
+    
+        if form_socorro:
+            obra_id = request.POST.get('obra')
+            obra = Obras.objects.get(id=obra_id)
+            data_saida = request.POST.get('data_saida')
+            if Socorro.objects.aggregate(Max('numero'))['numero__max'] == None:
+                numero = 0
+            else:
+                numero = Socorro.objects.aggregate(Max('numero'))['numero__max']
+
+            socorro = Socorro(obra = obra,
+                              data_saida = data_saida,
+                              numero = numero+1,
+                              data_chegada = None)
+            
+            socorro.save()
+            
+            
+            return redirect('/manutencao/home_manutencao')
 
 
 
-        return redirect('/manutencao/home_manutencao')
 
 def servico_oficina(request, id):
     if request.method == 'GET':
@@ -163,8 +190,6 @@ def servico_oficina(request, id):
             print(type(data_inicio), data_inicio)
 
             return redirect(f"/manutencao/osoficina/{ordem_oficina_aberta.id}")
-
-            #atualizar a data_status da OS.
 
 
 
@@ -283,13 +308,14 @@ def solicitacoes(request):
         solicitacoes = Solicitacao.objects.filter(atendida=False)
         equipamentos = Equipamentos.objects.filter(proprietario='Construtora Rocha')
         compradores = Funcionario.objects.filter(funcao="Comprador")
-        status = ('Baixa Prioridade', 'Média Prioridade', 'Alta Prioridade', 'Urgente')
+        status = ('Selecionar','Baixa Prioridade', 'Média Prioridade', 'Alta Prioridade', 'Urgente')
 
 
         return render(request, 'solicitacoes.html', {'solicitacoes_abertas':solicitacoes,
                                                      'equipamentos':equipamentos,
                                                      'compradores':compradores,
-                                                     'status':status})
+                                                     'status':status,
+                                                     })
     
     elif request.method == "POST":
         form_add_solicitacao = request.POST.get('form_solicitacao')
@@ -305,6 +331,8 @@ def solicitacoes(request):
             data_envio = request.POST.get('data_solicitacao')
             data_envio = datetime.strptime(data_envio, "%Y-%m-%dT%H:%M")  
             status = request.POST.get('status')
+            if status=="Selecionar":
+                status = 'Baixa Prioridades'
             previsao = request.POST.get('data_previsao')
             if previsao == "":
                 previsao="ok"
@@ -323,4 +351,89 @@ def solicitacoes(request):
                                                )
             cadastro_solicitacao.save()
 
-        return redirect('/manutencao/solicitacoes/')
+            return redirect('/manutencao/solicitacoes/')
+
+        elif form_att_solicitacao:
+            id_solicitacao = request.POST.get('id_solicitacao')
+            solicitacao_atual = Solicitacao.objects.get(id = id_solicitacao)
+
+            insumo = request.POST.get('insumo')
+            if insumo == "":
+                pass
+            else:
+                solicitacao_atual.insumo = insumo
+            
+            equipamento_id = request.POST.get('equipamento')
+            if equipamento_id == 'equipamento':
+                equipamento = None
+            else:
+                equipamento = Equipamentos.objects.get(id=equipamento_id)
+                solicitacao_atual.equipamento = equipamento
+            
+            comprador_id = request.POST.get('comprador')
+            if comprador_id == 'comprador':
+                comprador = None
+            else:
+                comprador = Funcionario.objects.get(id=comprador_id)
+                solicitacao_atual.comprador = comprador
+
+            solicitacao = request.POST.get('solicitacao')    
+            if solicitacao == "":
+                pass
+            else:
+                solicitacao_atual.solicitacao = solicitacao
+
+            data_envio = request.POST.get('data_solicitacao')
+            if data_envio == "":
+                pass
+            else:   
+                data_envio = datetime.strptime(data_envio, "%Y-%m-%dT%H:%M")  
+                solicitacao_atual.data_suprimentos = data_envio
+
+            status = request.POST.get('status')
+            if status == "Selecionar":
+                pass
+            else:
+                solicitacao_atual.status = status
+
+            previsao = request.POST.get('data_previsao')
+            if previsao == "":
+                pass
+            else:
+                solicitacao_atual.data_previsao = previsao
+            
+            link = request.POST.get('link')
+            if link == "":
+                pass
+            else:
+                solicitacao_atual.link_solicitacao = link
+            
+            observacao = request.POST.get('observacao')
+            if observacao == "":
+                pass
+            else:
+                solicitacao_atual.observacao = observacao
+            
+            atendida = request.POST.get('atendido')
+            if atendida != True:
+                atendida = False
+            solicitacao_atual.atendida = atendida
+            print(insumo, id_solicitacao, equipamento_id, comprador_id,solicitacao, data_envio, status, previsao, observacao, atendida)
+            print("xxxxxx", data_envio)
+
+            solicitacao_atual.save()
+
+            return redirect('/manutencao/solicitacoes/')
+
+def socorro(request, id):
+    if request.method == "GET":
+        if Socorro.objects.all().exists():
+            socorro = Socorro.objects.get(id=id)
+
+        else:
+            return redirect('/manutencao/home_manutencao/')
+
+        servicos_socorro = Servico_Socorro.objects.filter(socorro=id)
+        print(socorro.obra)
+
+        return render(request, 'socorro.html')

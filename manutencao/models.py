@@ -92,6 +92,32 @@ class Solicitacao(models.Model):
     observacao = models.CharField(max_length=1000, blank=True)
     atendida = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.insumo
+
+class Socorro(models.Model):
+    numero = models.IntegerField()
+    obra = models.ForeignKey(Obras, on_delete=models.DO_NOTHING)
+    data_saida = models.DateTimeField()
+    data_chegada = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return self.obra.nome
+    
+class Servico_Socorro(models.Model):
+    equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING)
+    socorro = models.ForeignKey(Socorro, on_delete=models.DO_NOTHING)
+    grupo_servico = models.ForeignKey(Grupo_Servico, on_delete=models.DO_NOTHING)
+    mecanico = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING)
+    data_inicio = models.DateTimeField()
+    data_fim = models.DateTimeField()
+    tempo_servico = models.FloatField()
+    descricao = models.CharField(max_length=500)
+    resultado_servico = models.BooleanField(default=False)
+
+
+
+
 
     
 

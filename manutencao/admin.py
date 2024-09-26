@@ -1,5 +1,5 @@
 from django.contrib import admin
-from.models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao
+from.models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro
 
 # Register your models here.
 
@@ -10,3 +10,5 @@ admin.site.register(Grupo_Servico)
 admin.site.register(Funcionario)
 admin.site.register(Servico_Terceirizado)
 admin.site.register(Solicitacao)
+admin.site.register(Socorro)
+admin.site.register(Servico_Socorro)
