@@ -1,0 +1,401 @@
+jdhahdakjlkj{%extends 'base.html'%}
+
+{%load static%}
+
+{%block 'head'%}
+<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{%endblock%}
+
+
+{%block 'body'%}
+  <!-- MENSAGENS -->
+  <main id="main" class="main">
+    <div class="pagetitle">
+      {% if messages %}
+        {%for i in messages%}
+          <div class="{{i.tags}}" role='alert'>
+              {{i}}
+          </div>
+        {%endfor%}
+      {%endif%}  
+ <!-- MENSAGENS --> 
+
+
+
+ <section class="section dashboard">
+    <div class="row">
+       <div class="col-lg-12">
+          <div class="row">
+
+
+            <div class="col-xxl-6 col-md-12">
+               <div class="card info-card sales-card">
+                  <div class="card-body">                     
+                     <div class="d-flex align-items-c enter">
+                        <div class="ps-1">
+
+                        </div>
+                        <div class="d-flex align-items-left justify-content-left"> 
+                         <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
+                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#adicao_solicitacao">
+                              Adicionar Solicitacao
+                            </button>
+                        </div>
+
+               </div>
+            </div>
+
+            <div class="col-xxl-6 col-md-12">
+              <div style='margin-bottom:10px' class="card info-card sales-card">
+                  <div class="card-body">
+
+                          <div style= 'font-weight: bold' class="row align-items-start">
+                              <div  class="col-2" style="height:50px">Equipamento</div>
+                              <div class="col-2" style="height:50px">Insumo</div>
+                              <div class="col-1" style="height:50px">Nº Solicitação</div>
+                              <div class="col-1" style="height:50px">Data Suprimentos</div>
+                              <div class="col-1" style="height:50px"> Comprador</div>
+                              <div class="col-1" style="height:50px">Status</div>
+                              <div class="col-1" style="height:50px">Previsão</div>
+                              <div class="col-3" style="height:50px">Observações</div>
+                          </div>
+                      </div>
+                  </div>
+                </div>
+
+
+                {% for solicitacao in solicitacoes_abertas %}
+                <div class="col-xxl-6 col-md-12">
+                    <div style="margin-bottom:10px" class="card info-card sales-card">
+                        <div class="card-body">
+                            <div class="row align-items-start">
+                                <div class="col-2" style="height:50px">{{ solicitacao.equipamento }}</div>
+                                <div class="col-2" style="height:50px">{{ solicitacao.insumo }}</div>
+                                <div class="col-1" style="height:50px">{{ solicitacao.solicitacao }}</div>
+                                <div class="col-1" style="height:50px">{{ solicitacao.data_suprimentos }}</div>
+                                <div class="col-1" style="height:50px">{{ solicitacao.comprador }}</div>
+                                
+                                <!-- Aplicando cores com base no status -->
+                                <div class="col-1 {% if solicitacao.status == 'Baixa Prioridade' %}bg-success
+                                        {% elif solicitacao.status == 'Média Prioridade' %}bg-primary
+                                        {% elif solicitacao.status == 'Alta Prioridade' %}bg-warning
+                                        {% elif solicitacao.status == 'Urgente' %}bg-danger
+                                        {% endif %} fw-bold" style="height:50px">
+
+                                        {{ solicitacao.status }}
+
+                                </div>
+                                
+                                <div class="col-1" style="height:50px">
+                                    {% if solicitacao.data_previsao == None %} 
+                                        Em Cotação 
+                                    {% else %} 
+                                        {{ solicitacao.data_previsao }} 
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-2" style="height:50px">{{ solicitacao.observacao }}</div>
+                                <div class="col" style="height:50px"> 
+                                  <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
+                                    <button style="width:40px height:50px" type="button" class="btn btn-secondary btn-lg" data-bs-toggle="modal" data-bs-target="#att_solicitacao">
+                                       Atualizar
+                                     </button>
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+
+
+             {% for solicitacao in solicitacoes %}
+             <div class="col-xxl-6 col-md-12">
+                <div class="card info-card sales-card">
+                   <div class="card-body">
+
+                      <div class="d-flex align-items-c enter">
+                         <div class="ps-3">
+                            <div style="font-size:20px">OSOF{{solicitacao.equipamento}}   //   {{servico.grupo_servico}}   //   {{servico.status}} // {{servico.descricao}} // {{servico.data_inicio}} //
+                              <button style="margin-left:50px" type="button" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#status_servico{{servico.id}}">
+                              Status Serviço
+                            </button> </div>
+
+                         </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+             dsffsdfs
+             {%endfor%}
+
+
+
+  {% comment %} <!-- MODAL status serviço // colocar o modal dentro do for loop, para que ele funcione em cada item gerado pelo for -->
+  <div class="modal fade" id="status_servico{{servico.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'servico_oficina' id=id_OS_oficina%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_status_servico' value='form_status_servico'>
+
+               <input class="form-control" id="disabledInput" type="hidden" placeholder="Disabled input here..." name="id_servico" value={{servico.id}}>
+
+ 
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="status_servico" id="flexRadioDefault1" value='Aguardando Serviço' checked>
+                  <label class="form-check-label" for="flexRadioDefault1">
+                    Aguardando Serviço
+                  </label>
+                </div>
+                <div style='width:200px' class="form-check">
+                  <input class="form-check-input" type="radio" name="status_servico" id="flexRadioDefault2" value='Aguardando Peças'>
+                  <label class="form-check-label" for="flexRadioDefault2">
+                    Aguardando Peças
+                  </label>
+
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="status_servico" id="flexRadioDefault3" value='Em Serviço' checked>
+                  <label class="form-check-label" for="flexRadioDefault3">
+                    Em Serviço
+                  </label>
+                </div>
+                <hr>
+                <div class="mb-3">
+                  <label class="form-label"> Data mudança de status:</label>
+                  <input style='width:300px' type="datetime-local" name="data_status"></input>
+                </div>
+
+                <hr>
+
+              {%if servico.executante == 'Funcionario' or servico.executante == "funcionario"%}
+                <div class="mb-3">
+                  <label class="form-label">Executante:</label>
+                  <select name='executante_funcionario'>
+                      {%for executante in executantes%} 
+                      <option value={{executante.id}}>{{executante}}</option>
+                      {%endfor%}
+                  </select>
+              </div>
+              {%else%}
+              <div class="mb-3">
+               <label class="form-label">Terceirizado:</label>
+               <select name='executante_terceiro'>
+                   {%for terceiro in terceiros%} 
+                   <option value={{terceiro.id}}>{{terceiro}}</option>
+                   {%endfor%}
+               </select>
+              </div>
+              {%endif%}
+
+              <div class='mb-3'></div>
+
+
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">Adicionar descrição:</label>
+                  <label for="exampleFormControlTextarea1" class="form-label">{{servico.descricao}}</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Data fim:</label>
+                  <input style='width:300px' type="datetime-local" name="data_fim"></input>
+                </div>
+ 
+  
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+{%endfor%}
+
+
+            {% endcomment %}
+             
+
+
+             
+            
+             
+          </div>
+       </div>
+      
+          </div>
+
+          
+          </div>
+       </div>
+    </div>
+ </section>
+
+
+
+
+  
+  <!-- MODAL Adição Solicitação -->
+  <div class="modal fade" id="adicao_solicitacao" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Adição Serviço</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FORM AQUI -->
+                <form method='POST' action="{%url 'solicitacoes'%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+                    <input type='hidden' name='form_solicitacao' value='form_solicitacao'>
+                    <div class='col-md-10'>
+                      <div class='col'>
+                        <label style='width:120px' for='insumo'>Insumo:</label>
+                        <input style='width:200px' type='text' name='insumo' placeholder='Insumo'>
+                      </div>
+
+                      <div class='col' >
+                        <label style='width: 120px' for='equipamento'>Equipamento:</label> 
+                        <select name='equipamento'>
+                          {%for equipamento in equipamentos%}
+                            <option value="{{equipamento.id}}">{{equipamento}}</option>
+                          {%endfor%}
+                        </select>
+                    </div>
+
+                    <div class='col' >
+                      <label style='width: 120px' for='Comprador'>Comprador:</label> 
+                      <select name='comprador'>
+                        {%for comprador in compradores%}
+                          <option value="{{comprador.id}}">{{comprador}}</option>
+                        {%endfor%}
+                      </select>
+                  </div>
+
+                  <div class='col'>
+                    <label style='width:120px' for='link'>Nº Solicitação:</label>
+                    <input style='width:200px' type='text' name='solicitacao' placeholder=' Nº Solicitação'>
+                  </div>
+
+                  <div class="col">
+                    <label style='width: 120px' class="form-label">Data envio:</label>
+                    <input style='width:200px' type="datetime-local" name="data_solicitacao"></input>
+                </div>
+
+                <div class='col' >
+                  <label style='width: 120px' for='status'>Status:</label> 
+                  <select name='status'>
+                    {%for statu in status%}
+                      <option value="{{statu}}">{{statu}}</option>
+                    {%endfor%}
+                  </select>
+              </div>
+
+              <div class="col">
+                <label style='width: 120px' class="form-label">Data Previsão:</label>
+                <input style='width:200px' type="date" name="data_previsao"></input>
+            </div>
+            <div class='col'>
+              <label style='width:120px' for='link'>URL Solicitação:</label>
+              <input style='width:200px' type='text' name='link' placeholder='URLS Solicitação'>
+            </div>
+
+            
+            <div class="col">
+              <label for="exampleFormControlTextarea1" class="form-label">Observação:</label>
+              <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='observacao'></textarea>
+          </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <input type="submit" class="btn btn-primary"></input>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSelects() {
+        const funcionarioSelect = document.getElementById('selectFuncionario');
+        const terceirizadoSelect = document.getElementById('selectTerceirizado');
+        const isFuncionario = document.getElementById('flexRadioFuncionario').checked;
+
+        if (isFuncionario) {
+            funcionarioSelect.style.display = 'block';
+            terceirizadoSelect.style.display = 'none';
+        } else {
+            funcionarioSelect.style.display = 'none';
+            terceirizadoSelect.style.display = 'block';
+        }
+    }
+
+    // Executa a função ao carregar a página para definir o estado inicial
+    document.addEventListener('DOMContentLoaded', toggleSelects);
+</script>
+{% comment %} 
+
+
+  <!-- MODAL FINALIZAR OS -->
+  <div class="modal fade" id="finalizar_os" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Finalizar O.S</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'servico_oficina' id=id_OS_oficina%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_fim_os' value='form_osoficina_fim'>
+
+              <div class='mb-3'></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Data Fim:</label>
+                    <input style='width:300px' type="datetime-local" name="data_fim"></input>
+                </div>
+
+  
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div> {% endcomment %}
+
+
+
+ 
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+
+{%endblock%} 
