@@ -61,7 +61,7 @@
                            O.S. Socorro
                         </button>
                         <button style="margin-bottom:5px" type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                           O.S. Corretiva Oficina
+                           O.S. Preventiva
                         </button>
                          </div> 
 
@@ -104,7 +104,7 @@
 
          {% comment %}Corretivas oficina{% endcomment %}
 
-            <div class="col-xxl-6 col-md-12 font-weight-bold " style="height:40px" >
+            <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
                <div style='margin-bottom:10px;height:40px'class="">
                   <div class="card-body">
                         <div class="d-flex">
@@ -176,7 +176,7 @@
 
 {% comment %}Socorros{% endcomment %}
 
-<div class="col-xxl-6 col-md-12 font-weight-bold " style="height:40px" >
+<div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
    <div style='margin-bottom:10px;height:40px'class="">
       <div class="card-body">
             <div class="d-flex">
@@ -202,8 +202,8 @@
 
             <div class="col-2 border-right">{{ socorro.obra }}</div>
             <div class="col-2 border-right">{{ socorro.data_saida|date:"d/m/Y - H:i"  }}</div>
-            <div class="col-2 border-right">num_finalizadas </div>
-            <div class="col-2 border-right">num_abertas </div>
+            <div class="col-2 border-right">qtd serviços </div>
+            <div class="col-2 border-right">lista equipamentos </div>
             <div class="col-1 border-right">
                 <a href="/manutencao/socorro/{{ socorro.id }}/">OSS{{ socorro.numero }}</a>
             </div>

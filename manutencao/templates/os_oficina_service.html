@@ -32,30 +32,24 @@
           <div class="row">
 
 
-            <div class="col-xxl-6 col-md-12">
+            <div class="col-xxl-6 col-md-12" >
                <div class="card info-card sales-card">
                   <div class="card-body">
                      <div class='card-title'>ORDEM DE SERVIÇO CORRETIVA OFICINA <span>|EM ABERTO</span>
-
-
-
-
                      </div>
-
-                     
                      <div class="d-flex align-items-c enter">
                         <div class="ps-3">
-                           <h6>{{ordem_oficina_aberta.equipamento}} _____ {{ordem_oficina_aberta.data_inicio}} _____ (colocar aqui tempo parado)  </h6>
+                           <h6>{{ordem_oficina_aberta.equipamento}} _____ {{ordem_oficina_aberta.data_inicio|date:"d/m/Y - H:i"}} _____ ({{ordem_oficina_aberta.tempo_total|floatformat:"2g"}} horas parado)  </h6>
 
                         </div>
                         <div class="d-flex align-items-left justify-content-left"> 
                          <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
-                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#adicao_os">
+                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-primary btn-md" data-bs-toggle="modal" data-bs-target="#adicao_os">
                               Adicionar Serviço
                             </button>
                         </div>
 
-                        <div class='align-items-right justify-content-right'><button type="button" class="btn btn-danger btn-lg" data-bs-toggle="modal" data-bs-target="#finalizar_os">
+                        <div class='align-items-right justify-content-right'><button type="button" class="btn btn-danger btn-md" data-bs-toggle="modal" data-bs-target="#finalizar_os">
                           Finalizar O.S.
                         </button>
                       </div>
@@ -64,24 +58,41 @@
                   </div>
                </div>
             </div>
+      
+            <div class="col-xxl-6 col-md-12 font-weight-bold " style="height:65px; font-size:15px" >
+              <div style='margin-bottom:10px;height:40px'class="">
+                 <div class="card-body">
+                       <div class="d-flex">
+           
+                             <div class="col-1">N OS</div>
+                             <div class="col-2">Grupo Serviço</div>
+                             <div class="col-1">Data Inicio</div>
+                             <div class="col-2">Status</div>
+                             <div class="col-1">Data Mudança</div>
+                             <div class="col-3">Descrição</div>
 
-
-
+                       </div>
+                 </div>
+              </div>
+           </div>
 
              {% for servico in servico_oficina %}
-             <div class="col-xxl-6 col-md-12">
-                <div class="card info-card sales-card">
+             <div class="col-xxl-6 col-md-12" style='margin-bottom:0px'>
+                <div class="card">
                    <div class="card-body">
 
-                      <div class="d-flex align-items-c enter">
-                         <div class="ps-3">
-                            <div style="font-size:20px">OSOF{{servico.numero}}   //   {{servico.grupo_servico}}   //   {{servico.status}} // {{servico.descricao}} // {{servico.data_inicio}} //
-                              <button style="margin-left:50px" type="button" class="btn btn-info btn-lg" data-bs-toggle="modal" data-bs-target="#status_servico{{servico.id}}">
+                      <div class="d-flex align-items-c enter" style='font-size:15px'>
+                          <div class='col-1 border-right'>OSOF{{servico.numero}}</div>
+                          <div class='col-2 border-right'>{{servico.grupo_servico}}</div> 
+                          <div class='col-1 border-right' style='font-size:12px'>{{servico.data_inicio|date:"d/m - H:i"}}</div> 
+                          <div class='col-2 border-right'>{{servico.status}}</div>
+                          <div class='col-1 border-right' style='font-size:12px'>{{servico.data_mudanca_status|date:"d/m - H:i"}}</div> 
+                          <div class='col-3 border-right' style='font-size:10px'>{{servico.descricao}}</div> 
+                          <div class='col-2 border-right'>
+                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#status_servico{{servico.id}}">
                               Status Serviço
                             </button> </div>
-
-                         </div>
-                      </div>
+                          </div>                                                  
                    </div>
                 </div>
              </div>
@@ -93,7 +104,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Atualizar informações</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">

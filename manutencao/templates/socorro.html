@@ -1,1 +1,301 @@
-dsadasdsa
+{%extends 'base.html'%}
+
+{%load static%}
+
+{%block 'head'%}
+<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{%endblock%}
+
+
+{%block 'body'%}
+  <!-- MENSAGENS -->
+  <main id="main" class="main">
+    <div class="pagetitle">
+      {% if messages %}
+        {%for i in messages%}
+          <div class="{{i.tags}}" role='alert'>
+              {{i}}
+          </div>
+        {%endfor%}
+      {%endif%}  
+ <!-- MENSAGENS --> 
+
+
+
+ <section class="section dashboard">
+    <div class="row">
+       <div class="col-lg-12">
+          <div class="row">
+
+
+            <div class="col-xxl-6 col-md-12" >
+               <div class="card info-card sales-card">
+                  <div class="card-body">
+                     <div class='card-title'>SOCORRO OFICINA <span>|EM ABERTO</span>
+                     </div>
+                     <div class="d-flex align-items-c enter">
+                        <div class="ps-3">
+                           <h6>{{socorro.obra}} _____ {{socorro.data_saida|date:"d/m/Y - H:i"}} </h6>
+
+                        </div>
+                        <div class="d-flex align-items-left justify-content-left"> 
+                         <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
+                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-warning btn-md" data-bs-toggle="modal" data-bs-target="#adicao_servico">
+                              Adicionar Serviço
+                            </button>
+                        </div>
+
+                        <div class='align-items-right justify-content-right'><button type="button" class="btn btn-danger btn-md" data-bs-toggle="modal" data-bs-target="#finalizar_socorro">
+                          Finalizar Socorro
+                        </button>
+                      </div>
+
+                     </div>
+                  </div>
+               </div>
+            </div>
+      
+            <div class="col-xxl-6 col-md-12 font-weight-bold " style="height:65px; font-size:15px" >
+              <div style='margin-bottom:10px;height:40px'class="">
+                 <div class="card-body">
+                       <div class="d-flex">
+                            <div class="col-1">Número</div>
+                             <div class="col-2">Equipamento</div>
+                             <div class="col-2">Grupo Serviço</div>
+                             <div class="col-1">Data Inicio</div>
+                             <div class="col-3">Descrição</div>
+                             <div class="col-2"></div>
+
+                       </div>
+                 </div>
+              </div>
+           </div>
+
+             {% for servico in servicos_socorro %}
+             <div class="col-xxl-6 col-md-12" style='margin-bottom:0px'>
+                <div class="card">
+                   <div class="card-body">
+
+                      <div class="d-flex align-items-c enter" style='font-size:15px'>
+                          <div class='col-1 border-right'>SS{{servico.numero}}</div>
+                          <div class='col-2 border-right'>{{servico.equipamento}}</div> 
+                          <div class='col-2 border-right'>{{servico.grupo}}</div>
+                          <div class='col-1 border-right' style='font-size:12px'>{{servico.data_saida|date:"d/m - H:i"}}</div>  
+                          <div class='col-3 border-right' style='font-size:10px'>{{servico.descricao}}</div> 
+                          <div class='col-2 border-right'>
+                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#status_servico{{servico.id}}">
+                              Status Serviço
+                            </button> </div>
+                          </div>                                                  
+                   </div>
+                </div>
+             </div>
+
+
+
+  <!-- MODAL status serviço // colocar o modal dentro do for loop, para que ele funcione em cada item gerado pelo for -->
+  <div class="modal fade" id="status_servico{{servico.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Atualizar informações</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'servico_oficina' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_servico_socorro' value='form_servico_socorro'>
+
+               <input class="form-control" id="disabledInput" type="hidden" placeholder="Disabled input here..." name="id_servico" value={{servico.id}}>
+
+                <div class="mb-3">
+                  <label class="form-label">Mecânico:</label>
+                  <select name='mecanico'>
+                      {%for executante in mecanicos%} 
+                      <option value={{executante.id}}>{{executante}}</option>
+                      {%endfor%}
+                  </select>
+              </div>
+
+              <div class='mb-3'></div>
+
+
+                <div class="mb-3">
+                  <label for="exampleFormControlTextarea1" class="form-label">Adicionar descrição:</label>
+                  <label for="exampleFormControlTextarea1" class="form-label">{{servico.descricao}}</label>
+                  <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label">Data fim:</label>
+                  <input style='width:300px' type="datetime-local" name="data_fim"></input>
+                </div>
+
+                <div style="border:solid; margin-top:20px" class="col">
+                    <label style='width:120px' class="form-check-label" for="flexCheckDefault">
+                    <input type="checkbox" value="True" name='atendido' id="flexCheckDefault">
+                    Serviço concluido?
+                  </label>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+             {%endfor%}
+             
+          </div>
+       </div>
+      
+          </div>
+
+          
+          </div>
+       </div>
+    </div>
+ </section>
+
+
+
+
+  
+  <!-- MODAL OS Socorro OFICINA -->
+  <div class="modal fade" id="adicao_servico" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Adição Serviço</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FORM AQUI -->
+                <form method='POST' action="{%url 'servico_oficina' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+                    <input type='hidden' name='form_abrir_servico' value='form_abrir_servico'>
+
+                    <div class="mb-3">
+                        <label class="form-label">Equipamento:</label>
+                        <select name='equipamento'>
+                            {%for equipamento in equipamentos%} 
+                            <option value={{equipamento.id}}>{{equipamento}}</option>
+                            {%endfor%}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Tipo Serviço:</label>
+                        <select name='grupo_servico'>
+                            {%for grupo in grupos%} 
+                            <option value={{grupo.id}}>{{grupo}}</option>
+                            {%endfor%}
+                        </select>
+                    </div>
+
+
+                    <div class="mb-3" id="selectFuncionario">
+                        <label class="form-label">Executante:</label>
+                        <select name='mecanico'>
+                            {%for mecanico in mecanicos%} 
+                            <option value={{mecanico.id}}>{{mecanico}}</option>
+                            {%endfor%}
+                        </select>
+                    </div>
+
+                    <div class='mb-3'></div>
+
+
+                    <div class="mb-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Descrição do serviço:</label>
+                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <input type="submit" class="btn btn-primary"></input>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSelects() {
+        const funcionarioSelect = document.getElementById('selectFuncionario');
+        const terceirizadoSelect = document.getElementById('selectTerceirizado');
+        const isFuncionario = document.getElementById('flexRadioFuncionario').checked;
+
+        if (isFuncionario) {
+            funcionarioSelect.style.display = 'block';
+            terceirizadoSelect.style.display = 'none';
+        } else {
+            funcionarioSelect.style.display = 'none';
+            terceirizadoSelect.style.display = 'block';
+        }
+    }
+
+    // Executa a função ao carregar a página para definir o estado inicial
+    document.addEventListener('DOMContentLoaded', toggleSelects);
+</script>
+
+
+
+  <!-- MODAL FINALIZAR OS -->
+  <div class="modal fade" id="finalizar_socorro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Finalizar Socorro</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'servico_oficina' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_fim_socorro' value='form_fim_socorro'>
+
+              <div class='mb-3'></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Data Chegada:</label>
+                    <input style='width:300px' type="datetime-local" name="data_chegada"></input>
+                </div>
+
+  
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+
+ 
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+
+{%endblock%}

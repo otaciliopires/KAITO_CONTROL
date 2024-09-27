@@ -232,22 +232,19 @@ def servico_oficina(request, id):
             # servico_oficina.status = status_servico
 
             if servico_oficina.status == "Em Serviço":
-                    servico_oficina.tempo_em_servico = servico_oficina.tempo_em_servico + (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600
-                    print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
-                    print("novo",hora_correta(servico_oficina.data_mudanca_status,data_status))                     
+                    servico_oficina.tempo_em_servico += (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600                 
+                    servico_oficina.tempo_total += (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600 
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
             elif servico_oficina.status == "Aguardando Peças":
-                    servico_oficina.tempo_aguardo_peca= hora_correta(servico_oficina.data_mudanca_status, data_status)
-                    print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
-                    print("novo",hora_correta(servico_oficina.data_mudanca_status,data_status)) 
+                    servico_oficina.tempo_aguardo_peca += hora_correta(servico_oficina.data_mudanca_status, data_status)
+                    servico_oficina.tempo_total += hora_correta(servico_oficina.data_mudanca_status, data_status)
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
 
             elif servico_oficina.status == 'Aguardando Serviço':
-                    servico_oficina.tempo_aguardo_servico = hora_correta(servico_oficina.data_mudanca_status, data_status)
-                    print("atual",(data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600)
-                    print("novo",hora_correta(servico_oficina.data_mudanca_status,data_status))                     
+                    servico_oficina.tempo_aguardo_servico += hora_correta(servico_oficina.data_mudanca_status, data_status) 
+                    servico_oficina.tempo_total += hora_correta(servico_oficina.data_mudanca_status, data_status)                     
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
 
@@ -429,11 +426,44 @@ def socorro(request, id):
     if request.method == "GET":
         if Socorro.objects.all().exists():
             socorro = Socorro.objects.get(id=id)
+            servs_socorro = Servico_Socorro.objects.filter(socorro=id)
+            mecanicos = Funcionario.objects.filter(funcao='MECÂNICO')
+            print(servs_socorro)
+            equipamentos = Equipamentos.objects.filter(proprietario='Construtora Rocha')
+            grupos = Grupo_Servico.objects.all()
+            terceirizados = Servico_Terceirizado.objects.all()
+            return render(request, 'socorro.html', {'servicos_socorro': servs_socorro,
+                                                    'socorro':socorro,
+                                                    'id_Socorro':id,
+                                                    'equipamentos':equipamentos,
+                                                    'grupos':grupos,
+                                                    'mecanicos':mecanicos,
+                                                    'terceirizados':terceirizados})
 
         else:
             return redirect('/manutencao/home_manutencao/')
+    
+    elif request.method == 'POST':
+        form_abrir_servico = request.POST.get('form_abrir_servico')
+        form_fim_socorro = request.POST.get('form_fim_socorro')
+        form_servico_socorro = request.POST.get('form_servico_socorro')
 
-        servicos_socorro = Servico_Socorro.objects.filter(socorro=id)
-        print(socorro.obra)
+        if form_abrir_servico:
+            equipamento_id = request.POST.get('equipamento')
+            equipamento = Equipamentos.objects.get(id=equipamento_id)
+            grupo_id = request.POST.get('grupo_servico')
+            grupo = Grupo_Servico.objects.get(id=grupo_id)
+            mecanico_id = request.POST.get('mecanico')
+            mecanico = Funcionario.objects.get(id=mecanico_id)
+            descricao = request.POST.get('descricao')
 
-        return render(request, 'socorro.html')
+            servico_socorro = Servico_Socorro(equipamento=equipamento,
+                                              grupo_servico=grupo,
+                                              mecanico=mecanico,
+                                              descricao=descricao)
+            
+            servico_socorro.save()
+            return redirect(f'/manutencao/socorro/{id}/')
+
+        elif form_servico_socorro:
+            mecanico_id = request.PO
