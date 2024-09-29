@@ -35,18 +35,8 @@
                    <div class="card-body">
                      <div class='row'>
                       <div class="col-lg-6" style='margin-left:50px'>
-                        <h5 class="card-title" style='font-size:30px'>ABRIR ORDEM DE SERVIÇO</h5>
+                        <div class="card-title" style='font-size:25px'>ABRIR ORDEM DE SERVIÇO</div>
                       </div>
-                      <div class="col-lg-5">
-                        <form action="{%url 'atualizacao_horarios'%}" method='POST'>{%csrf_token%}
-                           <input style="margin-bottom:5px; margin-left:250  px" type="submit" value='Atualizar horários' class="btn btn-danger btn-sm">
-                        </form>
-                     </div>
-                  </div>
-
-
-
-                     
 
                       <div class="d-flex align-items-left">
 
@@ -64,6 +54,12 @@
                            O.S. Preventiva
                         </button>
                          </div> 
+                         <div class="col-lg-5">
+                          <form action="{%url 'atualizacao_horarios'%}" method='POST'>{%csrf_token%}
+                             <input style="margin-bottom:5px; margin-left:250  px" type="submit" value='Atualizar horários' class="btn btn-danger btn-sm">
+                          </form>
+                       </div>
+                    </div>
 
 
                       </div>
@@ -103,18 +99,22 @@
          {%endfor%} {% endcomment %}
 
          {% comment %}Corretivas oficina{% endcomment %}
+         <div><h1 style='font-size:40px' class='text-primary'>Corretivas Oficina em Andamento</h1><div>
 
             <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
-               <div style='margin-bottom:10px;height:40px'class="">
+               <div style='margin-bottom:10px;height:60px'class="">
                   <div class="card-body">
                         <div class="d-flex">
 
-                              <div class="col-2">Equip.</div>
-                              <div class="col-2">data inicio</div>
-                              <div class="col-2">serv. abertos</div>
-                              <div class="col-2">serv. finalizados</div>
-                              <div class="col-2"> status</div>
-                              <div class="col-1">tempo total</div>
+                              <div class="col-1">Equip.</div>
+                              <div class="col-2">Data inicio</div>
+                              <div class="col-1">Serv. abertos</div>
+                              <div class="col-1">Serv. finalizados</div>
+                              <div class="col-2"> Status atual</div>
+                              <div class="col-1">Tempo em serviço</div>
+                              <div class="col-1">Tempo aguardando peças</div>
+                              <div class="col-1">Tempo aguardando serviço</div>
+                              <div class="col-1">Tempo total</div>
                               <div class="col-1">
                                     Link OS
                               </div>
@@ -129,12 +129,15 @@
             <div class="card-body">
                 <div class="d-flex align-items-center">
 
-                        <div class="col-2 border-right">{{ ordem_aberta.equipamento }}</div>
+                        <div class="col-1 border-right">{{ ordem_aberta.equipamento }}</div>
                         <div class="col-2 border-right">{{ ordem_aberta.data_inicio|date:"d/m/Y - H:i"  }}</div>
-                        <div class="col-2 border-right">{{ num_finalizadas }}</div>
-                        <div class="col-2 border-right">{{ num_abertas }}</div>
+                        <div class="col-1 border-right">{{ num_finalizadas }}</div>
+                        <div class="col-1 border-right">{{ num_abertas }}</div>
                         <div class="col-2 border-right"> {{ status_serv }}</div>
-                        <div class="col-1 border-right">{{ordem_aberta.tempo_total}}</div>
+                        <div class="col-1 border-right">{{ordem_aberta.tempo_em_servico|floatformat:"2g"}}</div>
+                        <div class="col-1 border-right">{{ordem_aberta.tempo_aguardo_peca|floatformat:"2g"}}</div>
+                        <div class="col-1 border-right">{{ordem_aberta.tempo_aguardo_servico|floatformat:"2g"}}</div>
+                        <div class="col-1 border-right">{{ordem_aberta.tempo_total|floatformat:"2g"}}</div>
                         <div class="col-1 border-right">
                             <a href="/manutencao/osoficina/{{ ordem_aberta.id }}/">OSF{{ ordem_aberta.numero }}</a>
                         </div>
@@ -149,18 +152,29 @@
                         </button>
                     </h2>
                     <div id="collapse{{ ordem_aberta.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+
+                      <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
+                        <div style='margin-bottom:10px;height:40px'class="">
+                           <div class="card-body">
+                                 <div class="d-flex">
+                     
+                                       <div class="col-2">Data Início</div>
+                                       <div class="col-2">Grupo Serviço</div>
+                                       <div class="col-2">Status</div>
+                                       <div class="col-6">Descrição do Serviço</div>
+                                 </div>
+                           </div>
+                        </div>
+                     </div>
                         <div class="accordion-body">
                             {%for serv in serv_a%}
-                            <div class="col-xxl-6 col-md-12">
+                            <div class="col-xxl-6 col-md-12 border-bottom border-dark">
 
                               <div class="row align-items-start">
-                              <div class="col">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
-                              <div class="col">{{ serv.grupo_servico }}</div>
-                              <div class="col">{{ serv.descricao }}</div>
-                              <div class="col">{{ serv.status }}</div>
-                              <div class="col"> </div>
-                              <div class="col"> Item para comprar</div>
-                              <div class="col"> Prioridade</div>
+                              <div class="col-2">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
+                              <div class="col-2">{{ serv.grupo_servico }}</div>
+                              <div class="col-2">{{ serv.status }}</div>
+                              <div class="col-6">{{ serv.descricao }}</div>
 
                            </div>
                         </div>
@@ -173,8 +187,12 @@
         </div>
     </div>
 {% endfor %}
+<div style='margin-bottom:50px'></div>
 
 {% comment %}Socorros{% endcomment %}
+
+<div><h1 style='font-size:40px' class='text-warning'>Socorros em Andamento </h1><div>
+
 
 <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
    <div style='margin-bottom:10px;height:40px'class="">
@@ -183,8 +201,8 @@
 
                   <div class="col-2">Obra</div>
                   <div class="col-2">data saída</div>
-                  <div class="col-2">Qtd. equipamentos</div>
                   <div class="col-2">Qtd. serviços</div>
+                  <div class="col-2">Equipamentos</div>
                   <div class="col-2">
                         Link OS
                   </div>
@@ -194,7 +212,7 @@
 </div>
 
 
-{% for socorro in socorros %}
+{% for socorro, qtd, equip, list_servicos_socorro in dados_zip_socorro %}
 <div class="col-xxl-6 col-md-12 ">
 <div style='margin-bottom:10px' class="card info-card sales-card  border border-warning">
 <div class="card-body">
@@ -202,8 +220,8 @@
 
             <div class="col-2 border-right">{{ socorro.obra }}</div>
             <div class="col-2 border-right">{{ socorro.data_saida|date:"d/m/Y - H:i"  }}</div>
-            <div class="col-2 border-right">qtd serviços </div>
-            <div class="col-2 border-right">lista equipamentos </div>
+            <div class="col-2 border-right">{{qtd}}</div>
+            <div class="col-2 border-right">{{equip}}</div>
             <div class="col-1 border-right">
                 <a href="/manutencao/socorro/{{ socorro.id }}/">OSS{{ socorro.numero }}</a>
             </div>
@@ -213,25 +231,36 @@
 <div class="accordion" id="accordionExample">
     <div class="accordion-item">
         <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ ordem_aberta.id }}" aria-expanded="true" aria-controls="collapse{{ ordem_aberta.id }}">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ socorro.id }}" aria-expanded="true" aria-controls="collapse{{ socorro.id }}">
                 Serviços
             </button>
         </h2>
-        <div id="collapse{{ ordem_aberta.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+        <div id="collapse{{ socorro.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+
+
+          <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
+            <div style='margin-bottom:10px;height:40px'class="">
+               <div class="card-body">
+                     <div class="d-flex">
+         
+                           <div class="col-2">Equipamento</div>
+                           <div class="col-2">Grupo Serviço</div>
+                           <div class="col-8">Descrição do Serviço</div>
+                     </div>
+               </div>
+            </div>
+         </div>
             <div class="accordion-body">
-                {%for serv in serv_a%}
-                <div class="col-xxl-6 col-md-12">
+                {%for serv in list_servicos_socorro%}
+                <div class="col-xxl-6 col-md-12 border-bottom border-dark">
 
                   <div class="row align-items-start">
-                  <div class="col">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
-                  <div class="col">{{ serv.grupo_servico }}</div>
-                  <div class="col">{{ serv.descricao }}</div>
-                  <div class="col">{{ serv.status }}</div>
-                  <div class="col"> </div>
-                  <div class="col"> Item para comprar</div>
-                  <div class="col"> Prioridade</div>
+                  <div class="col-2">{{ serv.equipamento}}</div>
+                  <div class="col-2">{{ serv.grupo_servico }}</div>
+                  <div class="col-8">{{ serv.descricao }}</div>
 
                </div>
+
             </div>
 
                 {%endfor%}

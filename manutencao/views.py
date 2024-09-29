@@ -13,7 +13,7 @@ def home_manutencao(request):
 
     if request.method == 'GET':
         list_equip=[]
-        equipamentos_rocha = Equipamentos.objects.filter(proprietario='Construtora Rocha')
+        equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
         obras = Obras.objects.all()
         print("xxxxxxxxxx", obras, equipamentos_rocha)
         for i in equipamentos_rocha:
@@ -50,8 +50,20 @@ def home_manutencao(request):
     
         #TRATAMENTO SOCORRO
         socorros_abertos = Socorro.objects.filter(data_chegada__isnull=True)
-        print(socorros_abertos)
+        qtd_serv_socorros = []
+        list_equipamentos = []
+        list_servicos_socorro = []
+        for socorro_aberto in socorros_abertos:
+            serv_socorro = Servico_Socorro.objects.filter(socorro = socorro_aberto.id)
+            equips = []
+            list_servicos_socorro.append(serv_socorro)
+            for serv in serv_socorro:
+                equips.append(serv.equipamento.prefixo)
+            list_equipamentos.append(equips)    
 
+            qtd_serv_socorros.append(serv_socorro.count())
+
+        dados_socorro = zip(socorros_abertos,qtd_serv_socorros, list_equipamentos, list_servicos_socorro )
 
 
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
@@ -60,7 +72,8 @@ def home_manutencao(request):
                                                     'serv_a':lista_servicos_a,
                                                     'serv_f':lista_servicos_f,
                                                     'obras':obras, 
-                                                    'socorros':socorros_abertos,
+                                                    'dados_zip_socorro':dados_socorro,
+                                                
                                                     })
 
     elif request.method == 'POST':
@@ -426,10 +439,10 @@ def socorro(request, id):
     if request.method == "GET":
         if Socorro.objects.all().exists():
             socorro = Socorro.objects.get(id=id)
-            servs_socorro = Servico_Socorro.objects.filter(socorro=id)
+            servs_socorro = Servico_Socorro.objects.filter(socorro=id,data_fim__isnull=True )
             mecanicos = Funcionario.objects.filter(funcao='MECÂNICO')
             print(servs_socorro)
-            equipamentos = Equipamentos.objects.filter(proprietario='Construtora Rocha')
+            equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
             grupos = Grupo_Servico.objects.all()
             terceirizados = Servico_Terceirizado.objects.all()
             return render(request, 'socorro.html', {'servicos_socorro': servs_socorro,
@@ -449,6 +462,7 @@ def socorro(request, id):
         form_servico_socorro = request.POST.get('form_servico_socorro')
 
         if form_abrir_servico:
+            socorro = Socorro.objects.get(id=id)
             equipamento_id = request.POST.get('equipamento')
             equipamento = Equipamentos.objects.get(id=equipamento_id)
             grupo_id = request.POST.get('grupo_servico')
@@ -457,13 +471,70 @@ def socorro(request, id):
             mecanico = Funcionario.objects.get(id=mecanico_id)
             descricao = request.POST.get('descricao')
 
-            servico_socorro = Servico_Socorro(equipamento=equipamento,
+            if Servico_Socorro.objects.aggregate(Max('numero'))['numero__max'] == None:
+                numero = 0
+            else:
+                numero = Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max']
+
+            servico_socorro = Servico_Socorro(socorro =socorro,
+                                              equipamento=equipamento,
                                               grupo_servico=grupo,
                                               mecanico=mecanico,
-                                              descricao=descricao)
+                                              descricao=descricao,
+                                              numero=numero+1)
             
             servico_socorro.save()
             return redirect(f'/manutencao/socorro/{id}/')
 
         elif form_servico_socorro:
-            mecanico_id = request.PO
+            id_servico_socorro = request.POST.get('id_servico_socorro')
+            servico_socorro = Servico_Socorro.objects.get(id=id_servico_socorro)
+            mecanico_id = request.POST.get('mecanico')
+            print(mecanico_id)
+
+            if mecanico_id == 'None':
+                pass
+            else: 
+                mecanico = Funcionario.objects.get(id=mecanico_id)
+                servico_socorro.mecanico = mecanico
+            descricao = request.POST.get('descricao')
+            servico_socorro.descricao += "-" +  descricao
+
+
+            data_inicio = request.POST.get('data_inicio')
+            data_fim = request.POST.get('data_fim')
+            print(data_fim,data_fim)
+            if data_inicio == "" or data_fim ==  "":
+                pass
+            else:
+
+                data_inicio = datetime.strptime(data_inicio, "%Y-%m-%dT%H:%M")    
+                servico_socorro.data_inicio = data_inicio
+                data_fim = datetime.strptime(data_fim, "%Y-%m-%dT%H:%M")    
+                servico_socorro.data_fim = data_fim
+                tempo_servico = (data_fim.timestamp() - data_inicio.timestamp())/3600
+                servico_socorro.tempo_servico = tempo_servico
+            resultado_servico = request.POST.get('resultado_servico')
+            if resultado_servico == 'on':
+                resultado_servico = True
+            else:
+                resultado_servico = False
+            servico_socorro.resultado_servico = resultado_servico
+
+
+
+            servico_socorro.save()
+            return redirect(f'/manutencao/socorro/{id}/')
+        
+        elif form_fim_socorro:
+            socorro = Socorro.objects.get(id=id)
+            data_chegada = request.POST.get('data_chegada')
+            data_chegada = datetime.strptime(data_chegada, "%Y-%m-%dT%H:%M")  
+            socorro.data_chegada = data_chegada 
+            socorro.save()
+
+            return redirect('/manutencao/home_manutencao/')
+
+
+
+

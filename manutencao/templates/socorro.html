@@ -44,7 +44,7 @@
                         </div>
                         <div class="d-flex align-items-left justify-content-left"> 
                          <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
-                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-warning btn-md" data-bs-toggle="modal" data-bs-target="#adicao_servico">
+                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-warning btn-md" data-bs-toggle="modal" data-bs-target="#adicao_servico_socorro">
                               Adicionar Serviço
                             </button>
                         </div>
@@ -63,11 +63,10 @@
               <div style='margin-bottom:10px;height:40px'class="">
                  <div class="card-body">
                        <div class="d-flex">
-                            <div class="col-1">Número</div>
+                            <div class="col-2">Número</div>
                              <div class="col-2">Equipamento</div>
                              <div class="col-2">Grupo Serviço</div>
-                             <div class="col-1">Data Inicio</div>
-                             <div class="col-3">Descrição</div>
+                             <div class="col-4">Descrição</div>
                              <div class="col-2"></div>
 
                        </div>
@@ -83,8 +82,7 @@
                       <div class="d-flex align-items-c enter" style='font-size:15px'>
                           <div class='col-1 border-right'>SS{{servico.numero}}</div>
                           <div class='col-2 border-right'>{{servico.equipamento}}</div> 
-                          <div class='col-2 border-right'>{{servico.grupo}}</div>
-                          <div class='col-1 border-right' style='font-size:12px'>{{servico.data_saida|date:"d/m - H:i"}}</div>  
+                          <div class='col-2 border-right'>{{servico.grupo_servico}}</div> 
                           <div class='col-3 border-right' style='font-size:10px'>{{servico.descricao}}</div> 
                           <div class='col-2 border-right'>
                             <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#status_servico{{servico.id}}">
@@ -107,14 +105,15 @@
         </div>
         <div class="modal-body">
             <!-- FORM AQUI -->
-            <form method='POST' action="{%url 'servico_oficina' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+            <form method='POST' action="{%url 'socorro' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
                <input type='hidden' name='form_servico_socorro' value='form_servico_socorro'>
 
-               <input class="form-control" id="disabledInput" type="hidden" placeholder="Disabled input here..." name="id_servico" value={{servico.id}}>
+               <input class="form-control" id="disabledInput" type="hidden" placeholder="Disabled input here..." name="id_servico_socorro" value={{servico.id}}>
 
                 <div class="mb-3">
                   <label class="form-label">Mecânico:</label>
                   <select name='mecanico'>
+                      <option value = 'None'>Selecione</option>
                       {%for executante in mecanicos%} 
                       <option value={{executante.id}}>{{executante}}</option>
                       {%endfor%}
@@ -131,13 +130,18 @@
                 </div>
 
                 <div class="mb-3">
+                  <label class="form-label">Data inicio:</label>
+                  <input style='width:300px' type="datetime-local" name="data_inicio"></input>
+                </div>
+
+                <div class="mb-3">
                   <label class="form-label">Data fim:</label>
                   <input style='width:300px' type="datetime-local" name="data_fim"></input>
                 </div>
 
                 <div style="border:solid; margin-top:20px" class="col">
                     <label style='width:120px' class="form-check-label" for="flexCheckDefault">
-                    <input type="checkbox" value="True" name='atendido' id="flexCheckDefault">
+                    <input type="checkbox" name='resultado_servico' id="flexCheckDefault">
                     Serviço concluido?
                   </label>
                 </div>
@@ -172,8 +176,8 @@
 
 
   
-  <!-- MODAL OS Socorro OFICINA -->
-  <div class="modal fade" id="adicao_servico" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <!-- MODAL ABRIR SERVIÇO SOCORRO -->
+  <div class="modal fade" id="adicao_servico_socorro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -182,7 +186,7 @@
             </div>
             <div class="modal-body">
                 <!-- FORM AQUI -->
-                <form method='POST' action="{%url 'servico_oficina' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+                <form method='POST' action="{%url 'socorro' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
                     <input type='hidden' name='form_abrir_servico' value='form_abrir_servico'>
 
                     <div class="mb-3">
@@ -262,7 +266,7 @@
         </div>
         <div class="modal-body">
             <!-- FORM AQUI -->
-            <form method='POST' action="{%url 'servico_oficina' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+            <form method='POST' action="{%url 'socorro' id=id_Socorro%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
                <input type='hidden' name='form_fim_socorro' value='form_fim_socorro'>
 
               <div class='mb-3'></div>

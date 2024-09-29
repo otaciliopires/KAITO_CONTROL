@@ -112,7 +112,7 @@ class Servico_Socorro(models.Model):
     mecanico = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING)
     data_inicio = models.DateTimeField(null=True, blank=True)
     data_fim = models.DateTimeField(null=True, blank=True)
-    tempo_servico = models.FloatField()
+    tempo_servico = models.FloatField(default=0.0)
     descricao = models.CharField(max_length=500)
     resultado_servico = models.BooleanField(default=False)
 
