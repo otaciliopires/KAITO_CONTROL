@@ -55,7 +55,9 @@ def comentario(request, id):
     obra = Obras.objects.get(nome=abastecimento.obra)
     comment = request.POST.get('comentario')
 
-    abastecimento.observacao = request.user.first_name + ":" + abastecimento.observacao + "-" + comment
+    abastecimento.observacao = abastecimento.observacao+ "-" + request.user.first_name + ":" + comment
+
+
 
     abastecimento.save() 
     
