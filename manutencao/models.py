@@ -116,6 +116,39 @@ class Servico_Socorro(models.Model):
     descricao = models.CharField(max_length=500)
     resultado_servico = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.equipamento.prefixo
+
+class Servico_Preventiva(models.Model):
+    descricao = models.CharField(max_length=500)
+    insumo = models.CharField(max_length=100)
+    quantidade = models.FloatField(null=True, blank=True)
+
+    def __str__(self):
+        return self.descricao
+    
+
+
+class Ordem_Preventiva(models.Model):
+    periodo = models.IntegerField()
+    servicos = models.ManyToManyField(Servico_Preventiva)
+    equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING )
+    
+    def __str__(self):
+        return self.equipamento.prefixo
+
+class Preventiva(models.Model):
+    ordem = models.ForeignKey(Ordem_Preventiva,on_delete=models.DO_NOTHING)
+    hotimetro = models.FloatField()
+    data_emissao = models.DateField()
+    data_separados = models.DateField(null=True, blank=True)
+    local = models.ForeignKey(Obras, on_delete=models.DO_NOTHING)
+    data_inicio = models.DateTimeField(null=True, blank=True)
+    data_fim = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return self.ordem.equipamento.prefixo
+
 
 
 
