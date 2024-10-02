@@ -16,5 +16,7 @@ class Servico_SocorroAdmin(admin.ModelAdmin):
     list_display=('equipamento','data_inicio', 'data_fim', 'mecanico','tempo_servico', 'resultado_servico')
 
 admin.site.register(Preventiva)
-admin.site.register(Ordem_Preventiva)
 admin.site.register(Servico_Preventiva)
+@admin.register(Ordem_Preventiva)
+class Servico_Ordem_PreventivaAdmin(admin.ModelAdmin):
+    list_display=('equipamento', 'periodo')

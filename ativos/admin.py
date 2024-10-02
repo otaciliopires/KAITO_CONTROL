@@ -3,5 +3,9 @@ from .models import Obras, Equipamentos
 
 # Register your models here.
 admin.site.register(Obras)
-admin.site.register(Equipamentos)
 
+
+class EquipamentosAdmin(admin.ModelAdmin):
+    list_filter = ('prefixo', 'proprietario')
+
+admin.site.register(Equipamentos, EquipamentosAdmin)

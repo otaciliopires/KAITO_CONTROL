@@ -131,11 +131,11 @@ class Servico_Preventiva(models.Model):
 
 class Ordem_Preventiva(models.Model):
     periodo = models.IntegerField()
-    servicos = models.ManyToManyField(Servico_Preventiva)
+    servicos = models.ManyToManyField(Servico_Preventiva, null=True, blank=True)
     equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING )
     
     def __str__(self):
-        return self.equipamento.prefixo
+        return f'{self.equipamento.prefixo} - {self.periodo}'
 
 class Preventiva(models.Model):
     ordem = models.ForeignKey(Ordem_Preventiva,on_delete=models.DO_NOTHING)

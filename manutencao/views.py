@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro
+from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva
 from .models import Equipamentos, Obras
 from django.db.models import Max
 from datetime import datetime
@@ -13,7 +13,7 @@ def home_manutencao(request):
 
     if request.method == 'GET':
         list_equip=[]
-        equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+        equipamentos_rocha = Equipamentos.objects.filter(proprietario='Construtora Rocha')
         obras = Obras.objects.all()
         print("xxxxxxxxxx", obras, equipamentos_rocha)
         for i in equipamentos_rocha:
@@ -66,6 +66,13 @@ def home_manutencao(request):
         dados_socorro = zip(socorros_abertos,qtd_serv_socorros, list_equipamentos, list_servicos_socorro )
 
 
+        #Tratamento PREVENTIVAS
+        equipamentos_preventiva= Equipamentos.objects.filter(proprietario='Construtora Rocha')
+        preventivas = Preventiva.objects.filter(data_fim=None)
+        print(preventivas[0].ordem)
+
+
+
         return render(request, 'home_manutencao.html', {'list_equip':list_equip,
                                                     'os_oficina_aberta':os_oficina_abertas,
                                                     'dados_zip':dados_zip,
@@ -73,12 +80,15 @@ def home_manutencao(request):
                                                     'serv_f':lista_servicos_f,
                                                     'obras':obras, 
                                                     'dados_zip_socorro':dados_socorro,
+                                                    'equipamentos_preventiva':equipamentos_preventiva,
+                                                    'preventivas':preventivas
                                                 
                                                     })
 
     elif request.method == 'POST':
         form_osoficina = request.POST.get('form_osoficina')
         form_socorro = request.POST.get('form_socorro')
+        form_preventiva = request.POST.get('form_preventiva')
 
         #equipamentos da rocha
 
@@ -123,8 +133,10 @@ def home_manutencao(request):
             
             
             return redirect('/manutencao/home_manutencao')
+        
+        if form_preventiva:
 
-
+            return redirect('/manutencao/home_manutencao')
 
 
 def servico_oficina(request, id):

@@ -40,7 +40,7 @@
 
                       <div class="d-flex align-items-left">
 
-                         <div style='margin-left:50px'>
+                         <div class="col-lg-8" style='margin-left:50px'>
                            
                              <!-- MODAL OS CORRETIVA OFICINA -->
                         <button style="margin-bottom:5px" type="button" class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#OSCorretiva">
@@ -50,14 +50,15 @@
                         <button style="margin-bottom:5px" type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#Socorro">
                            O.S. Socorro
                         </button>
-                        <button style="margin-bottom:5px" type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                        <button style="margin-bottom:5px" type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#Preventivas">
                            O.S. Preventiva
                         </button>
+                        <form action="{%url 'atualizacao_horarios'%}" method='POST'>{%csrf_token%}
+                          <input style="margin-bottom:5px; margin-left:250  px" type="submit" value='Atualizar horários' class="btn btn-danger btn-sm">
+                       </form>
                          </div> 
-                         <div class="col-lg-5">
-                          <form action="{%url 'atualizacao_horarios'%}" method='POST'>{%csrf_token%}
-                             <input style="margin-bottom:5px; margin-left:250  px" type="submit" value='Atualizar horários' class="btn btn-danger btn-sm">
-                          </form>
+                         <div class="col-lg-2">
+
                        </div>
                     </div>
 
@@ -275,6 +276,51 @@
 
 
 
+{% comment %}PREVENTIVAS{% endcomment %}
+
+<div><h1 style='font-size:40px' class='text-success'>Preventivas</h1><div>
+
+
+  <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
+     <div style='margin-bottom:10px;height:40px'class="">
+        <div class="card-body">
+              <div class="d-flex">
+  
+                    <div class="col-2">Equipamento - período</div>
+                    <div class="col-2">Data Emissão</div>
+                    <div class="col-2">Local</div>
+                    <div class="col-2">
+                          Link OS
+                    </div>
+              </div>
+        </div> 
+     </div>
+  </div>
+  
+  
+  {% for preventiva in preventivas %}
+  <div class="col-xxl-6 col-md-12 ">
+  <div style='margin-bottom:10px' class="card info-card sales-card  border border-success">
+  <div class="card-body">
+      <div class="d-flex align-items-center">
+  
+              <div class="col-2 border-right">{{ preventiva.ordem }} horas</div>
+              <div class="col-2 border-right">{{ preventiva.data_emissao|date:"d/m/Y"  }}</div>
+              <div class="col-2 border-right">{{preventiva.local}}</div>
+              <div class="col-1 border-right">
+                  <a href="/manutencao/socorro/{{ socorro.id }}/">OSS{{ socorro.numero }}</a>
+              </div>
+      </div>
+  </div>
+  
+  </div>
+  </div>
+  </div>
+  {% endfor %}
+
+
+
+
 
   <!-- MODAL OS CORRETIVA OFICINA -->
   <div class="modal fade" id="OSCorretiva" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -289,7 +335,7 @@
             <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
                <input type='hidden' name='form_osoficina' value='form_osoficina'>
                 <div class="mb-3">
-                    <label class="form-label">Equipamento:</label>
+                    <label style='width:100px' class="form-label">Equipamento:</label>
                     <select name='equipamento'>
                         {%for equipamento in list_equip%} 
                         <option value={{equipamento.id}}>{{equipamento}}</option>
@@ -297,11 +343,11 @@
                     </select>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Data Início:</label>
+                    <label style='width:100px' class="form-label">Data Início:</label>
                     <input style='width:300px' type="datetime-local" name="data_inicio"></input>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Horímetro:</label>
+                    <label style='width:100px' class="form-label">Horímetro:</label>
                     <input style='width:300px' type="number" name="horimetro"></input>
                 </div>
                 <div class="modal-footer">
@@ -327,7 +373,7 @@
               <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
                  <input type='hidden' name='form_socorro' value='form_socorro'>
                   <div class="mb-3">
-                      <label class="form-label">Obra:</label>
+                      <label style='width:100px' class="form-label">Obra:</label>
                       <select name='obra'>
                           {%for obra in obras%} 
                           <option value={{obra.id}}>{{obra}}</option>
@@ -335,7 +381,7 @@
                       </select>
                   </div>
                   <div class="mb-3">
-                      <label class="form-label">Data Saída:</label>
+                      <label style='width:100px' class="form-label">Data Saída:</label>
                       <input style='width:300px' type="datetime-local" name="data_saida"></input>
                   </div>
  
@@ -348,6 +394,64 @@
         </div>
       </div>
     </div>
+
+
+      <!-- MODAL PREVENTIVAS -->
+      <div class="modal fade" id="Preventivas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Preventivas</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FORM AQUI -->
+                <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
+                   <input type='hidden' name='form_preventiva' value='form_preventiva'>
+                    <div class="mb-3">
+                        <label style='width:100px' for='obra'>Obra:</label>
+                        <select name='obra'>
+                            {%for obra in obras%} 
+                            <option value={{obra.id}}>{{obra}}</option>
+                            {%endfor%}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label style='width:100px' class="form-label">Equipamento:</label>
+                      <select name='equipamentos'>
+                          {%for equip in equipamentos_preventiva%} 
+                          <option value={{equip.id}}>{{equip}}</option>
+                          {%endfor%}
+                      </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label style='width:100px' class="form-label">Período:</label>
+                    <select name='equipamentos'>
+
+                        <option value='250'>250</option>
+                        <option value='500'>500</option>
+                        <option value='1000'>1000</option>
+                        <option value='2000'>2000</option>
+
+                    </select>
+                </div>
+
+                    <div class="mb-3">
+                        <label style='width:100px' class="form-label">Data Emissão:</label>
+                        <input style='width:300px' type="datetime-local" name="data_saida"></input>
+                    </div>
+   
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <input type="submit" class="btn btn-primary"></input>
+                    </div>  
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
