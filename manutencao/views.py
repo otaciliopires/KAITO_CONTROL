@@ -135,6 +135,25 @@ def home_manutencao(request):
             return redirect('/manutencao/home_manutencao')
         
         if form_preventiva:
+            obra_id = request.POST.get('obra')
+            obra = Obras.objects.get(id=obra_id)
+            equipamento_id = request.POST.get('equipamento')
+            equipamento = Equipamentos.objects.get(id=equipamento_id)
+            data_emissao = request.POST.get('data_emissao')
+            periodo = int(request.POST.get('periodo'))
+            ordem = Ordem_Preventiva.objects.get(equipamento=equipamento, periodo=periodo)
+            if Preventiva.objects.aggregate(Max('numero'))['numero__max'] == None:
+                    numero = 0
+            else:
+                    numero = Preventiva.objects.aggregate(Max('numero'))['numero__max']
+
+            preventiva = Preventiva(local = obra,
+                                    ordem = ordem ,
+                                    data_emissao=data_emissao,
+                                    numero=numero+1)
+            
+            preventiva.save()
+
 
             return redirect('/manutencao/home_manutencao')
 
@@ -454,7 +473,7 @@ def socorro(request, id):
             servs_socorro = Servico_Socorro.objects.filter(socorro=id,data_fim__isnull=True )
             mecanicos = Funcionario.objects.filter(funcao='MECÂNICO')
             print(servs_socorro)
-            equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+            equipamentos = Equipamentos.objects.filter(proprietario='Construtora Rocha')
             grupos = Grupo_Servico.objects.all()
             terceirizados = Servico_Terceirizado.objects.all()
             return render(request, 'socorro.html', {'servicos_socorro': servs_socorro,
@@ -547,6 +566,69 @@ def socorro(request, id):
 
             return redirect('/manutencao/home_manutencao/')
 
+def preventiva(request, id):
+
+    if request.method == 'GET':
+        preventiva = Preventiva.objects.get(id=id)
+        mecanicos = Funcionario.objects.filter(funcao='MECÂNICO')
+
+        return render(request, 'preventiva.html', {'preventiva':preventiva,
+                                                   'mecanicos':mecanicos,
+                                                    'id_Preventiva':id })
+    elif request.method == 'POST':
+
+        form_atualizar_preventiva = request.POST.get('form_atualizar_preventiva')
+        if form_atualizar_preventiva:
+            preventiva_atualizada = Preventiva.objects.get(id=id)
+            
+            mecanico_id = request.POST.get('mecanico')
+            if mecanico_id == 'None':
+                pass
+            else:
+                mecanico = Funcionario.objects.get(id=mecanico_id)
+                preventiva_atualizada.mecanico = mecanico
+            
+            data_insumo = request.POST.get('data_insumo')
+            if data_insumo == "":
+                pass
+            else:
+                preventiva_atualizada.data_insumo = data_insumo
+            
+            data_inicio = request.POST.get('data_inicio')
+            if data_inicio == "":
+                pass
+            else:
+                data_inicio = datetime.strptime(data_inicio, "%Y-%m-%dT%H:%M")  
+                preventiva_atualizada.data_inicio = data_inicio
+
+            data_fim = request.POST.get('data_fim')
+            if data_fim == "":
+                pass
+            else:
+                data_fim = datetime.strptime(data_fim, "%Y-%m-%dT%H:%M")
+                preventiva_atualizada.data_fim = data_fim
+                
+            horimetro = request.POST.get('horimetro')
+            if horimetro == "":
+                pass
+            else:
+                horimentro = int(horimetro)
+                preventiva_atualizada.horimetro = horimetro
+
+            assinatura_responsavel = request.POST.get('assinatura_responsavel')
+            if assinatura_responsavel == "on":
+                assinatura_responsavel = True
+            else:
+                assinatura_responsavel = False
+            preventiva_atualizada.assinatura_responsavel = assinatura_responsavel
+
+
+            print(mecanico_id,data_insumo,data_inicio,data_fim, assinatura_responsavel, horimetro, id, "aaaaaaaaaaaaaaaaaaaaaaaa")
+
+            preventiva_atualizada.save()
+
+            return redirect(f'/manutencao/preventiva/{id}/')
+        
 
 
 

@@ -289,6 +289,7 @@
                     <div class="col-2">Equipamento - período</div>
                     <div class="col-2">Data Emissão</div>
                     <div class="col-2">Local</div>
+                    <div class='col-2'>Data Realização
                     <div class="col-2">
                           Link OS
                     </div>
@@ -308,14 +309,14 @@
               <div class="col-2 border-right">{{ preventiva.data_emissao|date:"d/m/Y"  }}</div>
               <div class="col-2 border-right">{{preventiva.local}}</div>
               <div class="col-1 border-right">
-                  <a href="/manutencao/socorro/{{ socorro.id }}/">OSS{{ socorro.numero }}</a>
+                  <a href="/manutencao/preventiva/{{ preventiva.id }}/">OSP{{ preventiva.numero }}</a>
               </div>
       </div>
   </div>
   
   </div>
   </div>
-  </div>
+
   {% endfor %}
 
 
@@ -326,7 +327,7 @@
   <div class="modal fade" id="OSCorretiva" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-primary">
           <h1 class="modal-title fs-5" id="exampleModalLabel">OS Corretiva Oficina</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -364,7 +365,7 @@
     <div class="modal fade" id="Socorro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
+          <div class="modal-header bg-warning">
             <h1 class="modal-title fs-5" id="exampleModalLabel">Socorro</h1>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
@@ -400,7 +401,7 @@
       <div class="modal fade" id="Preventivas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-success">
               <h1 class="modal-title fs-5" id="exampleModalLabel">Preventivas</h1>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -419,7 +420,7 @@
 
                     <div class="mb-3">
                       <label style='width:100px' class="form-label">Equipamento:</label>
-                      <select name='equipamentos'>
+                      <select name='equipamento'>
                           {%for equip in equipamentos_preventiva%} 
                           <option value={{equip.id}}>{{equip}}</option>
                           {%endfor%}
@@ -428,7 +429,7 @@
 
                   <div class="mb-3">
                     <label style='width:100px' class="form-label">Período:</label>
-                    <select name='equipamentos'>
+                    <select name='periodo'>
 
                         <option value='250'>250</option>
                         <option value='500'>500</option>
@@ -440,7 +441,7 @@
 
                     <div class="mb-3">
                         <label style='width:100px' class="form-label">Data Emissão:</label>
-                        <input style='width:300px' type="datetime-local" name="data_saida"></input>
+                        <input style='width:300px' type="date" name="data_emissao"></input>
                     </div>
    
                     <div class="modal-footer">

@@ -139,12 +139,16 @@ class Ordem_Preventiva(models.Model):
 
 class Preventiva(models.Model):
     ordem = models.ForeignKey(Ordem_Preventiva,on_delete=models.DO_NOTHING)
-    hotimetro = models.FloatField()
+    horimetro = models.FloatField(null=True, blank=True)
     data_emissao = models.DateField()
-    data_separados = models.DateField(null=True, blank=True)
+    data_insumo= models.DateField(null=True, blank=True)
     local = models.ForeignKey(Obras, on_delete=models.DO_NOTHING)
     data_inicio = models.DateTimeField(null=True, blank=True)
     data_fim = models.DateTimeField(null=True, blank=True)
+    tempo_servico = models.FloatField(default=0.0)
+    assinatura_responsavel = models.BooleanField(default=False)
+    numero = models.IntegerField()
+    mecanico = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING,null=True)
 
     def __str__(self):
         return self.ordem.equipamento.prefixo

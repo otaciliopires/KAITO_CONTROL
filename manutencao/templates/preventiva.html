@@ -1,0 +1,186 @@
+{%extends 'base.html'%}
+
+{%load static%}
+
+{%block 'head'%}
+<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{%endblock%}
+
+
+{%block 'body'%}
+  <!-- MENSAGENS -->
+  <main id="main" class="main">
+    <div class="pagetitle">
+      {% if messages %}
+        {%for i in messages%}
+          <div class="{{i.tags}}" role='alert'>
+              {{i}}
+          </div>
+        {%endfor%}
+      {%endif%}  
+ <!-- MENSAGENS --> 
+
+
+
+ <section class="section dashboard">
+    <div class="row">
+       <div class="col-lg-12">
+          <div class="row">
+
+
+            <div class="col-xxl-6 col-md-12" >
+               <div class="card info-card sales-card">
+                  <div class="card-body">
+                     <div class='card-title'>PREVENTIVA <span>|EM ABERTO</span>
+                     </div>
+                     <div class="d-flex align-items-c enter">
+                        <div class="ps-3">
+                           <h6>{{preventiva.ordem}} _____ {{preventiva.data_emissao|date:"d/m/Y"}} </h6>
+
+                        </div>
+                        <div class="d-flex align-items-left justify-content-left"> 
+                         <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
+                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-success btn-md" data-bs-toggle="modal" data-bs-target="#atualizar_preventiva">
+                              Atualizar Preventiva
+                            </button>
+                        </div>
+
+                     </div>
+                  </div>
+               </div>
+            </div>
+      
+            <div class="col-xxl-6 col-md-12 font-weight-bold " style="height:65px; font-size:15px" >
+              <div style='margin-bottom:10px;height:40px'class="">
+                 <div class="card-body">
+                       <div class="d-flex">
+                            <div class="col-1">Número</div>
+                             <div class="col-1">Equip.</div>
+                             <div class="col-1">Período</div>
+                             <div class="col-1">Data Emissão</div>
+                             <div class="col-1">Data Insumo</div>
+                             <div class="col-1">Data Início</div>
+                             <div class="col-1">Data Fim</div>
+                             <div class="col-1">Tempo Serviço</div>
+                             <div class="col-1">Mecanico</div>
+                             <div class="col-2">Horimetro</div>
+
+                       </div>
+                 </div>
+              </div>
+           </div>
+
+             <div class="col-xxl-6 col-md-12" style='margin-bottom:0px'>
+                <div class="card">
+                   <div class="card-body">
+
+                      <div class="d-flex align-items-c enter" style='font-size:15px'>
+                          <div class='col-1 border-right'>OSP{{preventiva.numero}}</div>
+                          <div class='col-1 border-right'>{{preventiva.ordem.equipamento}}</div> 
+                          <div class='col-1 border-right'>{{preventiva.ordem.periodo}}</div>
+                          <div class='col-1 border-right'>{{preventiva.data_emissao|date:"d/m/Y"}}</div>
+                          <div class='col-1 border-right'>{{preventiva.data_insumo|date:"d/m/Y"}}</div>
+                          <div class='col-1 border-right'>{{preventiva.data_inicio|date:"d/m/Y - H:i"}}</div>
+                          <div class='col-1 border-right'>{{preventiva.data_fim|date:"d/m/Y - H:i"}}</div>
+                          <div class='col-1 border-right'>{{preventiva.tempo_servico}}</div>
+                          <div class='col-1 border-right'>{{preventiva.mecanico}}</div>
+                          <div class='col-2 border-right'>{{preventiva.horimetro}}</div>                                              
+                   </div>
+                </div>
+             </div>
+
+
+
+  <!-- MODAL status serviço // colocar o modal dentro do for loop, para que ele funcione em cada item gerado pelo for -->
+  <div class="modal fade" id="atualizar_preventiva" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Atualizar informações</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'preventiva' id=id_Preventiva%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_atualizar_preventiva' value='form_atualizar_preventiva'>
+
+               <input class="form-control" id="disabledInput" type="hidden" placeholder="Disabled input here..." name="id_servico_socorro" value={{servico.id}}>
+
+                <div class="mb-3">
+                  <label style='width:140px' class="form-label">Mecânico:</label>
+                  <select name='mecanico'>
+                      <option value = 'None'>Selecione</option>
+                      {%for executante in mecanicos%} 
+                      <option value={{executante.id}}>{{executante}}</option>
+                      {%endfor%}
+                  </select>
+              </div>
+
+              <div class='mb-3'></div>
+
+                <div class="mb-3">
+                  <label style='width:140px' class="form-label">Insumos separados:</label>
+                  <input style='width:200px' type="date" name="data_insumo"></input>
+                </div>
+
+                <div class="mb-3">
+                  <label style='width:140px' class="form-label">Início serviço:</label>
+                  <input style='width:200px' type="datetime-local" name="data_inicio"></input>
+                </div>
+
+                <div class="mb-3">
+                    <label style='width:140px' class="form-label">Fim serviço:</label>
+                    <input style='width:200px' type="datetime-local" name="data_fim"></input>
+                  </div>
+
+                  <div class="mb-3">
+                      <label  style='width:140px' for='horimetro'>Horimetro:</label>
+                      <input type='text' name='horimetro' placeholder='Horimetro'>
+                    </div>
+
+                <div style="border:solid; margin-top:20px" class="col">
+                    <label style='width:120px' class="form-check-label" for="flexCheckDefault">
+                    <input type="checkbox" name='assinatura_responsavel' id="flexCheckDefault">
+                    Assinatura do responsável
+                  </label>
+                </div>
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+          </div>
+       </div>
+      
+          </div>
+
+          
+          </div>
+       </div>
+    </div>
+ </section>
+
+
+
+ 
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+
+{%endblock%}
