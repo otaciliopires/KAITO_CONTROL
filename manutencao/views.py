@@ -13,7 +13,7 @@ def home_manutencao(request):
 
     if request.method == 'GET':
         list_equip=[]
-        equipamentos_rocha = Equipamentos.objects.filter(proprietario='Construtora Rocha')
+        equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
         obras = Obras.objects.all()
         print("xxxxxxxxxx", obras, equipamentos_rocha)
         for i in equipamentos_rocha:
@@ -67,9 +67,9 @@ def home_manutencao(request):
 
 
         #Tratamento PREVENTIVAS
-        equipamentos_preventiva= Equipamentos.objects.filter(proprietario='Construtora Rocha')
+        equipamentos_preventiva= Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
         preventivas = Preventiva.objects.filter(data_fim=None)
-        print(preventivas[0].ordem)
+
 
 
 
@@ -327,7 +327,7 @@ def servico_oficina(request, id):
 def atualizacao_horarios(request):
 
     # att_tempo_2()
-    print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
+    print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkrtyrghfghgfghfghgf")
     return redirect('/manutencao/home_manutencao/')
 
 
@@ -347,7 +347,7 @@ def solicitacoes(request):
     
         #informaçoes das solicitações:
         solicitacoes = Solicitacao.objects.filter(atendida=False)
-        equipamentos = Equipamentos.objects.filter(proprietario='Construtora Rocha')
+        equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
         compradores = Funcionario.objects.filter(funcao="Comprador")
         status = ('Selecionar','Baixa Prioridade', 'Média Prioridade', 'Alta Prioridade', 'Urgente')
 
@@ -473,7 +473,7 @@ def socorro(request, id):
             servs_socorro = Servico_Socorro.objects.filter(socorro=id,data_fim__isnull=True )
             mecanicos = Funcionario.objects.filter(funcao='MECÂNICO')
             print(servs_socorro)
-            equipamentos = Equipamentos.objects.filter(proprietario='Construtora Rocha')
+            equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
             grupos = Grupo_Servico.objects.all()
             terceirizados = Servico_Terceirizado.objects.all()
             return render(request, 'socorro.html', {'servicos_socorro': servs_socorro,
@@ -622,6 +622,8 @@ def preventiva(request, id):
                 assinatura_responsavel = False
             preventiva_atualizada.assinatura_responsavel = assinatura_responsavel
 
+            preventiva_atualizada.tempo_servico = (data_fim.timestamp() - data_inicio.timestamp())/3600
+            print((data_fim.timestamp() - data_inicio.timestamp())/3600)
 
             print(mecanico_id,data_insumo,data_inicio,data_fim, assinatura_responsavel, horimetro, id, "aaaaaaaaaaaaaaaaaaaaaaaa")
 
