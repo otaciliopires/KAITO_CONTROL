@@ -325,10 +325,44 @@ def servico_oficina(request, id):
             
 
 def atualizacao_horarios(request):
+    now = datetime.now(timezone.utc)
+    
+    if now.hour - 3 < 7 or now.hour - 3 > 17:
+        pass
+    else:
+        os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)
+        for os in os_oficina_abertas:
+            print(os.id, os.equipamento.prefixo)
 
-    # att_tempo_2()
-    print("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk")
-    return redirect('/manutencao/home_manutencao/')
+        # a = Servico_Oficina.objects.all()
+        # for b in a:
+        #     print(b.data_mudanca_status)
+            att_tempo_1_os(os.id, now)
+        print("good game", now.day, type(now.hour),now.timestamp())
+        servicos_oficina_abertos = Servico_Oficina.objects.filter(data_fim=None)
+        for servico_oficina in servicos_oficina_abertos:
+
+            if servico_oficina.status == "Em Serviço":
+                            servico_oficina.tempo_em_servico += (now.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600                 
+                            servico_oficina.tempo_total += (now.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600 
+                            servico_oficina.data_mudanca_status = now
+                            servico_oficina.status = now
+            elif servico_oficina.status == "Aguardando Peças":
+                            servico_oficina.tempo_aguardo_peca += hora_correta(servico_oficina.data_mudanca_status, now)
+                            servico_oficina.tempo_total += hora_correta(servico_oficina.data_mudanca_status, now)
+                            servico_oficina.data_mudanca_status = now
+                            servico_oficina.status = now
+
+            elif servico_oficina.status == 'Aguardando Serviço':
+                            servico_oficina.tempo_aguardo_servico += hora_correta(servico_oficina.data_mudanca_status, now) 
+                            servico_oficina.tempo_total += hora_correta(servico_oficina.data_mudanca_status, now)                     
+                            servico_oficina.data_mudanca_status = now
+                            servico_oficina.status = now
+
+
+
+
+        return redirect('/manutencao/home_manutencao/')
 
 
 
