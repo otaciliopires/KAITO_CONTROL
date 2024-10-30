@@ -434,7 +434,7 @@ def saidas(request):
         total_saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).filter(equipamento__in=filtro_equipamento).filter(obra__in=filtro_obras).aggregate(Sum('litros'))['litros__sum']
 
     else:
-        saidas = Abastecimento.objects.all().order_by('numero')
+        saidas = Abastecimento.objects.all().order_by('-numero')[:100]
     user = request.user
     obra_user=Obras.objects.filter(usuario=user.id)
     print(type(data_fim), data_fim)
