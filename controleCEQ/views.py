@@ -195,15 +195,25 @@ def home(request):
 
         lista_obras = []
         lista_consumo = []
+        lista_entradas = []
+        lista_final = []
 
         
         #criação de gráfico obras no frontend
         for obra in obras:
             consumo_mensal_obras = Abastecimento.objects.filter(data__month=mes).filter(data__year=ano).filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
+            entrada_mensal_obras = Entrada.objects.filter(data_entrega__month=mes).filter(data_entrega__year=ano).filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']
             lista_obras.append(obra.nome)
             if consumo_mensal_obras == None:
                 consumo_mensal_obras = 0
             lista_consumo.append(consumo_mensal_obras)
+
+            if entrada_mensal_obras == None:
+                entrada_mensal_obras = 0
+            lista_entradas.append(entrada_mensal_obras)
+            lista_final.append([consumo_mensal_obras, entrada_mensal_obras])
+
+
         
         list_obras=(lista_obras)
         list_consumo = json.dumps(lista_consumo)
@@ -223,6 +233,17 @@ def home(request):
         dict_equip = dict(zip(list_equip,saidas_equip))
         sort_dict = dict(sorted(dict_equip.items(), key=itemgetter(1), reverse=True))
         sort_d = dict(list(sort_dict.items())[:5])
+        print(dict_equip)
+
+        #DATA ATUAL
+        data_ultimo_abastecimento = Abastecimento.objects.aggregate(ultima_data=Max('data'))['ultima_data']
+
+        # TABELA ENTRADAS E SAÍDAS OBRAS
+        sort_obras = dict(zip(lista_obras,lista_final))
+        # sort_dict_obras = dict(sorted(sort_obras.items(), key=itemgetter(1), reverse=True))
+        print(sort_obras)
+        
+
 
 
         return render(request, 'home.html', {'tanques':tanques, 
@@ -243,7 +264,9 @@ def home(request):
                                              'saidas':saidas,
                                              'list_obras':list_obras,
                                              'list_consumo':list_consumo,
-                                             'sort_dict':sort_d,})
+                                             'sort_dict':sort_d,
+                                             'data_ultimo_abastecimento':data_ultimo_abastecimento,
+                                             'sort_obras':sort_obras})
     
     if request.method == 'POST':
 

@@ -63,7 +63,7 @@
               <div class="col-xxl-4 col-xl-12">
                  <div class="card info-card customers-card">
                     <div class="card-body">
-                       <h5 class="card-title" style='font-size:30px'>Estoque de Diesel <span>| Atual</span></h5>
+                       <h5 class="card-title" style='font-size:30px'>Estoque de Diesel |<span style='font-size:16px'> Atualizado {{data_ultimo_abastecimento}}</span></h5>
                        <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-database"></i></div>
                           <div class="ps-3">
@@ -286,9 +286,48 @@
                     });
                     </script>
               </div>
+              
            </div>
+           
         </div>
+        
      </div>
+     <div class="col-lg-8">
+      <div class="card">
+
+         <div class="card-body">
+            <h5 class="card-title" style='font-size:25px'>Entradas e Saídas Obras - {{mes_atual}}</h5>
+            <div class="activity">
+
+
+             <table class="table table-striped table-bordered">
+               <thead style="font-size:10px" >
+                 <tr>
+                   <th scope='col'>Obra</th>
+                   <th scope="col">Saídas</th>
+                   <th scope="col">Entradas</th>
+
+                   
+                 </tr>
+               </thead>
+
+               <tbody style="font-size:10px" >
+               {%for key, value in sort_obras.items%}    
+                 <tr>
+                   <th scope="row">{{key}}</th>
+                   <td style='font-size:12px; font-weight:bold'>{{value.0|floatformat:"2g"}}</td>
+                   <td style='font-size:12px; font-weight:bold'>{{value.1|floatformat:"2g"}}</td>
+
+                 {%endfor%}
+                  </tbody>
+             </table>
+               
+            </div>
+         </div>
+      </div>
+
+
+     
   </section>
 </main>
 <footer id="footer" class="footer">
