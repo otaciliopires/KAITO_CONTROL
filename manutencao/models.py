@@ -69,15 +69,7 @@ class Servico_Oficina(models.Model):
 
     def __str__(self):
         return self.grupo_servico.grupo
-    
-class Registro_Tempo_Servico(models.Model):
-    servico_oficina = models.ForeignKey(Servico_Oficina, on_delete=models.DO_NOTHING)
-    funcionario = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING)
-    tercerizado = models.ForeignKey(Servico_Terceirizado, on_delete=models.DO_NOTHING)
-    tempo_servico = models.FloatField(null=True, blank=True)
-    
-    def __str__(self):
-        return self.servico_oficina
+
 
 class Solicitacao(models.Model):
     insumo = models.CharField(max_length=200)
@@ -131,7 +123,7 @@ class Servico_Preventiva(models.Model):
 
 class Ordem_Preventiva(models.Model):
     periodo = models.IntegerField()
-    servicos = models.ManyToManyField(Servico_Preventiva, null=True, blank=True)
+    servicos = models.ManyToManyField(Servico_Preventiva)
     equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING )
     
     def __str__(self):
@@ -155,7 +147,18 @@ class Preventiva(models.Model):
 
 
 
-
+class Registro_Tempo_Servico(models.Model):
+    servico_oficina = models.ForeignKey(Servico_Oficina, on_delete=models.DO_NOTHING, blank=True, null=True)
+    servico_socorro = models.ForeignKey(Servico_Socorro, on_delete=models.DO_NOTHING, blank=True, null=True)
+    servico_preventiva = models.ForeignKey(Servico_Preventiva, on_delete=models.DO_NOTHING, blank=True, null=True)
+    funcionario = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING)
+    tercerizado = models.ForeignKey(Servico_Terceirizado, on_delete=models.DO_NOTHING)
+    data_inicial = models.DateTimeField(null=True, blank=True)
+    data_final = models.DateTimeField(null=True, blank=True)
+    tempo_servico = models.FloatField(null=True, blank=True)
+    
+    def __str__(self):
+        return self.servico_oficina
 
     
 

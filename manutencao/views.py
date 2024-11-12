@@ -664,7 +664,12 @@ def preventiva(request, id):
             preventiva_atualizada.save()
 
             return redirect(f'/manutencao/preventiva/{id}/')
-        
 
+def analise_mecanicos(request):
+    nome_mecanico = 'GERÔNIMO'
+    mecanico_id = Funcionario.objects.get(nome=nome_mecanico).id
+    servicos_mecanico = Servico_Oficina.objects.filter(executante_funcionario=mecanico_id)
+    print(servicos_mecanico)
 
+    return render(request, 'analise_mecanicos.html')
 
