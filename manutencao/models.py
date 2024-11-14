@@ -151,14 +151,14 @@ class Registro_Tempo_Servico(models.Model):
     servico_oficina = models.ForeignKey(Servico_Oficina, on_delete=models.DO_NOTHING, blank=True, null=True)
     servico_socorro = models.ForeignKey(Servico_Socorro, on_delete=models.DO_NOTHING, blank=True, null=True)
     servico_preventiva = models.ForeignKey(Servico_Preventiva, on_delete=models.DO_NOTHING, blank=True, null=True)
-    funcionario = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING)
-    tercerizado = models.ForeignKey(Servico_Terceirizado, on_delete=models.DO_NOTHING)
+    funcionario = models.ForeignKey(Funcionario, on_delete=models.DO_NOTHING, null=True, blank=True)
+    tercerizado = models.ForeignKey(Servico_Terceirizado, on_delete=models.DO_NOTHING, null=True, blank=True)
     data_inicial = models.DateTimeField(null=True, blank=True)
     data_final = models.DateTimeField(null=True, blank=True)
     tempo_servico = models.FloatField(null=True, blank=True)
     
     def __str__(self):
-        return self.servico_oficina
+        return self.funcionario.nome
 
     
 

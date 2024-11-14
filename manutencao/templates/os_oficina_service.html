@@ -135,7 +135,7 @@
   <hr>
 
   <!-- Select para Executante -->
-  <div id="executanteContainer" style="display:none;"> <!-- Inicialmente oculto -->
+  <div id="executanteContainer{{servico.id}}" style="display:none;"> <!-- Inicialmente oculto -->
       {% if servico.executante == 'Funcionario' or servico.executante == "funcionario" %}
           <div class="mb-3">
               <label class="form-label">Executante:</label>
@@ -186,7 +186,7 @@
       const radioAguardandoServico = document.getElementById('radioAguardandoServico');
       const radioAguardandoPecas = document.getElementById('radioAguardandoPecas');
       const radioEmServico = document.getElementById('radioEmServico');
-      const executanteContainer = document.getElementById('executanteContainer');
+      const executanteContainer = document.getElementById('executanteContainer'+{{servico.id}});
 
       function toggleExecutante() {
           if (radioEmServico.checked) {

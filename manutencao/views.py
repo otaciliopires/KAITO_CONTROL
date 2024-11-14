@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva
+from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva, Registro_Tempo_Servico
 from .models import Equipamentos, Obras
 from django.db.models import Max
 from datetime import datetime, timezone
@@ -18,6 +18,7 @@ def home_manutencao(request):
         print("xxxxxxxxxx", obras, equipamentos_rocha)
         for i in equipamentos_rocha:
             list_equip.append(i)
+        print(list_equip)
         
         
         #TRATAMENTO  OS CORRETIVAS
@@ -233,6 +234,14 @@ def servico_oficina(request, id):
             servico_oficina.save()
             print(type(data_inicio), data_inicio)
 
+            #Criação de objeto registro de mecanico - tempo serviço
+            registro_tempo_servico = Registro_Tempo_Servico(servico_oficina=servico_oficina,
+                                                                    funcionario= funcionario,
+                                                                    tercerizado = terceiro,
+                                                                    data_inicial = data_inicio,
+                                                                    )
+            registro_tempo_servico.save()
+
             return redirect(f"/manutencao/osoficina/{ordem_oficina_aberta.id}")
 
 
@@ -275,11 +284,26 @@ def servico_oficina(request, id):
             servico_oficina.executante_terceiro = executante_terceiro
             # servico_oficina.status = status_servico
 
+            #FECHAR OBJETO DE REGISTRO DE TEMPO DO MECANICO - UTILIZAR SERVICO OFICINA.
+            registro_tempo_servico = Registro_Tempo_Servico.objects.get(servico_oficina=servico_oficina.id, data_final=None)
+            registro_tempo_servico.data_final = data_status
+            registro_tempo_servico.tempo_servico = (data_status.timestamp() - registro_tempo_servico.data_inicial.timestamp())/3600
+            registro_tempo_servico.save()
+
+
             if servico_oficina.status == "Em Serviço":
                     servico_oficina.tempo_em_servico += (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600                 
                     servico_oficina.tempo_total += (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600 
                     servico_oficina.data_mudanca_status = data_status
                     servico_oficina.status = status_servico
+                    #CRIAR OBJETO DE REGISTRO DE TEMPO DO MECANICO
+                    registro_tempo_servico = Registro_Tempo_Servico(servico_oficina=servico_oficina,
+                                                                    funcionario=executante_funcionario,
+                                                                    tercerizado = executante_terceiro,
+                                                                    data_inicial = data_status,
+                                                                    )
+                    registro_tempo_servico.save()
+
             elif servico_oficina.status == "Aguardando Peças":
                     servico_oficina.tempo_aguardo_peca += hora_correta(servico_oficina.data_mudanca_status, data_status)
                     servico_oficina.tempo_total += hora_correta(servico_oficina.data_mudanca_status, data_status)
