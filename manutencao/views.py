@@ -5,6 +5,7 @@ from .models import Equipamentos, Obras
 from django.db.models import Max
 from datetime import datetime, timezone
 from manutencao.utils import now, att_tempo_2, att_tempo_1_os, att_tempo_1_servico, hora_correta
+from django.db.models import Sum, Max
 
 # Create your views here.
 
@@ -690,10 +691,22 @@ def preventiva(request, id):
             return redirect(f'/manutencao/preventiva/{id}/')
 
 def analise_mecanicos(request):
+
+    mecanicos = Funcionario.objects.filter(funcao="MECANICO")
     nome_mecanico = 'GERÔNIMO'
     mecanico_id = Funcionario.objects.get(nome=nome_mecanico).id
     servicos_mecanico = Servico_Oficina.objects.filter(executante_funcionario=mecanico_id)
-    print(servicos_mecanico)
-
-    return render(request, 'analise_mecanicos.html')
+    tempos_mecanicos = []
+    qtd_servicos = []
+    for mecanico in mecanicos:
+        registros_servicos = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id)
+        tempos_mecanicos.append(registros_servicos.aggregate(Sum('tempo_servico'))['tempo_servico__sum'])
+        qtd_servicos.append(registros_servicos.count())
+        for servico_r in registros_servicos:
+            servicos = Servico_Oficina.objects.get(id = servico_r.servico_oficina.id)
+            print(servicos)
+    print(registros_servicos)
+    print(qtd_servicos)
+    print(tempos_mecanicos)        
+    return render(request, 'analise_mecanicos.html', {'mecanicos': mecanicos})
 

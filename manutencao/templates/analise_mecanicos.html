@@ -30,26 +30,71 @@
        <div class="col-lg-12">
           <div class="row">
 
+           
+   {% for ordem_aberta, num_abertas, num_finalizadas, status_serv, serv_a, serv_f in dados_zip %}
+   <div class="col-xxl-6 col-md-12 ">
+       <div style='margin-bottom:10px' class="card info-card sales-card  border border-primary">
+           <div class="card-body">
+               <div class="d-flex align-items-center">
 
-            <div class="col-xxl-6 col-md-12" >
-               <div class="card info-card sales-card">
-                  <div class="card-body">
-                     <div class='card-title'>SOCORRO OFICINA <span>|EM ABERTO</span>
-                     </div>
-                    
-
-                     </div>
-                  </div>
+                       <div class="col-1 border-right">{{ ordem_aberta.equipamento }}</div>
+                       <div class="col-2 border-right">{{ ordem_aberta.data_inicio|date:"d/m/Y - H:i"  }}</div>
+                       <div class="col-1 border-right">{{ num_finalizadas }}</div>
+                       <div class="col-1 border-right">{{ num_abertas }}</div>
+                       <div class="col-2 border-right"> {{ status_serv }}</div>
+                       <div class="col-1 border-right">{{ordem_aberta.tempo_em_servico|floatformat:"2g"}}</div>
+                       <div class="col-1 border-right">{{ordem_aberta.tempo_aguardo_peca|floatformat:"2g"}}</div>
+                       <div class="col-1 border-right">{{ordem_aberta.tempo_aguardo_servico|floatformat:"2g"}}</div>
+                       <div class="col-1 border-right">{{ordem_aberta.tempo_total|floatformat:"2g"}}</div>
+                       <div class="col-1 border-right">
+                           <a href="/manutencao/osoficina/{{ ordem_aberta.id }}/">OSF{{ ordem_aberta.numero }}</a>
+                       </div>
                </div>
-            </div>
-      
-            <div class="col-xxl-6 col-md-12 font-weight-bold " style="height:65px; font-size:15px" >
-              <div style='margin-bottom:10px;height:40px'class="">
-                 <div class="card-body">
-                 </div>
-              </div>
            </div>
+           <!-- Accordion colocado após o card-body -->
+           <div class="accordion" id="accordionExample">
+               <div class="accordion-item">
+                   <h2 class="accordion-header">
+                       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ ordem_aberta.id }}" aria-expanded="true" aria-controls="collapse{{ ordem_aberta.id }}">
+                           Serviços
+                       </button>
+                   </h2>
+                   <div id="collapse{{ ordem_aberta.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
 
+                     <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
+                       <div style='margin-bottom:10px;height:40px'class="">
+                          <div class="card-body">
+                                <div class="d-flex">
+                    
+                                      <div class="col-2">Data Início</div>
+                                      <div class="col-2">Grupo Serviço</div>
+                                      <div class="col-2">Status</div>
+                                      <div class="col-6">Descrição do Serviço</div>
+                                </div>
+                          </div>
+                       </div>
+                    </div>
+                       <div class="accordion-body">
+                           {%for serv in serv_a%}
+                           <div class="col-xxl-6 col-md-12 border-bottom border-dark">
+
+                             <div class="row align-items-start">
+                             <div class="col-2">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
+                             <div class="col-2">{{ serv.grupo_servico }}</div>
+                             <div class="col-2">{{ serv.status }}</div>
+                             <div class="col-6">{{ serv.descricao }}</div>
+
+                          </div>
+                       </div>
+
+                           {%endfor%}
+                       </div>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+{% endfor %}
         
 
 
