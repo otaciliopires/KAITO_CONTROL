@@ -2,6 +2,7 @@ venv
 #Django
 
 media/
+manutencao/migrations
 
 
 # Byte-compiled / optimized / DLL files

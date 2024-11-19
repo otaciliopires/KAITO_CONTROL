@@ -26,63 +26,99 @@
 
 
 <section class="section dashboard">
+
+
+
     <div class="row">
+        <div class='col-5'>
+            <h1 style="font-size:50px">Mecânicos</h1>
+        </div>
+        <div class='col-7'>
+            <form method='POST' action="{%url 'analise_mecanicos'%}">{% csrf_token %}
+                <input type='hidden' name='form_osoficina' value='form_osoficina'>
+            
+                 <div class="mb-3">
+                     <label style='width:80px' class="form-label">Data Início:</label>
+                     <input style='width:110px' type="date" name="data_inicio"></input>
+    
+                    <label style='width:80px' class="form-label">Data Fim:</label>
+                    <input style='width:110px' type="date" name="data_fim"></input>
+
+                    <input type="submit" class="btn btn-primary"></input>
+                  </div>  
+              </form>
+          </div>
+
+
+        </div>
        <div class="col-lg-12">
           <div class="row">
 
+            <div class="col-xxl-6 col-md-12 font-weight-bold " style="font-size:13px" >
+                <div style='margin-bottom:10px;height:80px'class="">
+                   <div class="card-body">
+                         <div class="d-flex text-center">
+ 
+                               <div class="col-2 border-right">Mecânico</div>
+                               <div class="col-1 border-right">Qtd. Serviços</div>
+                               <div class="col-2 border-right">Duração Serviço</div>
+                               <div class="col-1 border-right">Qtd. Viagens</div>
+                               <div class="col-2 border-right">% tempo em serviço</div>
+                         </div>
+                   </div>
+                </div>
+             </div>
+            
+
            
-   {% for ordem_aberta, num_abertas, num_finalizadas, status_serv, serv_a, serv_f in dados_zip %}
+   {% for mecanicos, servicos_mecanico, quantidade_servicos, tempo_servicos in doc_zip %}
    <div class="col-xxl-6 col-md-12 ">
        <div style='margin-bottom:10px' class="card info-card sales-card  border border-primary">
            <div class="card-body">
-               <div class="d-flex align-items-center">
+               <div class="d-flex align-items-center text-center">
 
-                       <div class="col-1 border-right">{{ ordem_aberta.equipamento }}</div>
-                       <div class="col-2 border-right">{{ ordem_aberta.data_inicio|date:"d/m/Y - H:i"  }}</div>
-                       <div class="col-1 border-right">{{ num_finalizadas }}</div>
-                       <div class="col-1 border-right">{{ num_abertas }}</div>
-                       <div class="col-2 border-right"> {{ status_serv }}</div>
-                       <div class="col-1 border-right">{{ordem_aberta.tempo_em_servico|floatformat:"2g"}}</div>
-                       <div class="col-1 border-right">{{ordem_aberta.tempo_aguardo_peca|floatformat:"2g"}}</div>
-                       <div class="col-1 border-right">{{ordem_aberta.tempo_aguardo_servico|floatformat:"2g"}}</div>
-                       <div class="col-1 border-right">{{ordem_aberta.tempo_total|floatformat:"2g"}}</div>
-                       <div class="col-1 border-right">
-                           <a href="/manutencao/osoficina/{{ ordem_aberta.id }}/">OSF{{ ordem_aberta.numero }}</a>
-                       </div>
+                       <div class="col-2 border-right font-weight-bold">{{mecanicos}}</div>
+                       <div class="col-1 border-right">{{quantidade_servicos}}</div>
+                       <div class="col-2 border-right">{{tempo_servicos|floatformat:"1g"}} horas</div>
+                       <div class="col-1 border-right">qtd. viagens</div>
+                       <div class="col-1 border-right">qtd. viagens</div>
                </div>
            </div>
            <!-- Accordion colocado após o card-body -->
            <div class="accordion" id="accordionExample">
                <div class="accordion-item">
                    <h2 class="accordion-header">
-                       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ ordem_aberta.id }}" aria-expanded="true" aria-controls="collapse{{ ordem_aberta.id }}">
+                       <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ mecanicos.id }}" aria-expanded="true" aria-controls="collapse{{ mecanicos.id }}">
                            Serviços
                        </button>
                    </h2>
-                   <div id="collapse{{ ordem_aberta.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                   <div id="collapse{{ mecanicos.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
 
                      <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
                        <div style='margin-bottom:10px;height:40px'class="">
                           <div class="card-body">
-                                <div class="d-flex">
+                                <div class="d-flex text-center">
                     
-                                      <div class="col-2">Data Início</div>
+                                      <div class="col-3">Data Início</div>
+                                      <div class="col-3">Data Fim</div>
                                       <div class="col-2">Grupo Serviço</div>
-                                      <div class="col-2">Status</div>
-                                      <div class="col-6">Descrição do Serviço</div>
+                                      <div class="col-2">Duração Serviço</div>
+                                      <div class="col-2">Descrição do Serviço</div>
                                 </div>
+                                <div class="col-xxl-6 col-md-12 border-bottom border-dark"> </div>
                           </div>
                        </div>
                     </div>
-                       <div class="accordion-body">
-                           {%for serv in serv_a%}
+                       <div class=" accordion-body">
+                           {%for registro in servicos_mecanico%}
                            <div class="col-xxl-6 col-md-12 border-bottom border-dark">
 
-                             <div class="row align-items-start">
-                             <div class="col-2">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
-                             <div class="col-2">{{ serv.grupo_servico }}</div>
-                             <div class="col-2">{{ serv.status }}</div>
-                             <div class="col-6">{{ serv.descricao }}</div>
+                             <div class="row align-items-start text-center">
+                             <div class="col-3">{{ registro.data_inicial|date:"d/m/Y - H:i" }}</div>
+                             <div class="col-3">{{ registro.data_final|date:"d/m/Y - H:i" }}</div>
+                             <div class="col-2">{{ registro.servico_oficina }}</div>
+                             <div class="col-2">{{ registro.tempo_servico|floatformat:"1g" }}</div>
+                             <div class="col-2">{{ registro.descricao }}</div>
 
                           </div>
                        </div>

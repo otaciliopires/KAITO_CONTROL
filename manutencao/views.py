@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva, Registro_Tempo_Servico
 from .models import Equipamentos, Obras
 from django.db.models import Max
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date, timedelta
 from manutencao.utils import now, att_tempo_2, att_tempo_1_os, att_tempo_1_servico, hora_correta
 from django.db.models import Sum, Max
 
@@ -240,6 +240,7 @@ def servico_oficina(request, id):
                                                                     funcionario= funcionario,
                                                                     tercerizado = terceiro,
                                                                     data_inicial = data_inicio,
+                                                                    descricao = descricao_servico
                                                                     )
             registro_tempo_servico.save()
 
@@ -302,6 +303,7 @@ def servico_oficina(request, id):
                                                                     funcionario=executante_funcionario,
                                                                     tercerizado = executante_terceiro,
                                                                     data_inicial = data_status,
+                                                                    descricao = request.POST.get('descricao')
                                                                     )
                     registro_tempo_servico.save()
 
@@ -691,22 +693,57 @@ def preventiva(request, id):
             return redirect(f'/manutencao/preventiva/{id}/')
 
 def analise_mecanicos(request):
+    #AQUISIÇÃO DAS DATAS NO FORM
+    if request.method == 'GET':
+        data_fim = date.today()
+        data_inicio = data_fim - timedelta(days=7)
+    elif request.method == 'POST':
+        data_inicio = request.POST.get('data_inicio')
+        if data_inicio == "":
+            data_inicio = date.today()
+        else:
+            data_inicio = datetime.strptime(data_inicio, "%Y-%m-%d").date()
 
+        data_fim = request.POST.get('data_fim')
+        if data_fim == "":
+            data_fim = date.today()
+        else:
+
+            data_fim = datetime.strptime(data_fim, "%Y-%m-%d").date()
+    periodo_dias = round((data_fim - data_inicio).total_seconds()/(2.66666666667*3600)) + 9
+    print(periodo_dias)
+
+    dias_semanais = 0
+    for i in range((data_fim - data_inicio).days + 1):
+        data_atual = data_inicio + timedelta(days=i)
+        if data_atual.weekday() == 5 or data_atual.weekday() == 6:
+            pass
+        else:
+            dias_semanais += 1
+    horas_disponíveis = dias_semanais*9
+
+    #AQUISIÇÃO DE DADOS FROM THE MODEL REGISTRO_SERVICOS, FUNCIONARIO
     mecanicos = Funcionario.objects.filter(funcao="MECANICO")
     nome_mecanico = 'GERÔNIMO'
     mecanico_id = Funcionario.objects.get(nome=nome_mecanico).id
     servicos_mecanico = Servico_Oficina.objects.filter(executante_funcionario=mecanico_id)
     tempos_mecanicos = []
     qtd_servicos = []
+    servicos_mecanico = []
+    porcent_servico = []
     for mecanico in mecanicos:
         registros_servicos = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id)
         tempos_mecanicos.append(registros_servicos.aggregate(Sum('tempo_servico'))['tempo_servico__sum'])
         qtd_servicos.append(registros_servicos.count())
+        servicos_mecanico.append(registros_servicos)
         for servico_r in registros_servicos:
             servicos = Servico_Oficina.objects.get(id = servico_r.servico_oficina.id)
-            print(servicos)
-    print(registros_servicos)
+    print(servicos_mecanico)
     print(qtd_servicos)
-    print(tempos_mecanicos)        
-    return render(request, 'analise_mecanicos.html', {'mecanicos': mecanicos})
+    print(tempos_mecanicos)
+    print(data_fim, data_inicio)
+
+    #AGREGANDO LISTAS PARA O FOR DO HTML
+    doc_zip = zip(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos)     
+    return render(request, 'analise_mecanicos.html', {'doc_zip': doc_zip})
 

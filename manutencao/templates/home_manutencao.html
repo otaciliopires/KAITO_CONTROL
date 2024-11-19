@@ -102,7 +102,7 @@
             <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
                <div style='margin-bottom:10px;height:80px'class="">
                   <div class="card-body">
-                        <div class="d-flex">
+                        <div class="d-flex text-center">
 
                               <div class="col-1 border-right">Equip.</div>
                               <div class="col-2 border-right">Data inicio</div>
@@ -125,9 +125,9 @@
     <div class="col-xxl-6 col-md-12 ">
         <div style='margin-bottom:10px' class="card info-card sales-card  border border-primary">
             <div class="card-body">
-                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center text-center">
 
-                        <div class="col-1 border-right">{{ ordem_aberta.equipamento }}</div>
+                        <div class="col-1 border-right font-weight-bold">{{ ordem_aberta.equipamento }}</div>
                         <div class="col-2 border-right">{{ ordem_aberta.data_inicio|date:"d/m/Y - H:i"  }}</div>
                         <div class="col-1 border-right">{{ num_finalizadas }}</div>
                         <div class="col-1 border-right">{{ num_abertas }}</div>
@@ -154,7 +154,7 @@
                       <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
                         <div style='margin-bottom:10px;height:40px'class="">
                            <div class="card-body">
-                                 <div class="d-flex">
+                                 <div class="d-flex text-center">
                      
                                        <div class="col-2">Data Início</div>
                                        <div class="col-2">Grupo Serviço</div>
@@ -168,7 +168,7 @@
                             {%for serv in serv_a%}
                             <div class="col-xxl-6 col-md-12 border-bottom border-dark">
 
-                              <div class="row align-items-start">
+                              <div class="row align-items-start text-center">
                               <div class="col-2">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
                               <div class="col-2">{{ serv.grupo_servico }}</div>
                               <div class="col-2">{{ serv.status }}</div>
@@ -195,13 +195,13 @@
 <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
    <div style='margin-bottom:10px;height:40px'class="">
       <div class="card-body">
-            <div class="d-flex">
+            <div class="d-flex text-center">
 
                   <div class="col-2">Obra</div>
                   <div class="col-2">data saída</div>
                   <div class="col-2">Qtd. serviços</div>
                   <div class="col-2">Equipamentos</div>
-                  <div class="col-2">
+                  <div class="col-1">
                         Link OS
                   </div>
             </div>

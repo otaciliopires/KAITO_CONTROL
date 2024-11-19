@@ -156,6 +156,7 @@ class Registro_Tempo_Servico(models.Model):
     data_inicial = models.DateTimeField(null=True, blank=True)
     data_final = models.DateTimeField(null=True, blank=True)
     tempo_servico = models.FloatField(null=True, blank=True)
+    descricao = models.CharField(max_length=500, default="")
     
     def __str__(self):
         return self.funcionario.nome
