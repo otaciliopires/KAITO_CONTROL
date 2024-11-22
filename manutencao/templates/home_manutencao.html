@@ -166,7 +166,8 @@
                      </div>
                         <div class="accordion-body">
                             {%for serv in serv_a%}
-                            <div class="col-xxl-6 col-md-12 border-bottom border-dark">
+                        <div style="margin-bottom:15px; background-color:#ADD8E6" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
+
 
                               <div class="row align-items-start text-center">
                               <div class="col-2">{{ serv.data_inicio|date:"d/m/Y - H:i" }}</div>
@@ -250,7 +251,8 @@
          </div>
             <div class="accordion-body">
                 {%for serv in list_servicos_socorro%}
-                <div class="col-xxl-6 col-md-12 border-bottom border-dark">
+                <div style="margin-bottom:15px; background-color:#FFFF80" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
+
 
                   <div class="row align-items-start">
                   <div class="col-2">{{ serv.equipamento}}</div>

@@ -99,24 +99,45 @@
                           <div class="card-body">
                                 <div class="d-flex text-center">
                     
-                                      <div class="col-3">Data Início</div>
-                                      <div class="col-3">Data Fim</div>
+                                      <div class="col-2">Data Início</div>
+                                      <div class="col-2">Data Fim</div>
+                                      <div class="col-2">Equipamento</div>
                                       <div class="col-2">Grupo Serviço</div>
                                       <div class="col-2">Duração Serviço</div>
                                       <div class="col-2">Descrição do Serviço</div>
                                 </div>
-                                <div class="col-xxl-6 col-md-12 border-bottom border-dark"> </div>
+                                <div class="col-xxl-6 col-md-12 border-dark"> </div>
                           </div>
                        </div>
                     </div>
                        <div class=" accordion-body">
                            {%for registro in servicos_mecanico%}
-                           <div class="col-xxl-6 col-md-12 border-bottom border-dark">
+                           {%if registro.servico_oficina%}
+                           <div style="margin-bottom:15px; background-color:#ADD8E6" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
+                           {%elif registro.servico_socorro%}
+                            <div style="margin-bottom:15px; background-color:#FFFF80" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
+                            {%elif registro.servico_preventiva%}
+                            <div style="margin-bottom:15px; background-color:#80FF80" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
+                            {%endif%}
+
+
 
                              <div class="row align-items-start text-center">
-                             <div class="col-3">{{ registro.data_inicial|date:"d/m/Y - H:i" }}</div>
-                             <div class="col-3">{{ registro.data_final|date:"d/m/Y - H:i" }}</div>
-                             <div class="col-2">{{ registro.servico_oficina }}</div>
+                             <div class="col-2">{{ registro.data_inicial|date:"d/m/Y - H:i" }}</div>
+                             <div class="col-2">{{ registro.data_final|date:"d/m/Y - H:i" }}</div>
+                             <div class="col-2">{% if registro.servico_oficina != None %} {{ registro.servico_oficina.ordem_servico.equipamento }}
+                                {% elif registro.servico_socorro != None %} {{registro.servico_socorro.equipamento}} 
+                                {% elif registro.servico_preventiva != None%}{{registro.servico_preventiva.ordem.equipamento}}
+                                {%else%} teste
+                                {%endif%}
+
+                             </div>
+                             <div class="col-2">{% if registro.servico_oficina != None %} {{ registro.servico_oficina }}
+                                                {% elif registro.servico_socorro != None %} {{registro.servico_socorro.grupo_servico}} 
+                                                {% elif registro.servico_preventiva != None%} PREVENTIVA {{registro.servico_preventiva.ordem.periodo}}
+                                                {%else%} teste
+                                                {%endif%}
+                             </div>
                              <div class="col-2">{{ registro.tempo_servico|floatformat:"1g" }}</div>
                              <div class="col-2">{{ registro.descricao }}</div>
 

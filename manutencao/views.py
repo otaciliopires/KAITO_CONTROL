@@ -119,7 +119,7 @@ def home_manutencao(request):
     
         if form_socorro:
             obra_id = request.POST.get('obra')
-            obra = Obras.objects.get(id=obra_id)
+            obra = Obras.objects.get(id=obra_id) 
             data_saida = request.POST.get('data_saida')
             if Socorro.objects.aggregate(Max('numero'))['numero__max'] == None:
                 numero = 0
@@ -532,7 +532,7 @@ def socorro(request, id):
         if Socorro.objects.all().exists():
             socorro = Socorro.objects.get(id=id)
             servs_socorro = Servico_Socorro.objects.filter(socorro=id,data_fim__isnull=True )
-            mecanicos = Funcionario.objects.filter(funcao='MECÂNICO')
+            mecanicos = Funcionario.objects.filter(funcao='MECANICO')
             print(servs_socorro)
             equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
             grupos = Grupo_Servico.objects.all()
@@ -613,6 +613,16 @@ def socorro(request, id):
                 resultado_servico = False
             servico_socorro.resultado_servico = resultado_servico
 
+            ##Criação de objeto registro de mecanico - tempo serviço
+
+            registro_servico = Registro_Tempo_Servico(servico_socorro=servico_socorro,
+                                                      funcionario=mecanico,
+                                                      data_inicial=data_inicio,
+                                                      data_final=data_fim,
+                                                      tempo_servico=tempo_servico,
+                                                      descricao=descricao)
+            registro_servico.save()
+
 
 
             servico_socorro.save()
@@ -620,9 +630,11 @@ def socorro(request, id):
         
         elif form_fim_socorro:
             socorro = Socorro.objects.get(id=id)
+            data_saida = datetime.strptime(socorro.data_saida, "%Y-%m-%dT%H:%M")
             data_chegada = request.POST.get('data_chegada')
             data_chegada = datetime.strptime(data_chegada, "%Y-%m-%dT%H:%M")  
-            socorro.data_chegada = data_chegada 
+            socorro.data_chegada = data_chegada
+            socorro.tempo_socorro = (data_chegada - data_saida)/3600
             socorro.save()
 
             return redirect('/manutencao/home_manutencao/')
@@ -631,7 +643,7 @@ def preventiva(request, id):
 
     if request.method == 'GET':
         preventiva = Preventiva.objects.get(id=id)
-        mecanicos = Funcionario.objects.filter(funcao='MECÂNICO')
+        mecanicos = Funcionario.objects.filter(funcao='MECANICO')
 
         return render(request, 'preventiva.html', {'preventiva':preventiva,
                                                    'mecanicos':mecanicos,
@@ -682,13 +694,26 @@ def preventiva(request, id):
             else:
                 assinatura_responsavel = False
             preventiva_atualizada.assinatura_responsavel = assinatura_responsavel
-
-            preventiva_atualizada.tempo_servico = (data_fim.timestamp() - data_inicio.timestamp())/3600
+            tempo_servico = (data_fim.timestamp() - data_inicio.timestamp())/3600
+            preventiva_atualizada.tempo_servico = tempo_servico
             print((data_fim.timestamp() - data_inicio.timestamp())/3600)
 
             print(mecanico_id,data_insumo,data_inicio,data_fim, assinatura_responsavel, horimetro, id, "aaaaaaaaaaaaaaaaaaaaaaaa")
 
             preventiva_atualizada.save()
+
+
+            ##Criação de objeto registro de mecanico - tempo serviço
+
+            registro_servico = Registro_Tempo_Servico(servico_preventiva = preventiva_atualizada,
+                                                      funcionario=mecanico,
+                                                      data_inicial=data_inicio,
+                                                      data_final=data_fim,
+                                                      tempo_servico=tempo_servico,
+                                                      descricao = "Preventiva realizada")
+            registro_servico.save()
+
+            
 
             return redirect(f'/manutencao/preventiva/{id}/')
 
@@ -732,12 +757,11 @@ def analise_mecanicos(request):
     servicos_mecanico = []
     porcent_servico = []
     for mecanico in mecanicos:
-        registros_servicos = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id)
+        registros_servicos = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id).filter(data_inicial__date__gte=data_inicio).filter(data_final__date__lte=data_fim)
         tempos_mecanicos.append(registros_servicos.aggregate(Sum('tempo_servico'))['tempo_servico__sum'])
         qtd_servicos.append(registros_servicos.count())
         servicos_mecanico.append(registros_servicos)
-        for servico_r in registros_servicos:
-            servicos = Servico_Oficina.objects.get(id = servico_r.servico_oficina.id)
+
     print(servicos_mecanico)
     print(qtd_servicos)
     print(tempos_mecanicos)
