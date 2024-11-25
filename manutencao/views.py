@@ -576,9 +576,13 @@ def socorro(request, id):
                                               numero=numero+1)
             
             servico_socorro.save()
+
+            socorro.mecanicos.add(mecanico)
+            socorro.save()
             return redirect(f'/manutencao/socorro/{id}/')
 
         elif form_servico_socorro:
+            socorro = Socorro.objects.get(id=id)
             id_servico_socorro = request.POST.get('id_servico_socorro')
             servico_socorro = Servico_Socorro.objects.get(id=id_servico_socorro)
             mecanico_id = request.POST.get('mecanico')
@@ -613,6 +617,8 @@ def socorro(request, id):
                 resultado_servico = False
             servico_socorro.resultado_servico = resultado_servico
 
+            socorro.mecanicos.add(mecanico)
+
             ##Criação de objeto registro de mecanico - tempo serviço
 
             registro_servico = Registro_Tempo_Servico(servico_socorro=servico_socorro,
@@ -630,11 +636,12 @@ def socorro(request, id):
         
         elif form_fim_socorro:
             socorro = Socorro.objects.get(id=id)
-            data_saida = datetime.strptime(socorro.data_saida, "%Y-%m-%dT%H:%M")
+            data_saida = socorro.data_saida
             data_chegada = request.POST.get('data_chegada')
-            data_chegada = datetime.strptime(data_chegada, "%Y-%m-%dT%H:%M")  
+            data_chegada = datetime.strptime(data_chegada, "%Y-%m-%dT%H:%M") 
+            data_saida = data_saida.replace(tzinfo=None) 
             socorro.data_chegada = data_chegada
-            socorro.tempo_socorro = (data_chegada - data_saida)/3600
+            socorro.tempo_socorro = (data_chegada.timestamp() - data_saida.timestamp())/3600
             socorro.save()
 
             return redirect('/manutencao/home_manutencao/')
@@ -749,25 +756,34 @@ def analise_mecanicos(request):
 
     #AQUISIÇÃO DE DADOS FROM THE MODEL REGISTRO_SERVICOS, FUNCIONARIO
     mecanicos = Funcionario.objects.filter(funcao="MECANICO")
-    nome_mecanico = 'GERÔNIMO'
-    mecanico_id = Funcionario.objects.get(nome=nome_mecanico).id
-    servicos_mecanico = Servico_Oficina.objects.filter(executante_funcionario=mecanico_id)
     tempos_mecanicos = []
     qtd_servicos = []
     servicos_mecanico = []
     porcent_servico = []
+    tempo_viagens = []
     for mecanico in mecanicos:
         registros_servicos = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id).filter(data_inicial__date__gte=data_inicio).filter(data_final__date__lte=data_fim)
         tempos_mecanicos.append(registros_servicos.aggregate(Sum('tempo_servico'))['tempo_servico__sum'])
-        qtd_servicos.append(registros_servicos.count())
         servicos_mecanico.append(registros_servicos)
+        qtd_servicos.append(registros_servicos.count())        
 
-    print(servicos_mecanico)
-    print(qtd_servicos)
-    print(tempos_mecanicos)
-    print(data_fim, data_inicio)
+        #tempo viagens de socorro debitado o tempo em serviço no socorro
+        tempo_socorro = Socorro.objects.filter(data_saida__date__gte=data_inicio).filter(data_chegada__lte=data_fim).filter(mecanicos=mecanico.id).aggregate(Sum('tempo_socorro'))['tempo_socorro__sum']
+        tempo_serv_socorro = registros_servicos.filter(servico_socorro__isnull=False).aggregate(Sum('tempo_servico'))['tempo_servico__sum']
+        print(tempo_serv_socorro, tempo_socorro, "xxxxx", mecanico)
+        if tempo_socorro == None:
+            tempo_socorro = 0
+        tempo_viagens.append(tempo_socorro - tempo_serv_socorro)
+
+
+        for servico in registros_servicos:
+            if servico.servico_socorro:
+                print(servico.servico_socorro.socorro.id, mecanico)
+
+
+
 
     #AGREGANDO LISTAS PARA O FOR DO HTML
-    doc_zip = zip(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos)     
+    doc_zip = zip(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos, tempo_viagens)     
     return render(request, 'analise_mecanicos.html', {'doc_zip': doc_zip})
 

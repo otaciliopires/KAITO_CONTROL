@@ -93,6 +93,7 @@ class Socorro(models.Model):
     data_saida = models.DateTimeField()
     data_chegada = models.DateTimeField(null=True, blank=True)
     tempo_socorro = models.FloatField(null=True, blank=True)
+    mecanicos = models.ManyToManyField(Funcionario, null=True, blank=True)
 
     def __str__(self):
         return self.obra.nome
