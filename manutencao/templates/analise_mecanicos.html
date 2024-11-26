@@ -63,6 +63,8 @@
                                <div class="col-1 border-right">Qtd. Serviços</div>
                                <div class="col-2 border-right">Duração Serviço</div>
                                <div class="col-1 border-right">Duração Viagens</div>
+                               <div class="col-1 border-right">Número de Viagens</div>
+                               <div class="col-1 border-right">Horas Extra</div>
                                <div class="col-2 border-right">% tempo em serviço</div>
                          </div>
                    </div>
@@ -71,7 +73,7 @@
             
 
            
-   {% for mecanicos, servicos_mecanico, quantidade_servicos, tempo_servicos, tempo_viagens in doc_zip %}
+   {% for mecanicos, servicos_mecanico, quantidade_servicos, tempo_servicos, tempo_viagens, qtd_viagens, horas_extra in doc_zip %}
    <div class="col-xxl-6 col-md-12 ">
        <div style='margin-bottom:10px' class="card info-card sales-card  border border-primary">
            <div class="card-body">
@@ -81,6 +83,8 @@
                        <div class="col-1 border-right">{{quantidade_servicos}}</div>
                        <div class="col-2 border-right">{{tempo_servicos|floatformat:"1g"}} horas</div>
                        <div class="col-1 border-right">{{tempo_viagens|floatformat:"1g"}} horas</div>
+                       <div class="col-1 border-right">{{qtd_viagens|floatformat:"0g"}}</div>
+                       <div class="col-1 border-right">{{horas_extra|floatformat:"0g"}}</div>
                        <div class="col-1 border-right">qtd. viagens</div>
                </div>
            </div>
