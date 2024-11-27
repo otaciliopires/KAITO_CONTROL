@@ -1,4 +1,4 @@
-{%extends 'base.html'%}
+{%extends 'base_manutencao.html'%}
 
 {%load static%}
 
@@ -65,6 +65,7 @@
                                <div class="col-1 border-right">Duração Viagens</div>
                                <div class="col-1 border-right">Número de Viagens</div>
                                <div class="col-1 border-right">Horas Extra</div>
+                               <div class="col-1 border-right">Horas ociosas</div>
                                <div class="col-2 border-right">% tempo em serviço</div>
                          </div>
                    </div>
@@ -73,21 +74,40 @@
             
 
            
-   {% for mecanicos, servicos_mecanico, quantidade_servicos, tempo_servicos, tempo_viagens, qtd_viagens, horas_extra in doc_zip %}
+   {% for mecanicos, servicos_mecanico, quantidade_servicos, tempo_servicos, tempo_viagens, qtd_viagens, horas_extra, tempo_ocioso, porcentagens_tempo in doc_zip %}
    <div class="col-xxl-6 col-md-12 ">
        <div style='margin-bottom:10px' class="card info-card sales-card  border border-primary">
            <div class="card-body">
                <div class="d-flex align-items-center text-center">
-
+                    
                        <div class="col-2 border-right font-weight-bold">{{mecanicos}}</div>
                        <div class="col-1 border-right">{{quantidade_servicos}}</div>
-                       <div class="col-2 border-right">{{tempo_servicos|floatformat:"1g"}} horas</div>
-                       <div class="col-1 border-right">{{tempo_viagens|floatformat:"1g"}} horas</div>
+                       <div id='tempo_servicos' class="col-2 border-right">{{tempo_servicos|floatformat:"1g"}} horas</div>
+                       <div id='tempo_viagens' class="col-1 border-right">{{tempo_viagens|floatformat:"1g"}} horas</div>
                        <div class="col-1 border-right">{{qtd_viagens|floatformat:"0g"}}</div>
-                       <div class="col-1 border-right">{{horas_extra|floatformat:"0g"}}</div>
-                       <div class="col-1 border-right">qtd. viagens</div>
+                       <div id='hora_extra' class="col-1 border-right">{{horas_extra|floatformat:"0g"}} horas</div>
+                       <div class="col-1 border-right">{{tempo_ocioso|floatformat:"0g"}} horas</div>
+                       <div class="col-3 border-right">
+                        <div class="progress" style="margin-bottom:7px"  role="progressbar" aria-label="Success example" aria-valuenow="{{porcentagens_tempo.0|floatformat:0}}" aria-valuemin="0" aria-valuemax="100">
+                            <div id='progress-servico' class="progress-bar bg-primary overflow-visible text-dark" style="width: {{porcentagens_tempo.0|floatformat:0}}%"> - {{porcentagens_tempo.0|floatformat:0}} % Serviços</div>
+                          </div>
+                          <div class="progress" style="margin-bottom:7px"  role="progressbar" aria-label="Info example" aria-valuenow="{{porcentagens_tempo.1|floatformat:0}}" aria-valuemin="0" aria-valuemax="100">
+                            <div id='progress-viagens' class="progress-bar bg-warning overflow-visible text-dark" style="width: {{porcentagens_tempo.1|floatformat:0}}%"> - {{porcentagens_tempo.1|floatformat:0}} % Viagens</div>
+                          </div>
+                          <div class="progress" style="margin-bottom:7px"  role="progressbar" aria-label="Success example" aria-valuenow="{{porcentagens_tempo.2|floatformat:0}}" aria-valuemin="0" aria-valuemax="100">
+                            <div id='progress-ocioso' class="progress-bar bg-danger overflow-visible text-dark" style="width: {{porcentagens_tempo.2|floatformat:0}}%"> - {{porcentagens_tempo.2|floatformat:0}}% Ocioso</div>
+                          </div>
+                          <div class="progress" style="margin-bottom:7px" role="progressbar" aria-label="Info example" aria-valuenow="{{porcentagens_tempo.3|floatformat:0}}" aria-valuemin="0" aria-valuemax="100">
+                            <div id='progress-extra' class="progress-bar bg-success overflow-visible text-dark" style="width: {{porcentagens_tempo.3|floatformat:0}}%"> - {{porcentagens_tempo.3|floatformat:0}}% Hora Extra</div>
+                          </div>
+                        
+
+                       </div>
                </div>
            </div>
+
+
+           
            <!-- Accordion colocado após o card-body -->
            <div class="accordion" id="accordionExample">
                <div class="accordion-item">
@@ -155,8 +175,43 @@
            </div>
        </div>
    </div>
+
+
 {% endfor %}
-        
+
+{% comment %} <h3>Resultado 2: <span id="resultado2"></span></h3>
+<h3>Porcentagem Viagens: <span id="porcentviagens"></span></h3>
+<h3>Porcentagem servicos: <span id="porcentservicos"></span></h3>
+<h3>Porcentagem Ocioso: <span id="porcentocioso"></span></h3>
+<h3>Porcentagem extra: <span id="porcentextra"></span></h3>
+<span class='hidden' id='total_semana'>{{total_semana}}</span> {% endcomment %}
+
+
+<script>
+    const total_semana = parseFloat(document.getElementById('total_semana').innerText);
+    const hora_extra = parseFloat(document.getElementById('hora_extra').innerText);
+    const tempo_servicos = parseFloat(document.getElementById('tempo_servicos').innerText);
+    const tempo_viagens = parseFloat(document.getElementById('tempo_viagens').innerText);
+    const ocioso = parseFloat(document.getElementById('tempo_viagens').innerText);
+    
+    const resultado = 50 + 10;
+    const resultado2 = 50 + 10;
+    const porcentviagens = (tempo_viagens / total_semana) * 100;
+    const porcentservicos = (tempo_servicos / total_semana) * 100;
+    const porcentocioso = (ocioso / total_semana) * 100;
+    const porcentextra = (hora_extra / total_semana) * 100;
+
+    document.getElementById('resultado2').innerText = resultado2;
+    document.getElementById('porcentviagens').innerText = porcentviagens.toFixed(1);
+    document.getElementById('porcentservicos').innerText = porcentservicos.toFixed(1);
+    document.getElementById('porcentocioso').innerText = porcentocioso.toFixed(1);
+    document.getElementById('porcentextra').innerText = porcentextra.toFixed(1);
+
+
+
+
+   </script>
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

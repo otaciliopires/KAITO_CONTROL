@@ -764,24 +764,30 @@ def analise_mecanicos(request):
     tempo_viagens = []
     qtd_viagens = []
     horas_extra=[]
+    tempo_ocioso = []
+    porcentagens_tempo = []
     
     for mecanico in mecanicos:
         registros_servicos = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id).filter(data_inicial__date__gte=data_inicio).filter(data_final__date__lte=data_fim)
-        tempos_mecanicos.append(registros_servicos.aggregate(Sum('tempo_servico'))['tempo_servico__sum'])
+        soma_tempo_servico_mecanicos = registros_servicos.aggregate(Sum('tempo_servico'))['tempo_servico__sum']
+        if soma_tempo_servico_mecanicos == None:
+            soma_tempo_servico_mecanicos = 0
+        else: pass
+        tempos_mecanicos.append(soma_tempo_servico_mecanicos) #TEMPO EM SERVIÇOS
         servicos_mecanico.append(registros_servicos)
         qtd_servicos.append(registros_servicos.count())        
 
         # TEMPO VIAGENS SOCORRO DEBITADO O TEMPO EM SERVIÇO NO SOCORRO
         qtd_socorro = Socorro.objects.filter(data_saida__date__gte=data_inicio).filter(data_chegada__lte=data_fim).filter(mecanicos=mecanico.id).count()
         qtd_viagens.append(qtd_socorro)
-        tempo_socorro = Socorro.objects.filter(data_saida__date__gte=data_inicio).filter(data_chegada__lte=data_fim).filter(mecanicos=mecanico.id).aggregate(Sum('tempo_socorro'))['tempo_socorro__sum']
-        tempo_serv_socorro = registros_servicos.filter(servico_socorro__isnull=False).aggregate(Sum('tempo_servico'))['tempo_servico__sum']
+        tempo_socorro = Socorro.objects.filter(data_saida__date__gte=data_inicio).filter(data_chegada__date__lte=data_fim).filter(mecanicos=mecanico.id).aggregate(Sum('tempo_socorro'))['tempo_socorro__sum']
+        tempo_serv_socorro = Servico_Socorro.objects.filter(data_inicio__date__gte=data_inicio).filter(data_fim__date__lte=data_fim).filter(mecanico=mecanico.id).aggregate(Sum('tempo_servico'))['tempo_servico__sum']
         print(tempo_serv_socorro, tempo_socorro, "xxxxx", mecanico)
         if tempo_socorro == None:
             tempo_socorro = 0
         if tempo_serv_socorro == None:
             tempo_serv_socorro = 0
-        tempo_viagens.append(tempo_socorro - tempo_serv_socorro)
+        tempo_viagens.append(tempo_socorro - tempo_serv_socorro) #TEMPO EM VIAGENS  - EM SERVIÇOS DE SOCORRO
 
 
        #HORAS EXTRAS DE SERVIÇOS E VIAGENS
@@ -790,26 +796,34 @@ def analise_mecanicos(request):
         tempo_serv_extras = 0
         tempo_viagens_extra = 0
         hora_extra_semana = 0
+        total_semana = 0
+        x = 0
         while current_date <= final_date:
-            if current_date.weekday() != 5 or current_date.weekday() != 6:
-                print(current_date)
+            if current_date.weekday() != 5 and current_date.weekday() != 6:
+                total_semana += 9 
+                print(current_date,type(current_date.weekday()), total_semana )
                 query_tempo_extra_semana = Registro_Tempo_Servico.objects.filter(funcionario__gte=mecanico.id).filter(data_inicial__date__gte=current_date).filter(data_final__date__lte=current_date)
                 
                 if query_tempo_extra_semana:
                     for i in query_tempo_extra_semana:
-                        if i.data_final.hour > 17:
-                            i = i.data_final.replace(tzinfo=None)
+                        i = i.data_final - timedelta(hours=3)
+                        i = i.replace(tzinfo=None)
+                        print(i, 'hora')
+                        if i.hour > 17:
+
                             hora_extra_semana += (i.timestamp() - datetime(i.year, i.month, i.day, 17,0,0).timestamp())/3600
 
 
+
             if current_date.weekday() == 5 or current_date.weekday() == 6:
-                tempo_socorro = Socorro.objects.filter(data_saida__date__gte=current_date).filter(data_chegada__lte=current_date).filter(mecanicos=mecanico.id).aggregate(Sum('tempo_socorro'))['tempo_socorro__sum']
-                tempo_serv_socorro = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id).filter(data_inicial__date__gte=current_date).filter(data_final__date__lte=current_date).filter(servico_socorro__isnull=False).aggregate(Sum('tempo_servico'))['tempo_servico__sum']
-                if tempo_socorro == None:
-                    tempo_socorro = 0
-                if tempo_serv_socorro == None:
-                    tempo_serv_socorro = 0
-                tempo_viagens_extra += (tempo_socorro - tempo_serv_socorro)
+        
+                tempo_socorro_weekend = Socorro.objects.filter(data_saida__date__gte=current_date).filter(data_chegada__lte=current_date).filter(mecanicos=mecanico.id).aggregate(Sum('tempo_socorro'))['tempo_socorro__sum']
+                tempo_serv_socorro_weekend = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id).filter(data_inicial__date__gte=current_date).filter(data_final__date__lte=current_date).filter(servico_socorro__isnull=False).aggregate(Sum('tempo_servico'))['tempo_servico__sum']
+                if tempo_socorro_weekend == None:
+                    tempo_socorro_weekend = 0
+                if tempo_serv_socorro_weekend == None:
+                    tempo_serv_socorro_weekend = 0
+                tempo_viagens_extra += (tempo_socorro_weekend - tempo_serv_socorro_weekend)
                 
                 tempo_serv_extra = Registro_Tempo_Servico.objects.filter(funcionario__gte=mecanico.id).filter(data_inicial__date__gte=current_date).filter(data_final__date__lte=current_date).aggregate(Sum('tempo_servico'))['tempo_servico__sum']
                 if tempo_serv_extra == None:
@@ -821,11 +835,14 @@ def analise_mecanicos(request):
                 pass
             current_date += timedelta(days=1)
         horas_extra.append(tempo_serv_extras+tempo_viagens_extra+hora_extra_semana)
-        print(horas_extra, current_date)
-
-
+        print(hora_extra_semana, tempo_viagens_extra, tempo_serv_extras, "!!!!!!!!!!!!!!!!!")
+        tempo_ocioso.append(total_semana - (tempo_socorro - tempo_serv_socorro) - soma_tempo_servico_mecanicos)
+        print(total_semana, tempo_ocioso,tempo_socorro, soma_tempo_servico_mecanicos, "////////////////////")
+        porcentagens_tempo.append([(soma_tempo_servico_mecanicos / total_semana)*100,((tempo_socorro - tempo_serv_socorro)/total_semana)*100, (((total_semana - (tempo_socorro - tempo_serv_socorro) - soma_tempo_servico_mecanicos)/total_semana)*100), ((tempo_serv_extras+tempo_viagens_extra+hora_extra_semana)/total_semana)*100  ])
+        print(porcentagens_tempo)
     #AGREGANDO LISTAS PARA O FOR DO HTML
-    doc_zip = zip(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos, tempo_viagens, qtd_viagens, horas_extra)  
+    doc_zip = zip(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos, tempo_viagens, qtd_viagens, horas_extra, tempo_ocioso, porcentagens_tempo)  
     print(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos, tempo_viagens, qtd_viagens, horas_extra)   
-    return render(request, 'analise_mecanicos.html', {'doc_zip': doc_zip})
+    return render(request, 'analise_mecanicos.html', {'doc_zip': doc_zip,
+                                                      'total_semana':total_semana})
 

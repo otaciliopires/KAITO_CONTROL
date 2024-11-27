@@ -24,7 +24,7 @@
       <div class="d-flex align-items-center justify-content-between"> 
          
 
-            <img style='width:280px' src="{%static 'ceq/img/kaito_combustivel5.png'%}"></img>
+            <img style='width:280px' src="{%static 'ceq/img/kaito_manutencao.png'%}"></img>
          <i class="bi bi-list toggle-sidebar-btn"></i>
       </div>
       <nav class="header-nav ms-auto">
@@ -53,16 +53,16 @@
    </header>
    <aside id="sidebar" class="sidebar">
       <ul class="sidebar-nav" id="sidebar-nav">
-         <li class="nav-item"> <a class="nav-link " href="{%url 'home'%}"> <i class="bi bi-grid"></i> <span>HOME Manutenção</span> </a></li>
+         <li class="nav-item"> <a class="nav-link " href="{%url 'home_manutencao'%}"> <i class="bi bi-grid"></i> <span>HOME Manutenção</span> </a></li>
          <li class="nav-item">
-            <a class="nav-link collapsed" href="{%url 'saidas'%}" data-bs-target="#components-nav"  > <i class="bi bi-arrow-90deg-left"></i></i><span>Dashboard</span> </a>
+            <a class="nav-link collapsed" href="{%url 'solicitacoes'%}" data-bs-target="#components-nav"  > <i class="bi bi-archive"></i></i><span>Solicitações</span> </a>
 
          </li>
          <li class="nav-item">
-            <a class="nav-link collapsed" href="{%url 'entradas'%}" data-bs-target="#forms-nav" > <i class="bi bi-arrow-90deg-right"></i></i><span>Serviços Finalizados</span></a>
+            <a class="nav-link collapsed" href="{%url 'analise_mecanicos'%}" data-bs-target="#forms-nav" > <i class="bi bi-tools"></i></i><span>Mecânicos</span></a>
 
          </li>
-         <li class="nav-item">
+         {% comment %} <li class="nav-item">
             <a class="nav-link collapsed" href="{%url 'transferencias'%}" data-bs-target="#forms-nav" > <i class="bi bi-arrow-counterclockwise"></i></i><span>Transferências</span> </a>
          </li>
          <li class="nav-item">
@@ -76,7 +76,7 @@
          <li class="nav-item">
             <a class="nav-link collapsed" href="{%url 'obras_ano'%}" data-bs-target="#forms-nav" > <i class="bi bi-calendar-month"></i><span>Ano Obras</span> </a>
            
-         </li>
+         </li> {% endcomment %}
          
    </aside>
         {%endif%}
