@@ -846,3 +846,37 @@ def analise_mecanicos(request):
     return render(request, 'analise_mecanicos.html', {'doc_zip': doc_zip,
                                                       'total_semana':total_semana})
 
+def servicos_post(request):
+
+    if request.method == "GET":
+        equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+        tipo_servicos = ['Oficina', 'Socorro', 'Preventiva']
+        grupos = Grupo_Servico.objects.all()
+
+        return render(request, 'servicos_post.html', {'equipamentos':equipamentos_rocha,
+                                                    'tipo_servicos':tipo_servicos,
+                                                    'grupos': grupos})
+    elif request.method == "POST":
+
+        form = request.POST.get('form')
+
+        if form:
+
+            equipamento_rocha_id = request.POST.get('equipamento')
+            if equipamento_rocha_id == "None":
+                equipamento_rocha = None
+            else:
+                equipamento_rocha = Equipamentos.objects.get(id = equipamento_rocha_id)
+            tipo = request.POST.get('tipo')
+            grupo_id = request.POST.get('grupo')
+
+            if grupo_id == "None":
+                grupo = None
+            else:
+                grupo = Grupo_Servico.objects.get(id=grupo_id)
+            data_inicial = request.POST.get('data_inicial')
+            data_final = request.POST.get('data_final')
+
+            print(equipamento_rocha, tipo, grupo, data_inicial, data_final)
+
+            return redirect("/manutencao/servicos_post/")

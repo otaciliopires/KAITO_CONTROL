@@ -10,5 +10,6 @@ path('socorro/<int:id>/', views.socorro, name='socorro'),
 path('preventiva/<int:id>/', views.preventiva, name='preventiva'),
 path('solicitacoes/', views.solicitacoes, name='solicitacoes'),
 path('', views.atualizacao_horarios, name='atualizacao_horarios'),
-path('analise_mecanicos/', views.analise_mecanicos, name='analise_mecanicos')
+path('analise_mecanicos/', views.analise_mecanicos, name='analise_mecanicos'),
+path('servicos_post/', views.servicos_post, name='servicos_post' )
 ]

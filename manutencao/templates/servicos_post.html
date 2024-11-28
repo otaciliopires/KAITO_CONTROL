@@ -1,0 +1,306 @@
+{%extends 'base_manutencao.html'%}
+
+{%load static%}
+
+{%block 'head'%}
+<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{%endblock%}
+
+
+{%block 'body'%}
+  <!-- MENSAGENS -->
+  <main id="main" class="main">
+    <div class="pagetitle">
+      {% if messages %}
+        {%for i in messages%}
+          <div class="{{i.tags}}" role='alert'>
+              {{i}}
+          </div>
+        {%endfor%}
+      {%endif%}  
+ <!-- MENSAGENS --> 
+
+
+
+ <section class="section dashboard">
+    <div class="row">
+       <div class="col-lg-12">
+          <div class="row">
+             <div class="col-xxl-4 col-xl-12">
+                <div class="card info-card customers-card">
+                   <div class="card-body">
+                     <div class='row'>
+                      <div class="col-lg-6" style='margin-left:50px'>
+                        <div class="card-title" style='font-size:25px'>FILTROS</div>
+                      </div>
+
+                      <form method='POST' action="{%url 'servicos_post'%}">{% csrf_token %}
+                        <input type='hidden' name='form' value='form'>
+
+                        <div class="row">
+                        <div class='col-6'>    
+                            <div class="mb-3">
+                                <label style='width:100px' class="form-label">Tipo Serviço:</label>
+                                <select name='tipo'>
+                                    <option value='None'>Todos</option>
+                                    {%for tipo in tipo_servicos%} 
+                                    <option value={{tipo}}>{{tipo}}</option>
+                                    {%endfor%}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label style='width:100px' class="form-label">Data Inicial:</label>
+                                <input style='width:300px' type="date" name="data_inicio"></input>
+                            </div>
+                            <div class="mb-3">
+                                <label style='width:100px' class="form-label">Data Final:</label>
+                                <input style='width:300px' type="date" name="data_fim"></input>
+                            </div>
+                        </div>
+                        <div class='col-6'>
+                            <div class="mb-3">
+                                <label style='width:110px' class="form-label">Equipamento:</label>
+                                <select name='equipamento'>
+                                    <option value='None'>Selecionar equipamento</option>
+                                    {%for equipamento in equipamentos%} 
+                                    <option value={{equipamento.id}}>{{equipamento}}</option>
+                                    {%endfor%}
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label style='width:110px' class="form-label">Grupo Serviço:</label>
+                                <select name='grupo'>
+                                    {%for grupo in grupos%} 
+                                    <option value='None'>Selecionar grupo</option>
+                                    <option value={{grupo.id}}>{{grupo}}</option>
+                                    {%endfor%}
+                                </select>
+                            </div>
+
+                            <div class="modal-footer">
+                                <input type="submit" class="btn btn-primary"></input>
+                            </div>
+                            
+                        </form>
+
+                        </div>
+
+                    </div>
+
+
+
+                      <div class="d-flex align-items-left">
+
+                         <div class="col-lg-8" style='margin-left:50px'>
+                           
+                             <!-- MODAL OS CORRETIVA OFICINA -->
+
+                    
+                         </div> 
+                         <div class="col-lg-2">
+                       </div>
+                    </div>
+                      </div>
+                   </div>
+                </div>
+             </div>
+
+            
+
+                      <div class="col-xxl-6 col-md-12 font-weight-bold " style="" >
+                        <div style='margin-bottom:10px;height:40px'class="">
+                           <div class="card-body">
+                                 <div class="d-flex text-center">
+                     
+                                       <div class="col-2">Equipamento</div>
+                                       <div class="col-2">Grupo</div>
+                                       <div class="col-1">inicio</div>
+                                       <div class="col-1">Fim</div>
+                                       <div class="col-1">Tempo</div>
+                                       <div class="col-2">Custo</div>
+                                       <div class="col-2">Descrição</div>
+                                 </div>
+                           </div>
+                        </div>
+                     </div>
+                            {% comment %} {%for serv in serv_a%} {% endcomment %}
+                            <div style="margin-bottom:15px; background-color:#ADD8E6" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
+
+
+                                <div class="row align-items-start text-center">
+
+                            <div class="col-2">Equipamento</div>
+                            <div class="col-2">Grupo</div>
+                            <div class="col-1">inicio</div>
+                            <div class="col-1">Fim</div>
+                            <div class="col-1">Tempo</div>
+                            <div class="col-2">Custo</div>
+                            <div class="col-2">Descrição</div>
+
+                           </div>
+                        </div>
+
+                            {% comment %} {%endfor%} {% endcomment %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<div style='margin-bottom:50px'></div>
+
+{% comment %}Socorros{% endcomment %}
+
+
+
+
+
+
+
+  <!-- MODAL OS CORRETIVA OFICINA -->
+  <div class="modal fade" id="OSCorretiva" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header bg-primary">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">OS Corretiva Oficina</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
+               <input type='hidden' name='form_osoficina' value='form_osoficina'>
+                <div class="mb-3">
+                    <label style='width:100px' class="form-label">Equipamento:</label>
+                    <select name='equipamento'>
+                        {%for equipamento in list_equip%} 
+                        <option value={{equipamento.id}}>{{equipamento}}</option>
+                        {%endfor%}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label style='width:100px' class="form-label">Data Início:</label>
+                    <input style='width:300px' type="datetime-local" name="data_inicio"></input>
+                </div>
+                <div class="mb-3">
+                    <label style='width:100px' class="form-label">Horímetro:</label>
+                    <input style='width:300px' type="number" name="horimetro"></input>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- MODAL SOCORRO -->
+    <div class="modal fade" id="Socorro" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-warning">
+            <h1 class="modal-title fs-5" id="exampleModalLabel">Socorro</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <!-- FORM AQUI -->
+              <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
+                 <input type='hidden' name='form_socorro' value='form_socorro'>
+                  <div class="mb-3">
+                      <label style='width:100px' class="form-label">Obra:</label>
+                      <select name='obra'>
+                          {%for obra in obras%} 
+                          <option value={{obra.id}}>{{obra}}</option>
+                          {%endfor%}
+                      </select>
+                  </div>
+                  <div class="mb-3">
+                      <label style='width:100px' class="form-label">Data Saída:</label>
+                      <input style='width:300px' type="datetime-local" name="data_saida"></input>
+                  </div>
+
+                  
+ 
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <input type="submit" class="btn btn-primary"></input>
+                  </div>  
+              </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+      <!-- MODAL PREVENTIVAS -->
+      <div class="modal fade" id="Preventivas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header bg-success">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Preventivas</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FORM AQUI -->
+                <form method='POST' action="{%url 'home_manutencao'%}">{% csrf_token %}
+                   <input type='hidden' name='form_preventiva' value='form_preventiva'>
+                    <div class="mb-3">
+                        <label style='width:100px' for='obra'>Obra:</label>
+                        <select name='obra'>
+                            {%for obra in obras%} 
+                            <option value={{obra.id}}>{{obra}}</option>
+                            {%endfor%}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                      <label style='width:100px' class="form-label">Equipamento:</label>
+                      <select name='equipamento'>
+                          {%for equip in equipamentos_preventiva%} 
+                          <option value={{equip.id}}>{{equip}}</option>
+                          {%endfor%}
+                      </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label style='width:100px' class="form-label">Período:</label>
+                    <select name='periodo'>
+
+                        <option value='250'>250</option>
+                        <option value='500'>500</option>
+                        <option value='1000'>1000</option>
+                        <option value='2000'>2000</option>
+
+                    </select>
+                </div>
+
+                    <div class="mb-3">
+                        <label style='width:100px' class="form-label">Data Emissão:</label>
+                        <input style='width:300px' type="date" name="data_emissao"></input>
+                    </div>
+   
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <input type="submit" class="btn btn-primary"></input>
+                    </div>  
+                </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+
+{%endblock%}
