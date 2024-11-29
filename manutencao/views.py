@@ -913,6 +913,7 @@ def servicos_post(request):
                 serv_oficina_list.append(serv_oficina.data_fim)
                 serv_oficina_list.append(serv_oficina.tempo_em_servico)
                 serv_oficina_list.append(serv_oficina.descricao)
+                
             print(serv_oficina_list)
 
 
