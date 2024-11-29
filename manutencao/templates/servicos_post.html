@@ -46,7 +46,7 @@
                             <div class="mb-3">
                                 <label style='width:100px' class="form-label">Tipo Serviço:</label>
                                 <select name='tipo'>
-                                    <option value='None'>Todos</option>
+                                    <option>Todos</option>
                                     {%for tipo in tipo_servicos%} 
                                     <option value={{tipo}}>{{tipo}}</option>
                                     {%endfor%}
@@ -65,7 +65,7 @@
                             <div class="mb-3">
                                 <label style='width:110px' class="form-label">Equipamento:</label>
                                 <select name='equipamento'>
-                                    <option value='None'>Selecionar equipamento</option>
+                                    <option value="">Selecionar equipamento</option>
                                     {%for equipamento in equipamentos%} 
                                     <option value={{equipamento.id}}>{{equipamento}}</option>
                                     {%endfor%}
@@ -75,8 +75,9 @@
                             <div class="mb-3">
                                 <label style='width:110px' class="form-label">Grupo Serviço:</label>
                                 <select name='grupo'>
+                                  <option value="">Selecionar grupo</option>
                                     {%for grupo in grupos%} 
-                                    <option value='None'>Selecionar grupo</option>
+
                                     <option value={{grupo.id}}>{{grupo}}</option>
                                     {%endfor%}
                                 </select>

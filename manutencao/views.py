@@ -167,7 +167,7 @@ def servico_oficina(request, id):
         else:
             return redirect("/manutencao/home_manutencao") 
 
-        servico_oficina = Servico_Oficina.objects.filter(ordem_servico = id)
+        servico_oficina = Servico_Oficina.objects.filter(ordem_servico = id).filter(data_fim__isnull=True)
         for service in servico_oficina:
 
             if service.status == "Em Serviço":
@@ -860,23 +860,62 @@ def servicos_post(request):
 
         form = request.POST.get('form')
 
+        #coletando os POSTS
         if form:
+            all_equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+            all_grupos = Grupo_Servico.objects.all()
+            all_servicos = ['Oficina', 'Socorro', 'Preventiva']
 
+            tipo_servico = request.POST.get('tipo')
             equipamento_rocha_id = request.POST.get('equipamento')
-            if equipamento_rocha_id == "None":
-                equipamento_rocha = None
-            else:
-                equipamento_rocha = Equipamentos.objects.get(id = equipamento_rocha_id)
+            # if equipamento_rocha_id == "None":
+            #     equipamento_rocha = None
+            # else:
+            # equipamento_rocha = Equipamentos.objects.get(id = equipamento_rocha_id)
             tipo = request.POST.get('tipo')
             grupo_id = request.POST.get('grupo')
 
-            if grupo_id == "None":
-                grupo = None
-            else:
-                grupo = Grupo_Servico.objects.get(id=grupo_id)
+            # if grupo_id == "None":
+            #     grupo = None
+            # else:
+            # grupo = Grupo_Servico.objects.get(id=grupo_id)
             data_inicial = request.POST.get('data_inicial')
             data_final = request.POST.get('data_final')
+            print( tipo,  data_inicial, data_final)
+            lista_servicos = []
 
-            print(equipamento_rocha, tipo, grupo, data_inicial, data_final)
+
+            if equipamento_rocha_id or grupo_id or data_final or data_inicial or tipo_servico:
+                if not equipamento_rocha_id:
+                    equipamento_rocha_id = all_equipamentos
+                if not grupo_id:
+                    grupo_id = all_grupos
+                if not data_inicial:
+                    data_inicial = date.today() - timedelta(days=7)
+                if not data_final:
+                    data_final = date.today()
+
+            servicos_oficina = Servico_Oficina.objects.filter(ordem_servico__equipamento__in = equipamento_rocha_id).filter(grupo_servico__in = grupo_id).filter(data_inicio__gte=data_inicial).filter(data_fim__lte=data_final)
+            servico_socorro = Servico_Socorro.objects.filter(equipamento__in = equipamento_rocha_id).filter(grupo_servico__in = grupo_id).filter(data_inicio__gte = data_inicial).filter(data_fim__lte = data_final)
+            preventiva = Preventiva.objects.filter(ordem__equipamento__in = equipamento_rocha_id).filter(data_inicio__gte = data_inicial).filter(data_fim__lte = data_final)
+            print(servicos_oficina)
+            print(servico_socorro)
+            print(preventiva)
+            print(equipamento_rocha_id, grupo_id, data_final, data_inicial, tipo)
+            
+
+            #adiquirindo lista com as informações de serviços oficina
+            serv_oficina_list=[]
+            for serv_oficina in servicos_oficina:
+                serv_oficina_list.append(serv_oficina.ordem_servico.equipamento.prefixo)
+                serv_oficina_list.append(serv_oficina.grupo_servico.grupo)
+                serv_oficina_list.append(serv_oficina.data_inicio)
+                serv_oficina_list.append(serv_oficina.data_fim)
+                serv_oficina_list.append(serv_oficina.tempo_em_servico)
+                serv_oficina_list.append(serv_oficina.descricao)
+            print(serv_oficina_list)
+
+
+
 
             return redirect("/manutencao/servicos_post/")
