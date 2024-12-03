@@ -873,12 +873,18 @@ def relatorio(request):
             lista_obras.append(obra.nome)
             if consumo_mensal_obras == None:
                 consumo_mensal_obras = 0
-            lista_consumo.append(consumo_mensal_obras)
+                pass
+            else:
+                lista_consumo.append(consumo_mensal_obras)
 
             if entrada_mensal_obras == None:
                 entrada_mensal_obras = 0
-            lista_entradas.append(entrada_mensal_obras)
-            lista_final.append([obra, consumo_mensal_obras, entrada_mensal_obras])
+                pass
+                lista_entradas.append(entrada_mensal_obras)
+            if entrada_mensal_obras ==0 and consumo_mensal_obras ==0:
+                pass
+            else:
+                lista_final.append([obra, consumo_mensal_obras, entrada_mensal_obras])
 
         list_obras=(lista_obras)
         list_consumo = json.dumps(lista_consumo)
@@ -925,7 +931,6 @@ def relatorio(request):
             'obras_grafico': obras_grafico,
             'entradas': entradas,
             'saidas': saidas,
-            'grafico_img': img_base64,
             'sort_obras':sort_obras
         })
 
@@ -946,62 +951,61 @@ from django.core.files.storage import default_storage
 
 
 def pdf_relatorio(request, mes_atual):
+    
+      #criação de gráfico semanal no frontend
     form_data = request.GET.get('mes')
     ano = datetime.today().year
     mes = datetime.today().month
     meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
 
-    if mes_atual is None:
-        mes_atual = meses[mes-1]
-    else:
-        mes = meses.index(mes_atual)+1
 
+    if mes_atual == None:
+            mes_atual = meses[mes-1]
+    else:
+            mes = meses.index(mes_atual)+1
+
+    if mes_atual == None:
+            mes_atual = meses[mes-1]
+    else:
+            mes = meses.index(mes_atual)+1
+        
     lista_obras = []
     lista_consumo = []
     lista_entradas = []
     lista_final = []
 
     obras = Obras.objects.all()
-
-    for obra in obras:
-        consumo_mensal_obras = Abastecimento.objects.filter(data__month=mes).filter(data__year=ano).filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
-        entrada_mensal_obras = Entrada.objects.filter(data_entrega__month=mes).filter(data_entrega__year=ano).filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']
-        lista_obras.append(obra.nome)
-        if consumo_mensal_obras is None:
-            consumo_mensal_obras = 0
-        lista_consumo.append(consumo_mensal_obras)
-
-        if entrada_mensal_obras is None:
-            entrada_mensal_obras = 0
-        lista_entradas.append(entrada_mensal_obras)
-        lista_final.append([obra, consumo_mensal_obras, entrada_mensal_obras])
-
-    list_obras = lista_obras
-    list_consumo = json.dumps(lista_consumo)
-
-    def terceiro_item(list):
-        return list[1]
-
-    lista_final = sorted(lista_final, key=terceiro_item)
-
-    entrada = []
-    saida = []
-    obras_grafico = []
-    for i in lista_final:
-        saida.append(i[1])
-        entrada.append(i[2])
-        obras_grafico.append(i[0].nome)
-
-    obras = Obras.objects.all()
+            #criação de gráfico obras no frontend
     for obra in obras:
             consumo_mensal_obras = Abastecimento.objects.filter(data__month=mes).filter(data__year=ano).filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
             entrada_mensal_obras = Entrada.objects.filter(data_entrega__month=mes).filter(data_entrega__year=ano).filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']
             lista_obras.append(obra.nome)
-            lista_consumo.append(consumo_mensal_obras or 0)
-            lista_entradas.append(entrada_mensal_obras or 0)
-            lista_final.append([obra, consumo_mensal_obras or 0, entrada_mensal_obras or 0])
+            if consumo_mensal_obras == None:
+                consumo_mensal_obras = 0
+                pass
+            else:
+                lista_consumo.append(consumo_mensal_obras)
 
-    sort_obras = sorted(lista_final, key=lambda x: x[1])
+            if entrada_mensal_obras == None:
+                entrada_mensal_obras = 0
+                pass
+                lista_entradas.append(entrada_mensal_obras)
+            if entrada_mensal_obras ==0 and consumo_mensal_obras ==0:
+                pass
+            else:
+                lista_final.append([obra, consumo_mensal_obras, entrada_mensal_obras])
+
+    list_obras=(lista_obras)
+    list_consumo = json.dumps(lista_consumo)
+
+    def terceiro_item(list):
+            return list[1]
+
+    lista_final = sorted(lista_final, key=terceiro_item)
+        # TABELA ENTRADAS E SAÍDAS OBRAS
+    sort_obras = lista_final
+        # sort_dict_obras = dict(sorted(sort_obras.items(), key=itemgetter(1), reverse=True))
+    print(sort_obras)
 
                # Gerar gráfico com Matplotlib
     entradas = [i[2] for i in lista_final]
@@ -1018,19 +1022,24 @@ def pdf_relatorio(request, mes_atual):
     ax.set_ylabel('Quantidade de Diesel')
     ax.set_title(f'Gráfico de Diesel Recebido e Consumido - {mes_atual}')
     ax.set_xticks(ind)
-    ax.set_xticklabels(obras_grafico)
-    ax.legend()
+    ax.set_xticklabels(obras_grafico, rotation=60, fontsize=8)  # Define a rotação e o tamanho da fonte
 
+    ax.legend()
+    # Ajusta automaticamente o layout para evitar corte de labels
+    plt.tight_layout()
+
+    # Limpa o buffer para evitar sobreposição
         # Salvar a imagem do gráfico em base64
-    img_buffer = BytesIO()
-    plt.savefig(img_buffer, format='png')
-    img_buffer.seek(0)
+    img_buffer = BytesIO()  # Certifique-se de criar um novo buffer vazio
+    plt.savefig(img_buffer, format='png')  # Salva a imagem no buffer
+    plt.close(fig)  # Fecha o gráfico
+    img_buffer.seek(0)  # Reposiciona o ponteiro no início do buffer
 
     # Codificando a imagem em base64 para incluir no template HTML
     img_base64 = base64.b64encode(img_buffer.read()).decode('utf-8')
 
     # Gera o HTML com os dados
-    html_string = render_to_string('relatorio.html', {
+    html_string = render_to_string('pdf_relatorio.html', {
         'meses': meses,
         'sort_obras': sort_obras,
         'mes_atual': mes_atual,
@@ -1047,3 +1056,7 @@ def pdf_relatorio(request, mes_atual):
     response = HttpResponse(pdf_file, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="relatorio.pdf"'
     return response
+
+def ativar_pdf(request):
+    mes_atual = request.POST.get('mes_atual')
+    return redirect(f'/pdf_relatorio/{mes_atual}')

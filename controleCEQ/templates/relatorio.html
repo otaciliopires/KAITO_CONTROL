@@ -33,12 +33,13 @@
           {%endfor%}
         </select>
       </form>
-    </div>
-  </div>  
 
-  <div class='row'>     
-  <div><h1>Home</h1></div>            
-   
+      
+    </div>
+    <a href="/ceq/pdf_relatorio/{{mes_atual}}/" class="btn btn-info" role="button">Gerar Relatório</a>
+    </div> 
+
+  <div class='row'>        
      <div class="col-4">
       <div class="card">
 
@@ -113,12 +114,6 @@
       </script>
   </div>
 </div>
-
-{% if grafico_img %}
-  <img src="data:image/png;base64,{{ grafico_img }}" alt="Gráfico" style="width: 700px; height: 500px;">
-{% else %}
-  <p>Gráfico não disponível.</p>
-{% endif %}
 
 
   </div>
