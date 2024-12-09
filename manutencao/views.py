@@ -881,7 +881,7 @@ def servicos_post(request):
             # grupo = Grupo_Servico.objects.get(id=grupo_id)
             data_inicial = request.POST.get('data_inicial')
             data_final = request.POST.get('data_final')
-            print( tipo,  data_inicial, data_final)
+            print( tipo,  data_inicial, data_final, "okokokokok")
             lista_servicos = []
 
 
