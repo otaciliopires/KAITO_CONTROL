@@ -14,8 +14,8 @@ class ObrasSchema(ModelSchema):
         fields = ('nome','saldo')
 
 class AbastecimentoSchema(ModelSchema):
-    equipamento: EquipamentosSchema | None=None
-    obra: ObrasSchema | None=None
+    equipamento: EquipamentosSchema 
+    obra: ObrasSchema 
 
     class Meta:
         model = Abastecimento
