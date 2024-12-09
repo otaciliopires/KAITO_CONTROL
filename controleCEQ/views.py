@@ -444,7 +444,7 @@ def saidas(request):
     filtro_obras = request.POST.getlist('obra')
     filtro_equipamento = request.POST.getlist('equipamento')
     
-    if data_inicio or data_fim or filtro_equipamento or filtro_obras:
+    if request.POST.get('data_inicio') or request.POST.get('data_fim') or request.POST.getlist('equipamento') or request.POST.getlist('obra'):
         if not data_inicio:
             data_inicio = date(2020,1,1)
         if not data_fim:
