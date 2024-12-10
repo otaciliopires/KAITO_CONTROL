@@ -433,7 +433,7 @@ def saidas(request):
     
 
     data_inicio = request.POST.get('data_inicio')
-    if data_inicio == None or data_inicio == '': datetime.strptime('2020-01-02', '%Y-%m-%d').date()
+    if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
     else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
         
     data_fim = request.POST.get('data_fim')
@@ -460,6 +460,8 @@ def saidas(request):
 
     else:
         saidas = Abastecimento.objects.all().order_by('-numero')[:100]
+        total_saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).aggregate(Sum('litros'))['litros__sum']
+
     user = request.user
     obra_user=Obras.objects.filter(usuario=user.id)
     print(type(data_fim), data_fim)
