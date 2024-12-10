@@ -4,6 +4,7 @@ from .api import api
 
 urlpatterns = [
     path('home/', views.home, name='home'),
+    path('operacoes/', views.operacoes, name='operacoes'),
     path('saidas/', views.saidas, name='saidas'),
     path('entradas/',views.entradas, name='entradas'),
     path('transferencias/', views.transferencias, name='transferencias'),

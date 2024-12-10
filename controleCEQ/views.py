@@ -36,92 +36,6 @@ def home(request):
         equipamentos = Equipamentos.objects.all()
         print(user)
 
-        """Esse script serve para verificar dentro de um excel todos os equipamentos e cadastrá-los
-        Utilizar esse código mas transformando o excel em um dictionary e cadastrando os dados do dict
-        assim ficará masis fácil o cadastro dentro do servidor
-        realizar uma verificação para se o equipamento já for cadastrado, não cadastrar mais"""
-        # delete_all = Entrada.objects.all()
-        # delete_all.delete()
-        
-        #Método para cadastrar os equipamentos
-
-        # excel = "media/fotos/equipamentos2.xlsx"
-        # workbooks = openpyxl.load_workbook(excel)
-        # equipamentss = workbooks['Equipamentos']
-        # total_list_x=[]
-        # list_x = []
-        # for i in equipamentss.iter_rows(min_row=2,values_only=True):
-        #         equip = i[:4]
-        #         print(equip)
-        #         if equip[0] == None:
-        #                 break
-        #         else:
-        #             total_list_x.append(equip) 
-        # for i in total_list_x:
-        #     print(i[3]) 
-
-        # lista_equipamentos = [('RE-02 BRASIL LOCAÇÕES', 'RETROESCAVADEIRA', 'BRASIL LOCAÇÕES', 'T'),
-        #                         ('RLU-7625', 'CAÇAMBA', 'RAMINHO', 'T'),
-        #                         ('MN-01 COSAMPA', 'MOTONIVELADORA', 'COSAMPA', 'T'),
-        #                         ('POX-3E32', 'FIAT TORO', 'MAZINHO', 'T'),
-        #                         ('KLZ-0C11', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('KAO-4455', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('EH-01 MX CONSTRUÇÕES', 'ESCAVADEIRA HIDRÁULICA', 'MX CONSTRUÇÕES', 'T'),
-        #                         ('RE-01 MX CONSTRUÇÕES', 'RETROESCAVADEIRA', 'MX CONSTRUÇÕES', 'T'),
-        #                         ('RETRO ANCHIETA', 'RETROESCAVADEIRA', 'ANCHIETA', 'T'),
-        #                         ('MIF-0636', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('JJZ-1B82', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('MNB-7C69', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
-        #                         ('RLS-6B96', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('ROLO LOCADO', 'ROLO COMPACTADOR VIBRATÓRIO', 'LOCADO', 'T'),
-        #                         ('NPW-1B68', 'CAMINHÃO MUNCK', 'INTERBLOCK ', 'T'),
-        #                         ('POX-3C62', 'CAMINHÃO CARROCERIA 3X4', 'FAZENDA ARIMATE', 'T'),
-        #                         ('MEIO FIO', 'MEIO FIO OBRA', None, 'T'),
-        #                         ('KXJ-3C40', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
-        #                         ('BALDE PARA TRATOR', 'RESERVATÓRIO NA FAZENDA', None, 'T'),
-        #                         ('WE TRANSPORTES', 'ACERTO WE LOCAÇÕES E OBRA', 'EDGLEY', 'T'),
-        #                         ('RLS-8J35', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('PEU-5344', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
-        #                         ('RESERVATÓRIO PARA TRATOR', 'RESERVATÓRIO PARA TRATOR DE ESTEIRA', None, 'T'),
-        #                         ('EH-02 REALMAQ', 'ESCAVADEIRA HIDRÁULICA', 'REALMAQ', 'T'),
-        #                         ('NTS-2338', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
-        #                         ('MOB-3F89', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('MOTONIVELADORA LOCADA', 'MOTONIVELADORA', None, 'T'),
-        #                         ('NQG-3442', 'CAMINHÃO CARROCERIA 3X4', None, 'T'),
-        #                         ('OHH-4I33', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('SERVIÇO SILO', 'SERVIÇO SILO', None, 'T'),
-        #                         ('CARVALHO LOCAÇÕES', 'CARVALHO', 'CARVALHO LOCAÇÕES', 'T'),
-        #                         ('PC-01 MINERAÇÃO PAULISTA', 'PÁ CARREGADEIRA', 'MINERAÇÃO PAULISTA', 'T')]
-
-        # for i in lista_equipamentos:
-
-        #     cadastro_equipamentoss = Equipamentos(prefixo=i[0],
-        #                                             descricao=i[0],
-        #                                             tipo=i[3],
-        #                                             proprietario=i[2],
-        #                                             horímetro=0)
-
-        #     cadastro_equipamentoss.save()
-
-        
-        # saidas = Abastecimento.objects.all()
-        # for saida in saidas:
-        #     saida.observacao = ""
-        #     saida.save()
-
-
-
-
-        
-        # Método para atualizar saldo da obra.
-        for obra in obras:
-            
-            saldo = Entrada.objects.filter(obra=obra)  and Abastecimento.objects.filter(obra=obra)
-            # if saldo == None:                
-            #     obra.saldo = 0
-            # else:
-            #     obra.saldo = Entrada.objects.filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum'] - Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
-            # obra.save()
 
         #Método para atualizar saldo dos tanques e lançar valores no frontend
         for tanque in tanques:
@@ -418,6 +332,253 @@ def home(request):
             return HttpResponse(f"{tanque_fixo}, {tanque_movel}, {type(contador_inicial)}, {contador_final}, {contador_comboio}, LITROS:{litros}")
 
     else: return HttpResponse('<h1>Acesso negado</h1>')
+
+@login_required(login_url='/auth/login/')
+def operacoes(request):
+
+    if request.method == 'GET' and request.user.status=='c':
+
+        
+        user = request.user
+        obra_user=Obras.objects.filter(usuario=user.id)
+        tanques = Tanque.objects.all()
+        obras = Obras.objects.all()
+        equipamentos = Equipamentos.objects.all()
+        print(user)
+
+        """Esse script serve para verificar dentro de um excel todos os equipamentos e cadastrá-los
+        Utilizar esse código mas transformando o excel em um dictionary e cadastrando os dados do dict
+        assim ficará masis fácil o cadastro dentro do servidor
+        realizar uma verificação para se o equipamento já for cadastrado, não cadastrar mais"""
+        # delete_all = Entrada.objects.all()
+        # delete_all.delete()
+        
+        #Método para cadastrar os equipamentos
+
+        # excel = "media/fotos/equipamentos2.xlsx"
+        # workbooks = openpyxl.load_workbook(excel)
+        # equipamentss = workbooks['Equipamentos']
+        # total_list_x=[]
+        # list_x = []
+        # for i in equipamentss.iter_rows(min_row=2,values_only=True):
+        #         equip = i[:4]
+        #         print(equip)
+        #         if equip[0] == None:
+        #                 break
+        #         else:
+        #             total_list_x.append(equip) 
+        # for i in total_list_x:
+        #     print(i[3]) 
+
+        # lista_equipamentos = [('RE-02 BRASIL LOCAÇÕES', 'RETROESCAVADEIRA', 'BRASIL LOCAÇÕES', 'T'),
+        #                         ('RLU-7625', 'CAÇAMBA', 'RAMINHO', 'T'),
+        #                         ('MN-01 COSAMPA', 'MOTONIVELADORA', 'COSAMPA', 'T'),
+        #                         ('POX-3E32', 'FIAT TORO', 'MAZINHO', 'T'),
+        #                         ('KLZ-0C11', 'FRETE TERCEIRIZADO', None, 'T'),
+        #                         ('KAO-4455', 'FRETE TERCEIRIZADO', None, 'T'),
+        #                         ('EH-01 MX CONSTRUÇÕES', 'ESCAVADEIRA HIDRÁULICA', 'MX CONSTRUÇÕES', 'T'),
+        #                         ('RE-01 MX CONSTRUÇÕES', 'RETROESCAVADEIRA', 'MX CONSTRUÇÕES', 'T'),
+        #                         ('RETRO ANCHIETA', 'RETROESCAVADEIRA', 'ANCHIETA', 'T'),
+        #                         ('MIF-0636', 'FRETE TERCEIRIZADO', None, 'T'),
+        #                         ('JJZ-1B82', 'FRETE TERCEIRIZADO', None, 'T'),
+        #                         ('MNB-7C69', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
+        #                         ('RLS-6B96', 'FRETE TERCEIRIZADO', None, 'T'),
+        #                         ('ROLO LOCADO', 'ROLO COMPACTADOR VIBRATÓRIO', 'LOCADO', 'T'),
+        #                         ('NPW-1B68', 'CAMINHÃO MUNCK', 'INTERBLOCK ', 'T'),
+        #                         ('POX-3C62', 'CAMINHÃO CARROCERIA 3X4', 'FAZENDA ARIMATE', 'T'),
+        #                         ('MEIO FIO', 'MEIO FIO OBRA', None, 'T'),
+        #                         ('KXJ-3C40', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
+        #                         ('BALDE PARA TRATOR', 'RESERVATÓRIO NA FAZENDA', None, 'T'),
+        #                         ('WE TRANSPORTES', 'ACERTO WE LOCAÇÕES E OBRA', 'EDGLEY', 'T'),
+        #                         ('RLS-8J35', 'FRETE TERCEIRIZADO', None, 'T'),
+        #                         ('PEU-5344', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
+        #                         ('RESERVATÓRIO PARA TRATOR', 'RESERVATÓRIO PARA TRATOR DE ESTEIRA', None, 'T'),
+        #                         ('EH-02 REALMAQ', 'ESCAVADEIRA HIDRÁULICA', 'REALMAQ', 'T'),
+        #                         ('NTS-2338', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
+        #                         ('MOB-3F89', 'FRETE TERCEIRIZADO', None, 'T'),
+        #                         ('MOTONIVELADORA LOCADA', 'MOTONIVELADORA', None, 'T'),
+        #                         ('NQG-3442', 'CAMINHÃO CARROCERIA 3X4', None, 'T'),
+        #                         ('OHH-4I33', 'FRETE TERCEIRIZADO', None, 'T'),
+        #                         ('SERVIÇO SILO', 'SERVIÇO SILO', None, 'T'),
+        #                         ('CARVALHO LOCAÇÕES', 'CARVALHO', 'CARVALHO LOCAÇÕES', 'T'),
+        #                         ('PC-01 MINERAÇÃO PAULISTA', 'PÁ CARREGADEIRA', 'MINERAÇÃO PAULISTA', 'T')]
+
+        # for i in lista_equipamentos:
+
+        #     cadastro_equipamentoss = Equipamentos(prefixo=i[0],
+        #                                             descricao=i[0],
+        #                                             tipo=i[3],
+        #                                             proprietario=i[2],
+        #                                             horímetro=0)
+
+        #     cadastro_equipamentoss.save()
+
+        
+        # saidas = Abastecimento.objects.all()
+        # for saida in saidas:
+        #     saida.observacao = ""
+        #     saida.save()
+
+        
+
+
+
+        return render(request, 'operacoes.html', {'tanques':tanques, 
+                                             'obras': obras, 
+                                             'equipamentos':equipamentos, 
+                                             'user':user, } )
+    
+
+    if request.method == 'POST':
+
+        form_transferencias = request.POST.get('form_transferencias')
+        form_entradas = request.POST.get('form_entradas')
+        form_test = request.POST.get('form_test')
+        form_data = request.POST.get('form_data')
+        form_saidas = request.POST.get('form_saidas')
+
+# método acima é para quando for necessário selecionar um form específico em um html com mais de um form
+        print(form_saidas)
+
+        if form_saidas:
+
+            tanque_id = request.POST.get('tanque_id')
+            tanque = Tanque.objects.get(id=tanque_id)
+            obra_id = request.POST.get('obra') #Método para buscar o id de uma ForeignKey
+            obra = Obras.objects.get(id=obra_id)
+            equipamento_id = request.POST.get('equipamento')
+            equipamento =Equipamentos.objects.get(id=equipamento_id)
+            
+            contador_inicial = request.POST.get('contador_inicial')
+            contador_final = request.POST.get('contador_final')
+            litros = request.POST.get('saida_litros')
+            horimetro = request.POST.get('horimetro')
+            operador = request.POST.get('operador')
+            data = request.POST.get('data')
+            num_saida = Abastecimento.objects.aggregate(Max('numero'))
+            num_saida = (num_saida['numero__max'] + 1)
+
+            print('deu certo')
+
+            #lançamento abastecimentos:
+            abastecimento = Abastecimento(litros=litros,
+                                          contador_inicio=contador_inicial,
+                                          contador_fim=contador_final,
+                                          horimetro=horimetro,
+                                          data=data,
+                                          tanque=tanque,
+                                          obra=obra,
+                                          equipamento=equipamento,
+                                          operador=operador,
+                                          colaborador= request.user,
+                                          numero=num_saida)
+            try:
+                abastecimento.save()
+                print('deu certo')
+
+                messages.add_message(request, constants.SUCCESS, "Abastecimento laçado com sucesso!" )
+                return redirect("/ceq/home")
+            except:
+                print('deu errado')
+                messages.add_message(request, constants.ERROR, "ERRO AO LANÇAR O ABASTECIMENTO" )
+                return redirect("/ceq/home")
+
+
+
+
+            print(f"{tanque}, {obra}, {equipamento}, {contador_inicial}, {contador_final}, {type(litros)},{horimetro}, {operador}")
+            return HttpResponse(f"{data}, {equipamento}, {contador_inicial}, {contador_final}, {litros},{horimetro}, {operador} -- ,tanque:{tanque}  tanque.saldo: {tanque.estoque} -- obra:{obra}, saldo:{obra.saldo}")
+        
+        
+        if form_entradas:
+
+            tanque_id = request.POST.get('tanque_id')
+            tanque = Tanque.objects.get(id=tanque_id)
+            obra_id = request.POST.get('obra_id')
+            obra = Obras.objects.get(id=obra_id)
+            data_emissao = request.POST.get('data_nf')
+            data_entrega = request.POST.get('data_entrega')
+            fornecedor = request.POST.get('fornecedor')
+            nota_fiscal = request.POST.get('NF')
+            valor_litro = request.POST.get('valor_litro')
+            quantidade_litros = request.POST.get('quantidade')
+            valor_total = float(valor_litro) * int(quantidade_litros)
+            num_entrada = Entrada.objects.aggregate(Max('numero'))
+            num_entrada = num_entrada['numero__max']+1
+
+            print('deucerto')
+
+            #lançamento entradas:
+            entrada = Entrada(tanque=tanque,
+                              nota_fiscal=nota_fiscal,
+                              fornecedor=fornecedor,
+                              data_nf=data_emissao,
+                              data_entrega=data_entrega,
+                              obra=obra,
+                              quantidade=quantidade_litros,
+                              preco_unitario=valor_litro,
+                              preco_total=valor_total,
+                              colaborador=request.user,
+                              numero=num_entrada
+                              )
+            entrada.save()
+
+            #Método para atualizar saldo dos tanques.
+            total_entradas = nonetest(Entrada.objects.filter(tanque=tanque).aggregate(Sum('quantidade'))['quantidade__sum'])
+            total_saidas = nonetest(Abastecimento.objects.filter(tanque=tanque).aggregate(Sum('litros'))['litros__sum'])
+            total_transferências = nonetest(Transferencia.objects.filter(fixo=tanque).aggregate(Sum('litros'))['litros__sum'])
+            tanque.estoque = total_entradas - total_saidas - total_transferências
+            tanque.save()
+            
+            #Método para atualizar saldo da obra.
+            total_entradas = nonetest(Entrada.objects.filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum'])
+            total_saidas = nonetest(Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum'])
+            obra.saldo = total_entradas - total_saidas
+            obra.save()
+            print(f"obra:{obra} ---saldo_obra = {obra.saldo} --- estoque_tanque = {tanque.estoque}")
+            return HttpResponse(f"{tanque}, {obra_id}, {type(data_emissao)}, {type(data_entrega)}, {fornecedor}, {nota_fiscal},{valor_litro}, {quantidade_litros}")
+
+        
+        if form_transferencias:
+            tanque_fixo_id = request.POST.get('tanque_fixo_id')
+            tanque_fixo = Tanque.objects.get(id=tanque_fixo_id)
+            tanque_movel_id = request.POST.get('tanque_movel_id')
+            tanque_movel = Tanque.objects.get(id=tanque_movel_id)
+
+            contador_inicial = request.POST.get('contador_inicio')
+            contador_final = request.POST.get('contador_fim')
+            litros = float(contador_final) - float(contador_inicial)
+            contador_comboio = request.POST.get('contador_comboio')
+            data = date.today()
+
+            #lançamento transferências:
+            transferencia = Transferencia(fixo=tanque_fixo,
+                                          movel=tanque_movel,
+                                          contador_inicio=float(contador_inicial),
+                                          contador_fim=float(contador_final),
+                                          litros=litros,
+                                          contador_comboio=float(contador_comboio),
+                                          colaborador=request.user,
+                                          data=date.today())
+            
+            transferencia.save()
+            #Método para atualizar saldo dos tanques.
+            tanque_fixo.estoque = nonetest(Entrada.objects.filter(tanque=tanque_fixo).aggregate(Sum('quantidade'))['quantidade__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_fixo).aggregate(Sum('litros'))['litros__sum']) - nonetest(Transferencia.objects.filter(fixo=tanque_fixo).aggregate(Sum('litros'))['litros__sum'])
+            tanque_movel.estoque = nonetest(Transferencia.objects.filter(movel=tanque_movel).aggregate(Sum('litros'))['litros__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_movel).aggregate(Sum('litros'))['litros__sum'])
+                
+            
+            tanque_fixo.contador = float(contador_final)
+            tanque_movel.contador = float(contador_comboio)
+            tanque_fixo.save()
+            tanque_movel.save()
+
+            print(f"{tanque_fixo.estoque}, {tanque_movel.estoque}")
+
+            return HttpResponse(f"{tanque_fixo}, {tanque_movel}, {type(contador_inicial)}, {contador_final}, {contador_comboio}, LITROS:{litros}")
+
+    else: return HttpResponse('<h1>Acesso negado</h1>')
+
+
 
 @login_required(login_url='/auth/login/')
 def saidas(request):

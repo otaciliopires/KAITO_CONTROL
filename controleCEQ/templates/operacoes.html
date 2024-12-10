@@ -1,0 +1,376 @@
+{%extends 'base.html'%}
+
+{%load static%}
+
+{%block 'head'%}
+<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{%endblock%}
+
+{%block 'body'%}
+
+
+<main id="main" class="main">
+  <div class="pagetitle">
+    {% if messages %}
+      {%for i in messages%}
+        <div class="{{i.tags}}" role='alert'>
+            {{i}}
+        </div>
+      {%endfor%}
+    {%endif%}    
+
+
+
+  <div class='row'>     
+  <div><h1>OPERAÇÕES</h1></div>
+             
+    <nav> 
+        <ol class="breadcrumb">
+           <li class="breadcrumb-item" ><a style='margin-top:30px' >Controle de diesel - Upload arquivo em excel (.xlsx):</a></li>
+           <li ><div style="margin-left:0"><div class="row mb-3">
+              <form method='POST'  enctype="multipart/form-data" action="{%url 'importexcel'%}">{% csrf_token %}
+              
+              <label  class="col-sm-2 col-form-label"></label>
+              <div class="col-sm-10"> <input name='excel' class="form-control" type="file" id="formFile"></div>
+              </div></div></li>
+           <li ><div style="margin-left:10px"><button style="margin-left:20px; margin-top:20px" type="submit"  class="btn btn-primary">Enviar</button></div></li>
+            </form>
+        </ol>
+     </nav>
+
+
+  </div>
+  <section class="section dashboard">
+     <div class="row">
+        <div class="col-lg-8">
+           <div class="row">
+              <div class="col-xxl-4 col-xl-12">
+                 <div class="card info-card customers-card">
+                    <div class="card-body">
+                       <div class="d-flex align-items-center">
+
+                          <div style='margin-left:120px'>
+                            
+                            <div id="bordas" class="col-md-4">
+                              <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-success btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_entradas" >ENTRADA</button>
+                            </div>
+                            <div id="bordas" class="col-md-4">
+                              <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-danger btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_saidas">ABASTECIMENTO</button>
+                            </div>
+                            <div id="bordas" class="col-md-4">
+                              <button style='margin-left:0px; margin-bottom: 5px'   class="btn btn-warning btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_transferencias">TRANSFERÊNCIA</button>
+                            </div>
+                          </div> 
+
+
+                       </div>
+                    </div>
+                 </div>
+              </div>
+
+              
+              
+
+             
+
+
+     
+  </section>
+</main>
+<footer id="footer" class="footer">
+  <div class="copyright"> &copy; Copyright <strong><span>KAITO Solutions</span></strong>. All Rights Reserved</div>
+  
+</footer>
+<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>  
+
+
+
+      
+</body>
+
+
+
+      <div class="modal fade" id="modal_saidas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5">ABASTECIMENTOS</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
+                <input type='hidden' name='form_saidas' value='form_saidas'>
+                <div class="container text-left">
+                    <div class="row">
+                        <div class='col-md-8'>
+                            <div class='col'>
+                                <label style='width:120px' for='tanque'>Tanque:</label> 
+                                <select style="lenght:30px" name='tanque_id'>
+                                  {%for tanque in tanques%}
+                                    <option value="{{tanque.id}}">{{tanque}}</option>
+                                    {%endfor%}
+                                </select>
+                            </div>
+
+                            <div class='col' >
+                                <label style='width: 120px' for='obra'>Obra:</label> 
+                                <select name='obra'>
+                                  {%for obra in obras%}
+                                    <option value="{{obra.id}}">{{obra}}</option>
+                                  {%endfor%}
+                                </select>
+                            </div>
+                            <div class='col' >
+                                <label style='width: 120px' for='equipamento'>Equipamento:</label> 
+                                <select name='equipamento'>
+                                  {%for equipamento in equipamentos%}
+                                    <option value="{{equipamento.id}}">{{equipamento}}</option>
+                                  {%endfor%}
+                                </select>
+                            </div>
+                            <div class='col' >
+                              <label style='width: 120px' for='data_'>Data:</label> 
+                              <input type='date' name='data'>
+                          </div>
+  
+                        </div>
+                    </div>
+
+
+                    <hr>
+
+                    <div class='row'>
+                      <div class='col-md-6'>
+                          <div class='col'>
+                            <label style='width:120px' for='contador_inicial'>Contador inicial:</label>
+                            <input type='text' name='contador_inicial' placeholder='Contador Inicial'>
+                          </div>
+                          <div class='col'>
+                            <label style='width:120px' for='contador_final'>Contador final:</label>
+                            <input type='text' name='contador_final' placeholder='Contador Final'>
+                          </div>
+
+                          <div class='col'>
+                            <label style='width:120px' for='horímetro'>Horímetro:</label>
+                            <input type='text' name='horimetro' placeholder='Horímetro'>
+                          </div>
+                      </div>
+                              <div class='col-md-6'>
+                                  <div class='col'>
+                                    <label style='width:120px' for='saida_litros'>Litros:</label>
+                                    <input type='text' name='saida_litros' placeholder='Litros'> 
+                                  </div>
+                                  <div class='col'>
+                                    <label style='width:120px' for='operador'>Operador:</label>
+                                    <input type='text' name='operador' placeholder='Operador/Motorista'> 
+                                  </div>
+                              </div>
+                    </div>
+                  </div>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value='Salvar'>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
+
+
+
+      
+      
+      
+      <div class="modal fade" id="modal_entradas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">ENTRADAS</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
+                <input type='hidden' name='form_entradas' value='form_entradas'>
+                <div class="container text-left">
+                    <div class="row">
+                        <div class='col-md-6'>
+                            <div class='col'>
+                                <label style='width:80px' for='tanque'>Tanque:</label> 
+                                <select name='tanque_id'>                                 
+                                  {%for tanque in tanques%}
+                                    {%if tanque.tipo == 'F'%}
+                                      <option value="{{tanque.id}}">{{tanque}}</option>
+                                    {%endif%}
+                                  {%endfor%}
+                                </select>
+                            </div>
+
+                            <div class='col' >
+                                <label style='width:80px' for='obra'>Obra:</label> 
+                                <select name='obra_id'>
+                                  {%for obra in obras%}
+                                    <option value="{{obra.id}}">{{obra}}</option>
+                                  {%endfor%}
+                                </select>
+                            </div>
+                            <div class='col' >
+                                <label style='width:80px' for='data_nf'>Data NF:</label> 
+                                <input type='date' name='data_nf'>
+                            </div>
+                        </div>
+
+                      <div class='col-md-6'>
+                        <div class='col'>
+                          <label style='width:100px' for='fornecedor'>Fornecedor:</label>
+                          <input type='text' name='fornecedor' placeholder='Fornecedor'>
+                        </div>
+                          <div class='col'>
+                            <label style='width:100px' for='NF'>Nota Fiscal:</label>
+                            <input type='text' name='NF' placeholder='Nota Fiscal'>
+                          </div>
+                          <div class='col' >
+                            <label style='width:100px' for='data_entrega'>Data Entrega:</label> 
+                            <input type='date' name='data_entrega'>
+                        </div>
+
+
+                      </div>
+                    </div>
+
+                    <hr>
+
+                    <div class='row'>
+                      <div class='col-md-6'>
+                          <div class='col'>
+                            <label style='width:85px' for='valor_litro'>Valor Litro:</label>
+                            <input type='text' name='valor_litro' placeholder='Valor_litro'>
+                          </div>
+                          <div class='col'>
+                            <label style='width:85px' for='quantidade'>Quantidade:</label>
+                            <input type='text' name='quantidade' placeholder='Quantidade'>
+                          </div>
+                      </div>
+                      <div class='col-md-6'>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value='Salvar'>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="modal fade" id="modal_transferencias" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">TRANSFERÊNCIAS</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
+                <input type='hidden' name='form_transferencias' value='form_transferencias'>
+                <div class="container text-left">
+                    <div class="row">
+                        <div class='col-md-6'>
+                            <div class='col'>
+                                <label style='width:130px' for='tanque'>Tanque Fixo:</label> 
+                                <select name='tanque_fixo_id'>                                 
+                                  {%for tanque in tanques%}
+                                    {%if tanque.tipo == 'F'%}
+                                      <option value="{{tanque.id}}">{{tanque}}</option>
+                                    {%endif%}
+                                  {%endfor%}
+                                </select>
+                            </div>
+
+                            <div class='col'>
+                              <label style='width:130px' for='tanque'>Tanque Móvel:</label> 
+                              <select name='tanque_movel_id'>                                 
+                                {%for tanque in tanques%}
+                                  {%if tanque.tipo == 'M'%}
+                                    <option value="{{tanque.id}}">{{tanque}}</option>
+                                  {%endif%}
+                                {%endfor%}
+                              </select>
+                          </div>
+
+                            <div class='col' >
+                                <label style='width:130px' for='contador_inicio'>Contador Inicial:</label>
+                                <input type='text' name='contador_inicio' placeholder='Contador Inicio'>
+                            </div>
+                            <div class='col' >
+                              <label style='width:130px' for='contador_fim'>Contador Final:</label>
+                              <input type='text' name='contador_fim' placeholder='Contador Final'>
+                          </div>
+                            
+                        </div>
+
+                      <div class='col-md-6'>
+                        <div class='col'>
+                          <label style='width:130px' for='contador_comboio'>Contador Melosa:</label>
+                          <input type='text' name='contador_comboio' placeholder='Contador'>
+                        </div>
+                          <div class='col' >
+                            <label style='width:130px' for='motorista'>Motorista:</label> 
+                            <input type='text' name='motorista' placeholder='motorista'>
+                        </div>
+
+
+                      </div>
+                    </div>
+
+                    <hr>
+
+                    <div class='row'>
+                      <div class='col-md-6'>
+                          <div class='col'>
+
+                          <div class='col'>
+
+                          </div>
+                      </div>
+                      <div class='col-md-6'>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <input type="submit" class="btn btn-primary" value='Salvar'>
+            </div>
+          </form>
+          </div>
+        </div>
+      </div>
+
+
+      </html>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+
+
+
+{%endblock%}
