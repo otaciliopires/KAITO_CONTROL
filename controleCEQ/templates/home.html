@@ -37,30 +37,15 @@
 
   <div class='row'>     
   <div><h1>Home</h1></div>
-             
-
-
-    <nav> 
-        <ol class="breadcrumb">
-           <li class="breadcrumb-item" ><a style='margin-top:30px' >Controle de diesel - Upload arquivo em excel (.xlsx):</a></li>
-           <li ><div style="margin-left:0"><div class="row mb-3">
-              <form method='POST'  enctype="multipart/form-data" action="{%url 'importexcel'%}">{% csrf_token %}
-              
-              <label  class="col-sm-2 col-form-label"></label>
-              <div class="col-sm-10"> <input name='excel' class="form-control" type="file" id="formFile"></div>
-              </div></div></li>
-           <li ><div style="margin-left:10px"><button style="margin-left:20px; margin-top:20px" type="submit"  class="btn btn-primary">Enviar</button></div></li>
-            </form>
-        </ol>
-     </nav>
+            
 
 
   </div>
   <section class="section dashboard">
      <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-6">
            <div class="row">
-              <div class="col-xxl-4 col-xl-12">
+              <div class="col-lg-12">
                  <div class="card info-card customers-card">
                     <div class="card-body">
                        <h5 class="card-title" style='font-size:30px'>Estoque de Diesel |<span style='font-size:16px'> Atualizado {{data_ultimo_abastecimento}}</span></h5>
@@ -70,18 +55,24 @@
                              <h6>{{estoque_total|floatformat:"2g"}} Litros </h6>
                              <span class="text-danger small pt-1 fw-bold">{{porcent_estoque}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
                           </div>
-                          <div style='margin-left:120px'>
-                            
-                            <div id="bordas" class="col-md-4">
-                              <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-success btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_entradas" >ENTRADA</button>
-                            </div>
-                            <div id="bordas" class="col-md-4">
-                              <button style='margin-left:0px; margin-bottom: 5px' class="btn btn-danger btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_saidas">ABASTECIMENTO</button>
-                            </div>
-                            <div id="bordas" class="col-md-4">
-                              <button style='margin-left:0px; margin-bottom: 5px'   class="btn btn-warning btn-lg" type="button" data-bs-toggle="modal" data-bs-target="#modal_transferencias">TRANSFERÊNCIA</button>
-                            </div>
-                          </div> 
+                          <div style='margin-left:5px'>
+
+                            <div class="tanque">
+                              <div class="volume" id="volume">
+                                  <div class="ondas">
+                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 28" preserveAspectRatio="none">
+                                          <path d="M0 15 Q30 25 60 15 T120 15 V28 H0 Z" fill="rgba(255, 255, 255, 0.5)"></path>
+                                      </svg>
+                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 28" preserveAspectRatio="none">
+                                          <path d="M0 20 Q30 10 60 20 T120 20 V28 H0 Z" fill="rgba(255, 255, 255, 0.3)"></path>
+                                      </svg>
+                                  </div>
+                              </div>
+                              <div class="label" id="label">{{porcent_estoque}}%</div>
+                          </div>
+
+                          </div>
+
 
 
                        </div>
@@ -208,8 +199,42 @@
               
            </div>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-6">
            <div class="card">
+        
+                 <div class="card-body">
+                    <h5 class="card-title" style='font-size:25px'>Entradas e Saídas Obras - {{mes_atual}}</h5>
+                    <div class="activity">
+        
+        
+                     <table class="table table-striped table-bordered">
+                       <thead style="font-size:10px" >
+                         <tr>
+                           <th scope='col'>Obra</th>
+                           <th scope="col">Saídas</th>
+                           <th scope="col">Entradas</th>
+        
+                           
+                         </tr>
+                       </thead>
+        
+                       <tbody style="font-size:10px" >
+                       {%for value in sort_obras%}    
+                         <tr>
+                           <th scope="row">{{value.0}}</th>
+                           <td style='font-size:12px; font-weight:bold'>{{value.1|floatformat:"2g"}}</td>
+                           <td style='font-size:12px; font-weight:bold'>{{value.2|floatformat:"2g"}}</td>
+        
+                         {%endfor%}
+                          </tbody>
+                     </table>
+                       
+                    </div>
+                 </div>
+              </div>
+
+              
+        
 
               <div class="card-body">
                  <h5 class="card-title" style='font-size:25px'>Equipamentos maior consumo - {{mes_atual}}</h5>
@@ -236,8 +261,78 @@
                   </table>
                     
                  </div>
+
+
+
+                 <div class="col-12">
+                  <div class="card">
+                     <div class="filter">
+                        <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                        {% comment %} <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                           <li class="dropdown-header text-start">
+                              <h6>Filtro</h6>
+                              <form method='GET' id="monthform" action="{%url 'home'%}">
+                               <label for='monthselector'>mês:</label>
+                               <select id='monthselector' name='month'>
+                                 {%for mes in meses%}
+                                   <option value="{{mes}}">{{mes}}</option>
+                                 {%endfor%}
+                               </select>
+                               <input type="submit" class="btn btn-primary" value='Ir'>
+                             </form>
+                        </ul> {% endcomment %}
+                     </div>
+                     <div class="card-body">
+                        <h5 class="card-title">Consumo semanal <span>{{mes_atual}}</span></h5>
+                        <canvas id="reportsChart"></canvas>
+                        <script>
+                           // Dados para o gráfico
+                           var daysOfWeek = ['1ª Sem', '2ª Sem', '3ª Sem', '4ª Sem'];
+                           var values = {{entradas}};
+                           var additionalValues = {{saidas}};
+                   
+                           // Criando o contexto do gráfico
+                           var ctx = document.getElementById('reportsChart').getContext('2d');
+                   
+                           // Criando o gráfico de barras empilhadas
+                           var barChart = new Chart(ctx, {
+                               type: 'bar',
+                               data: {
+                                   labels: daysOfWeek,
+                                   datasets: [
+                                       {
+                                           label: 'Diesel Recebido',
+                                           data: values,
+                                           backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                                           borderColor: 'rgba(75, 192, 192, 1)',
+                                           borderWidth: 1
+                                       },
+                                       {
+                                           label: 'Diesel consumido',
+                                           data: additionalValues,
+                                           backgroundColor: 'rgba(255, 99, 132, 0.7)', // Barra vermelha
+                                           borderColor: 'rgba(217, 5, 12, 1)',
+                                           borderWidth: 1
+                                       }
+                                   ]
+                               },
+                               options: {
+                                   scales: {
+                                       y: {
+                                           beginAtZero: true,
+                                           max: 75000
+                                       }
+                                   }
+                               }
+                           });
+                       </script>
+                     </div>
+                  </div>
+               </div>
               </div>
-           </div>
+
+
+           
 
            <div class="card">
 
@@ -292,39 +387,78 @@
         </div>
         
      </div>
-     <div class="col-lg-8">
-      <div class="card">
-
-         <div class="card-body">
-            <h5 class="card-title" style='font-size:25px'>Entradas e Saídas Obras - {{mes_atual}}</h5>
-            <div class="activity">
 
 
-             <table class="table table-striped table-bordered">
-               <thead style="font-size:10px" >
-                 <tr>
-                   <th scope='col'>Obra</th>
-                   <th scope="col">Saídas</th>
-                   <th scope="col">Entradas</th>
 
-                   
-                 </tr>
-               </thead>
 
-               <tbody style="font-size:10px" >
-               {%for key, value in sort_obras.items%}    
-                 <tr>
-                   <th scope="row">{{key}}</th>
-                   <td style='font-size:12px; font-weight:bold'>{{value.0|floatformat:"2g"}}</td>
-                   <td style='font-size:12px; font-weight:bold'>{{value.1|floatformat:"2g"}}</td>
+      <style>
+        .tanque {
+            width: 250px;
+            height: 125px;
+            border: 2px solid #000;
+            border-radius: 100px; /* Para o efeito cilíndrico */
+            position: relative;
+            overflow: hidden;
+            background: #e0e0e0;
+        }
 
-                 {%endfor%}
-                  </tbody>
-             </table>
-               
-            </div>
-         </div>
-      </div>
+        .volume {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 0%;
+            background: yellow;
+            overflow: hidden;
+            transition: height 0.5s ease;
+        }
+
+        .ondas {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Animação das ondas */
+        .ondas svg {
+            position: absolute;
+            bottom: 0;
+            width: 200%;
+            height: 100%;
+            animation: ondas 4s infinite linear;
+        }
+
+        @keyframes ondas {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+    </style>
+    <div id="porcentagem_diesel" value="{{porcent_estoque}}"></div>
+  
+    <script>
+      // Defina o valor da porcentagem diretamente aqui
+      const porcentagem = {{porcent_estoque}}; // Insira o valor desejado aqui (0 a 100)
+
+      // Atualiza o tanque com base na porcentagem
+      document.getElementById('volume').style.height = porcentagem + '%';
+      document.getElementById('label').innerText = porcentagem + '%';
+  </script>
+
 
 
      
@@ -341,274 +475,6 @@
       
 </body>
 
-
-
-      <div class="modal fade" id="modal_saidas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5">ABASTECIMENTOS</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
-                <input type='hidden' name='form_saidas' value='form_saidas'>
-                <div class="container text-left">
-                    <div class="row">
-                        <div class='col-md-8'>
-                            <div class='col'>
-                                <label style='width:120px' for='tanque'>Tanque:</label> 
-                                <select style="lenght:30px" name='tanque_id'>
-                                  {%for tanque in tanques%}
-                                    <option value="{{tanque.id}}">{{tanque}}</option>
-                                    {%endfor%}
-                                </select>
-                            </div>
-
-                            <div class='col' >
-                                <label style='width: 120px' for='obra'>Obra:</label> 
-                                <select name='obra'>
-                                  {%for obra in obras%}
-                                    <option value="{{obra.id}}">{{obra}}</option>
-                                  {%endfor%}
-                                </select>
-                            </div>
-                            <div class='col' >
-                                <label style='width: 120px' for='equipamento'>Equipamento:</label> 
-                                <select name='equipamento'>
-                                  {%for equipamento in equipamentos%}
-                                    <option value="{{equipamento.id}}">{{equipamento}}</option>
-                                  {%endfor%}
-                                </select>
-                            </div>
-                            <div class='col' >
-                              <label style='width: 120px' for='data_'>Data:</label> 
-                              <input type='date' name='data'>
-                          </div>
-  
-                        </div>
-                    </div>
-
-
-                    <hr>
-
-                    <div class='row'>
-                      <div class='col-md-6'>
-                          <div class='col'>
-                            <label style='width:120px' for='contador_inicial'>Contador inicial:</label>
-                            <input type='text' name='contador_inicial' placeholder='Contador Inicial'>
-                          </div>
-                          <div class='col'>
-                            <label style='width:120px' for='contador_final'>Contador final:</label>
-                            <input type='text' name='contador_final' placeholder='Contador Final'>
-                          </div>
-
-                          <div class='col'>
-                            <label style='width:120px' for='horímetro'>Horímetro:</label>
-                            <input type='text' name='horimetro' placeholder='Horímetro'>
-                          </div>
-                      </div>
-                              <div class='col-md-6'>
-                                  <div class='col'>
-                                    <label style='width:120px' for='saida_litros'>Litros:</label>
-                                    <input type='text' name='saida_litros' placeholder='Litros'> 
-                                  </div>
-                                  <div class='col'>
-                                    <label style='width:120px' for='operador'>Operador:</label>
-                                    <input type='text' name='operador' placeholder='Operador/Motorista'> 
-                                  </div>
-                              </div>
-                    </div>
-                  </div>
-            </div>
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" value='Salvar'>
-            </div>
-          </form>
-          </div>
-        </div>
-      </div>
-
-
-
-
-      
-      
-      
-      <div class="modal fade" id="modal_entradas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">ENTRADAS</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
-                <input type='hidden' name='form_entradas' value='form_entradas'>
-                <div class="container text-left">
-                    <div class="row">
-                        <div class='col-md-6'>
-                            <div class='col'>
-                                <label style='width:80px' for='tanque'>Tanque:</label> 
-                                <select name='tanque_id'>                                 
-                                  {%for tanque in tanques%}
-                                    {%if tanque.tipo == 'F'%}
-                                      <option value="{{tanque.id}}">{{tanque}}</option>
-                                    {%endif%}
-                                  {%endfor%}
-                                </select>
-                            </div>
-
-                            <div class='col' >
-                                <label style='width:80px' for='obra'>Obra:</label> 
-                                <select name='obra_id'>
-                                  {%for obra in obras%}
-                                    <option value="{{obra.id}}">{{obra}}</option>
-                                  {%endfor%}
-                                </select>
-                            </div>
-                            <div class='col' >
-                                <label style='width:80px' for='data_nf'>Data NF:</label> 
-                                <input type='date' name='data_nf'>
-                            </div>
-                        </div>
-
-                      <div class='col-md-6'>
-                        <div class='col'>
-                          <label style='width:100px' for='fornecedor'>Fornecedor:</label>
-                          <input type='text' name='fornecedor' placeholder='Fornecedor'>
-                        </div>
-                          <div class='col'>
-                            <label style='width:100px' for='NF'>Nota Fiscal:</label>
-                            <input type='text' name='NF' placeholder='Nota Fiscal'>
-                          </div>
-                          <div class='col' >
-                            <label style='width:100px' for='data_entrega'>Data Entrega:</label> 
-                            <input type='date' name='data_entrega'>
-                        </div>
-
-
-                      </div>
-                    </div>
-
-                    <hr>
-
-                    <div class='row'>
-                      <div class='col-md-6'>
-                          <div class='col'>
-                            <label style='width:85px' for='valor_litro'>Valor Litro:</label>
-                            <input type='text' name='valor_litro' placeholder='Valor_litro'>
-                          </div>
-                          <div class='col'>
-                            <label style='width:85px' for='quantidade'>Quantidade:</label>
-                            <input type='text' name='quantidade' placeholder='Quantidade'>
-                          </div>
-                      </div>
-                      <div class='col-md-6'>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" value='Salvar'>
-            </div>
-          </form>
-          </div>
-        </div>
-      </div>
-
-
-
-      <div class="modal fade" id="modal_transferencias" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">TRANSFERÊNCIAS</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
-                <input type='hidden' name='form_transferencias' value='form_transferencias'>
-                <div class="container text-left">
-                    <div class="row">
-                        <div class='col-md-6'>
-                            <div class='col'>
-                                <label style='width:130px' for='tanque'>Tanque Fixo:</label> 
-                                <select name='tanque_fixo_id'>                                 
-                                  {%for tanque in tanques%}
-                                    {%if tanque.tipo == 'F'%}
-                                      <option value="{{tanque.id}}">{{tanque}}</option>
-                                    {%endif%}
-                                  {%endfor%}
-                                </select>
-                            </div>
-
-                            <div class='col'>
-                              <label style='width:130px' for='tanque'>Tanque Móvel:</label> 
-                              <select name='tanque_movel_id'>                                 
-                                {%for tanque in tanques%}
-                                  {%if tanque.tipo == 'M'%}
-                                    <option value="{{tanque.id}}">{{tanque}}</option>
-                                  {%endif%}
-                                {%endfor%}
-                              </select>
-                          </div>
-
-                            <div class='col' >
-                                <label style='width:130px' for='contador_inicio'>Contador Inicial:</label>
-                                <input type='text' name='contador_inicio' placeholder='Contador Inicio'>
-                            </div>
-                            <div class='col' >
-                              <label style='width:130px' for='contador_fim'>Contador Final:</label>
-                              <input type='text' name='contador_fim' placeholder='Contador Final'>
-                          </div>
-                            
-                        </div>
-
-                      <div class='col-md-6'>
-                        <div class='col'>
-                          <label style='width:130px' for='contador_comboio'>Contador Melosa:</label>
-                          <input type='text' name='contador_comboio' placeholder='Contador'>
-                        </div>
-                          <div class='col' >
-                            <label style='width:130px' for='motorista'>Motorista:</label> 
-                            <input type='text' name='motorista' placeholder='motorista'>
-                        </div>
-
-
-                      </div>
-                    </div>
-
-                    <hr>
-
-                    <div class='row'>
-                      <div class='col-md-6'>
-                          <div class='col'>
-
-                          <div class='col'>
-
-                          </div>
-                      </div>
-                      <div class='col-md-6'>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" value='Salvar'>
-            </div>
-          </form>
-          </div>
-        </div>
-      </div>
 
 
       </html>

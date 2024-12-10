@@ -55,7 +55,9 @@ def home(request):
             elif tanque.prefixo == 'CA-02.1':
                 ca02 = [tanque.estoque, round(100*tanque.estoque/4500,2)]
         estoque_total = tc01[0]+tc02[0]+ca01[0]+ca02[0]
-        porcent_estoque = round(100*(estoque_total/(15000+30000+4200+4500)),1)
+        porcent_estoque = int(round(100*(estoque_total/(15000+30000+4200+4500)),1))
+
+
         #Alterações horímetro equipamento
 
         tc_total = tc01[0]+tc02[0]
@@ -115,19 +117,36 @@ def home(request):
         lista_final = []
         print(entradas, saidas, "!!!!!!!!!!!!!!!!!!")
         
-        #criação de gráfico obras no frontend
+        #criação de tabela e grafico de consumo e entardas
         for obra in obras:
             consumo_mensal_obras = Abastecimento.objects.filter(data__month=mes).filter(data__year=ano).filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
             entrada_mensal_obras = Entrada.objects.filter(data_entrega__month=mes).filter(data_entrega__year=ano).filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']
             lista_obras.append(obra.nome)
             if consumo_mensal_obras == None:
                 consumo_mensal_obras = 0
-            lista_consumo.append(consumo_mensal_obras)
+                pass
+            else:
+                lista_consumo.append(consumo_mensal_obras)
 
             if entrada_mensal_obras == None:
                 entrada_mensal_obras = 0
-            lista_entradas.append(entrada_mensal_obras)
-            lista_final.append([consumo_mensal_obras, entrada_mensal_obras])
+                pass
+                lista_entradas.append(entrada_mensal_obras)
+            if entrada_mensal_obras ==0 and consumo_mensal_obras ==0:
+                pass
+            else:
+                lista_final.append([obra, consumo_mensal_obras, entrada_mensal_obras])
+
+        def terceiro_item(list):
+                return list[1]
+
+        lista_final = sorted(lista_final, key=terceiro_item)
+        # TABELA ENTRADAS E SAÍDAS OBRAS
+        sort_obras = lista_final
+        # sort_dict_obras = dict(sorted(sort_obras.items(), key=itemgetter(1), reverse=True))
+        print(sort_obras)
+
+
 
 
         
@@ -154,11 +173,6 @@ def home(request):
         #DATA ATUAL
         data_ultimo_abastecimento = Abastecimento.objects.aggregate(ultima_data=Max('data'))['ultima_data']
 
-        # TABELA ENTRADAS E SAÍDAS OBRAS
-        sort_obras = dict(zip(lista_obras,lista_final))
-        # sort_dict_obras = dict(sorted(sort_obras.items(), key=itemgetter(1), reverse=True))
-        print(sort_obras)
-        
 
 
 
