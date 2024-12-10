@@ -177,6 +177,8 @@ def home(request):
         entradas_graph = [i[2] for i in lista_final]
         saidas_graph = [i[1] for i in lista_final]
         obras_grafico = [i[0].nome for i in lista_final]
+
+        print(entradas_graph, saidas_graph, obras_grafico)
         
 
 

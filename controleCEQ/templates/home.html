@@ -55,7 +55,7 @@
                              <h6>{{estoque_total|floatformat:"2g"}} Litros </h6>
                              <span class="text-danger small pt-1 fw-bold">{{porcent_estoque}}%</span> <span class="text-muted small pt-2 ps-1">volume</span>
                           </div>
-                          <div style='margin-left:5px'>
+                          <div style='margin-left:20px'>
 
                             <div class="tanque">
                               <div class="volume" id="volume">
@@ -235,12 +235,12 @@
 
 
                 <div class="card">
-                  <canvas id="obraChart"></canvas>
+                  <canvas id="OKOK"></canvas>
                   <script>
                       var obras = {{ obras_grafico|safe }};
-                      var values = {{ entradas|safe }};
-                      var additionalValues = {{ saidas|safe }};
-                      var ctx = document.getElementById('obraChart').getContext('2d');
+                      var values = {{ entradas_graph|safe }};
+                      var additionalValues = {{ saidas_graph|safe }};
+                      var ctx = document.getElementById('OKOK').getContext('2d');
                       
                       var barChart = new Chart(ctx, {
                           type: 'bar',
