@@ -173,6 +173,11 @@ def home(request):
         #DATA ATUAL
         data_ultimo_abastecimento = Abastecimento.objects.aggregate(ultima_data=Max('data'))['ultima_data']
 
+        # Gerar gráfico com JChart
+        entradas_graph = [i[2] for i in lista_final]
+        saidas_graph = [i[1] for i in lista_final]
+        obras_grafico = [i[0].nome for i in lista_final]
+        
 
 
 
@@ -196,7 +201,11 @@ def home(request):
                                              'list_consumo':list_consumo,
                                              'sort_dict':sort_d,
                                              'data_ultimo_abastecimento':data_ultimo_abastecimento,
-                                             'sort_obras':sort_obras})
+                                             'sort_obras':sort_obras,
+                                             'entradas_graph':entradas_graph,
+                                             'saidas_graph':saidas_graph,
+                                             'obras_grafico':obras_grafico
+                                             })
     
     if request.method == 'POST':
 
