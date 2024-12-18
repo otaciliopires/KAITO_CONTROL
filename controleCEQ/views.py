@@ -1237,7 +1237,7 @@ def pdf_relatorio(request, mes_atual):
         'grafico_img': img_base64,  # Incluindo a imagem gerada no HTML
     })
 
-    # Converte o HTML para PDF
+    # Converte o HTML para PDF#
     pdf_file = HTML(string=html_string).write_pdf()
 
     # Retorna o PDF como uma resposta HTTP
