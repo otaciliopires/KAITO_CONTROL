@@ -1245,14 +1245,24 @@ def pdf_relatorio(request, mes_atual):
     response['Content-Disposition'] = 'attachment; filename="relatorio.pdf"'
     return response
 
+import tempfile
+
 def saidas_pdf(request):
     saidas = Abastecimento.objects.all()[:5]
     html_index = render_to_string('saidas_pdf.html', {'saidas': saidas,
                                                       'total_saidas':10000})  
+    
+    # Cria um arquivo temporário
+    with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
+        temp_file.write(html_index)
+        temp_file_path = temp_file.name
 
-    pdf = HTML(string=html_index).write_pdf()
+    pdf = HTML(temp_file_path).write_pdf()
 
     # Retorna o PDF como resposta HTTP
     response = HttpResponse(pdf, content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="documento.pdf"'
+
+    import os
+    os.remove(temp_file_path)
     return response
