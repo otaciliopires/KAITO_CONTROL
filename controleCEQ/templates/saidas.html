@@ -127,7 +127,7 @@
              <a class="btn btn-danger" href="{% url 'saidas_pdf' %}">ExportPDF</a>
              <div style="margin-left: 450px; margin-top:8px; color:black; font-size:20px">TOTAL {{total_saidas|floatformat:"2g"}} Litros</div>
              <div  class="modal fade" id="basicModal" tabindex="-1">
-              <form method='POST' action="{% url 'saidas' %}"> {% csrf_token %}
+              <form method='GET' action="{% url 'saidas' %}"> {% csrf_token %}
                 <div  class="modal-dialog">
                    <div style="width: 650px; padding-left: 40px; padding-right: 40px;" class="modal-content">
                       <div class="modal-header">

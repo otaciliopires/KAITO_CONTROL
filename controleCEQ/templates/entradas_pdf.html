@@ -35,78 +35,7 @@
 
 
 {%block 'body'%}
-
-
-
-
-
-
-
-
   <main id="main" class="main">
-    <div class="pagetitle">
-       <h1 style="font-size: 50px;">Entradas</h1>
-       <nav>
-          
-       </nav>
-       <nav>
-          <ol class="breadcrumb">
-             <li style="margin-top: 10px; margin-right: 10px;"><a href="index.html">Filtrar entradas:</a></li>
-             <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#basicModal"> Filtro Entradas </button>
-             <a class="btn btn-success" href="{% url 'entradas_pdf' %}">ExportPDF</a>
-             <div style="margin-left: 400px; margin-top:8px; color:black; font-size:20px">TOTAL {{total_entradas|floatformat:"2g"}} Litros</div>
-             <div  class="modal fade" id="basicModal" tabindex="-1">
-              <form method='GET' action="{% url 'entradas' %}"> {% csrf_token %}
-                <div  class="modal-dialog">
-                   <div style="width: 650px; padding-left: 40px; padding-right: 40px;" class="modal-content">
-                      <div class="modal-header">
-                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                      </div>
-                      <div class="row mb-3">
-                         <label for="inputDate" class="col-sm-2 col-form-label">Data Início:</label>
-                         <div class="col-sm-10"> <input style="width:150px" name='data_inicio' type="date" class="form-control"></div>
-                      </div>          
-                      <div class="row mb-3">
-                         <label for="inputDate" class="col-sm-2 col-form-label">Data Fim:</label>
-                         <div class="col-sm-10"> <input style="width:150px" name='data_fim' type="date" class="form-control"></div>
-                      </div>
-                      <div class="row mb-3">
-                         <label class="col-sm-2 col-form-label">Obras:</label>
-                         <div class="col-sm-10">
-                            
-            <div class="mb-3">
-              <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Obras
-              </button>
-              <ul style='width:300px' class="dropdown-menu">
-                  {%for obra in obras%}
-                  <li>
-                      <div style='margin-left:20px' class="mb-3 form-check">
-                          <input name='obra' type="checkbox" class="form-check-input" id="exampleCheck1" value="{{obra.id}}">
-                          <label class="form-check-label" for="exampleCheck1">{{obra}}</label>
-                      </div>
-                  </li>
-                  {%endfor%}
-
-                  
-              </ul>
-            </div>
-              </button>
-          </div>
-                         </div>
-                      </div>
-                                                         
-                      <div class="modal-footer"><input type="submit" class="btn btn-primary" value='ENVIAR'></input></div>
-                   </div>
-                </div>
-              </form>
-             </div>
-          </ol>
-       </nav>
-
-
-
 
     </div>
     <section class="section dashboard">
@@ -157,13 +86,6 @@
 
                
  </main>
- <footer id="footer" class="footer">
-    <div class="copyright"> &copy; Copyright <strong><span>Kaito Control</span></strong>. All Rights Reserved</div>
-    
- </footer>
- <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>  
-
-
 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

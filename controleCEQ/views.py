@@ -618,19 +618,19 @@ def saidas(request):
     for o in obras: list_obras.append(o)
     
 
-    data_inicio = request.POST.get('data_inicio')
+    data_inicio = request.GET.get('data_inicio')
     if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
     else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
         
-    data_fim = request.POST.get('data_fim')
+    data_fim = request.GET.get('data_fim')
     if data_fim == None or data_fim == '': data_fim = date.today()
     else: data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
 
 
-    filtro_obras = request.POST.getlist('obra')
-    filtro_equipamento = request.POST.getlist('equipamento')
+    filtro_obras = request.GET.getlist('obra')
+    filtro_equipamento = request.GET.getlist('equipamento')
     
-    if request.POST.get('data_inicio') or request.POST.get('data_fim') or request.POST.getlist('equipamento') or request.POST.getlist('obra'):
+    if request.GET.get('data_inicio') or request.GET.get('data_fim') or request.GET.getlist('equipamento') or request.GET.getlist('obra'):
         if not data_inicio:
             data_inicio = date(2020,1,1)
         if not data_fim:
@@ -652,7 +652,7 @@ def saidas(request):
     obra_user=Obras.objects.filter(usuario=user.id)
     print(type(data_fim), data_fim)
     print(type(data_inicio), data_inicio)
-    print(total_saidas)
+    print(type(saidas))
     
     return render(request, 'saidas.html', {'saidas': saidas, 
                                            'obras': obras, 
@@ -673,13 +673,11 @@ def entradas(request):
     for i in obras: list_obras.append(i)
 
     #filtro
-    filtro_obra = request.POST.getlist('obra')
-    data_inicio = request.POST.get('data_inicio')
-    data_fim = request.POST.get('data_fim')
-    if request.method == 'POST':
-        print(data_inicio, data_fim, filtro_obra)
+    filtro_obra = request.GET.getlist('obra')
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
 
-        if data_inicio or data_fim or filtro_obra:
+    if data_inicio or data_fim or filtro_obra:
             if not data_inicio:
                 data_inicio = date(2020,1,1)
             elif data_inicio == None:
@@ -690,27 +688,13 @@ def entradas(request):
                 data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
             if not filtro_obra:
                 filtro_obra = list_obras
-        entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
-        total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
-
-    elif request.method == "GET":
-        if not data_inicio:
-            data_inicio = date(2020,1,1)
-        elif data_inicio == None:
-            data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
-        if not data_fim:
-            data_fim = date.today()
-        elif data_fim == None:
-            data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
-        if not filtro_obra:
-            filtro_obra = list_obras
+            entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
+            total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
 
         
-        entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
-        total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
     else:
-        entradas = Entrada.objects.all().order_by('numero')
-        total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
+            entradas = Entrada.objects.all().order_by('numero')
+            total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
 
 
     # print(f"{filtro_obra} and {type(filtro_obra)}")
@@ -1203,20 +1187,24 @@ def pdf_relatorio(request, mes_atual):
     # Gerar gráfico com Matplotlib
     fig, ax = plt.subplots(figsize=(10, 6))
     ind = np.arange(len(obras_grafico))  # Localizações no eixo x
-    width = 0.4  # Largura das barras (reduzida para criar espaço)
+    width = 0.4  # Largura das barras
 
     # Criar as barras lado a lado com espaçamento
     ax.bar(ind - width/2 - 0.02, entradas, width=width - 0.02, label='Diesel Recebido', color='blue')  # Ligeiro deslocamento à esquerda
     ax.bar(ind + width/2 + 0.02, saidas, width=width - 0.02, label='Diesel Consumido', color='red')  # Ligeiro deslocamento à direita
 
+    # Ajustar a posição dos ticks do eixo X para ficarem centralizados entre as barras
+    ax.set_xticks(ind)  # Ticks permanecem no mesmo índice
+    ax.set_xticklabels(obras_grafico, rotation=60, fontsize=8)  # Centralizar os nomes das obras
+
     # Configurações do gráfico
     ax.set_xlabel('Obras')
     ax.set_ylabel('Quantidade de Diesel')
     ax.set_title(f'Gráfico de Diesel Recebido e Consumido - {mes_atual}')
-    ax.set_xticks(ind)
-    ax.set_xticklabels(obras_grafico, rotation=60, fontsize=8)  # Rotação e tamanho da fonte
 
+    # Adicionar legenda
     ax.legend()
+
     # Ajusta automaticamente o layout para evitar corte de labels
     plt.tight_layout()
 
@@ -1251,9 +1239,99 @@ def pdf_relatorio(request, mes_atual):
 
 from xhtml2pdf import pisa
 def saidas_pdf(request):
+    obras = Obras.objects.all()
+    equipamentos = Equipamentos.objects.all()
+    list_equipamentos = []
+    list_obras =[]
+
+    for e in equipamentos:list_equipamentos.append(e)
+    for o in obras: list_obras.append(o)
+    
+
+    data_inicio = request.GET.get('data_inicio')
+    if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
+    else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+        
+    data_fim = request.GET.get('data_fim')
+    if data_fim == None or data_fim == '': data_fim = date.today()
+    else: data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
+
+
+    filtro_obras = request.GET.getlist('obra')
+    filtro_equipamento = request.GET.getlist('equipamento')
+    
+    if request.GET.get('data_inicio') or request.GET.get('data_fim') or request.GET.getlist('equipamento') or request.GET.getlist('obra'):
+        if not data_inicio:
+            data_inicio = date(2020,1,1)
+        if not data_fim:
+            data_fim = date.today()
+        if not filtro_equipamento:
+            filtro_equipamento = list_equipamentos
+        if not filtro_obras:
+            filtro_obras= list_obras
+
+
+        saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).filter(equipamento__in=filtro_equipamento).filter(obra__in=filtro_obras).order_by('numero')
+        total_saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).filter(equipamento__in=filtro_equipamento).filter(obra__in=filtro_obras).aggregate(Sum('litros'))['litros__sum']
+
+    else:
+        saidas = Abastecimento.objects.all().order_by('-numero')[:100]
+        total_saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).aggregate(Sum('litros'))['litros__sum']
+
+
+
     # Renderizar o HTML
-    saidas = Abastecimento.objects.all()[:5]
-    html_index = render_to_string('saidas_pdf.html', {'saidas': saidas, 'total_saidas': 10000})
+
+
+    html_index = render_to_string('saidas_pdf.html', {'saidas': saidas, 'total_saidas': total_saidas})
+    
+    # Criação do PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="documento.pdf"'
+
+    # Converter HTML para PDF
+    pisa_status = pisa.CreatePDF(html_index, dest=response)
+    
+    # Verificar erros
+    if pisa_status.err:
+        return HttpResponse('Erro ao gerar PDF', status=500)
+    
+    return response
+
+
+def entradas_pdf(request):
+    obras = Obras.objects.all()
+
+    list_obras = []
+    for i in obras: list_obras.append(i)
+
+    #filtro
+    filtro_obra = request.GET.getlist('obra')
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+
+    if request.GET.getlist('obra') or request.GET.get('data_inicio') or request.GET.get('data_fim'):
+            if not data_inicio:
+                data_inicio = date(2020,1,1)
+            elif data_inicio == None:
+                data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+            if not data_fim:
+                data_fim = date.today()
+            elif data_fim == None:
+                data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
+            if not filtro_obra:
+                filtro_obra = list_obras
+            entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
+            total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
+
+        
+    else:
+            entradas = Entrada.objects.all().order_by('numero')
+            total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
+
+
+    # Renderizar o HTML
+    html_index = render_to_string('entradas_pdf.html', {'entradas': entradas, 'total_entradas': total_entradas})
     
     # Criação do PDF
     response = HttpResponse(content_type='application/pdf')

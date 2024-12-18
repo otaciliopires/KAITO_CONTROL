@@ -16,6 +16,7 @@ urlpatterns = [
     path('grafico_vunit/', views.grafico_vunit, name='grafico_vunit'),
     path('relatorio/', views.relatorio, name='relatorio'),
     path('pdf_relatorio/<str:mes_atual>/', views.pdf_relatorio, name='pdf_relatorio'),
-    path('saidas_pdf/', views.saidas_pdf, name='saidas_pdf')
+    path('saidas_pdf/', views.saidas_pdf, name='saidas_pdf'),
+    path('entradas_pdf/', views.entradas_pdf, name='entradas_pdf'),
 
 ]
