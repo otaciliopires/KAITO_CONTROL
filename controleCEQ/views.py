@@ -1245,24 +1245,21 @@ def pdf_relatorio(request, mes_atual):
     response['Content-Disposition'] = 'attachment; filename="relatorio.pdf"'
     return response
 
-import tempfile
-
+from xhtml2pdf import pisa
 def saidas_pdf(request):
+    # Renderizar o HTML
     saidas = Abastecimento.objects.all()[:5]
-    html_index = render_to_string('saidas_pdf.html', {'saidas': saidas,
-                                                      'total_saidas':10000})  
+    html_index = render_to_string('saidas_pdf.html', {'saidas': saidas, 'total_saidas': 10000})
     
-    # Cria um arquivo temporário
-    with tempfile.NamedTemporaryFile(delete=False, mode='w', encoding='utf-8') as temp_file:
-        temp_file.write(html_index)
-        temp_file_path = temp_file.name
-
-    pdf = HTML(temp_file_path).write_pdf()
-
-    # Retorna o PDF como resposta HTTP
-    response = HttpResponse(pdf, content_type='application/pdf')
+    # Criação do PDF
+    response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="documento.pdf"'
 
-    import os
-    os.remove(temp_file_path)
+    # Converter HTML para PDF
+    pisa_status = pisa.CreatePDF(html_index, dest=response)
+    
+    # Verificar erros
+    if pisa_status.err:
+        return HttpResponse('Erro ao gerar PDF', status=500)
+    
     return response
