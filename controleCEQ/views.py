@@ -1245,6 +1245,14 @@ def pdf_relatorio(request, mes_atual):
     response['Content-Disposition'] = 'attachment; filename="relatorio.pdf"'
     return response
 
-def ativar_pdf(request):
-    mes_atual = request.POST.get('mes_atual')
-    return redirect(f'/pdf_relatorio/{mes_atual}')
+def saidas_pdf(request):
+    saidas = Abastecimento.objects.all()[:5]
+    html_index = render_to_string('saidas_pdf.html', {'saidas': saidas,
+                                                      'total_saidas':10000})  
+
+    pdf = HTML(string=html_index).write_pdf()
+
+    # Retorna o PDF como resposta HTTP
+    response = HttpResponse(pdf, content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="documento.pdf"'
+    return response
