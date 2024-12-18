@@ -1200,24 +1200,27 @@ def pdf_relatorio(request, mes_atual):
     saidas = [i[1] for i in lista_final]
     obras_grafico = [i[0].nome for i in lista_final]
         
+    # Gerar gráfico com Matplotlib
     fig, ax = plt.subplots(figsize=(10, 6))
-    ind = np.arange(len(obras_grafico))  # localizações no eixo x
-    width = 0.35  # largura das barras
-    ax.bar(ind, entradas, width, label='Diesel Recebido', color='blue')
-    ax.bar(ind, saidas, width, bottom=entradas, label='Diesel Consumido', color='red')
+    ind = np.arange(len(obras_grafico))  # Localizações no eixo x
+    width = 0.4  # Largura das barras (reduzida para criar espaço)
 
+    # Criar as barras lado a lado com espaçamento
+    ax.bar(ind - width/2 - 0.02, entradas, width=width - 0.02, label='Diesel Recebido', color='blue')  # Ligeiro deslocamento à esquerda
+    ax.bar(ind + width/2 + 0.02, saidas, width=width - 0.02, label='Diesel Consumido', color='red')  # Ligeiro deslocamento à direita
+
+    # Configurações do gráfico
     ax.set_xlabel('Obras')
     ax.set_ylabel('Quantidade de Diesel')
     ax.set_title(f'Gráfico de Diesel Recebido e Consumido - {mes_atual}')
     ax.set_xticks(ind)
-    ax.set_xticklabels(obras_grafico, rotation=60, fontsize=8)  # Define a rotação e o tamanho da fonte
+    ax.set_xticklabels(obras_grafico, rotation=60, fontsize=8)  # Rotação e tamanho da fonte
 
     ax.legend()
     # Ajusta automaticamente o layout para evitar corte de labels
     plt.tight_layout()
 
-    # Limpa o buffer para evitar sobreposição
-        # Salvar a imagem do gráfico em base64
+    # Salvar a imagem do gráfico em base64
     img_buffer = BytesIO()  # Certifique-se de criar um novo buffer vazio
     plt.savefig(img_buffer, format='png')  # Salva a imagem no buffer
     plt.close(fig)  # Fecha o gráfico
@@ -1226,23 +1229,24 @@ def pdf_relatorio(request, mes_atual):
     # Codificando a imagem em base64 para incluir no template HTML
     img_base64 = base64.b64encode(img_buffer.read()).decode('utf-8')
 
-    # Gera o HTML com os dados
+    # Geração do HTML para o PDF
     html_string = render_to_string('pdf_relatorio.html', {
-        'meses': meses,
-        'sort_obras': sort_obras,
         'mes_atual': mes_atual,
-        'saidas': json.dumps([x[1] for x in lista_final]),
-        'entradas': json.dumps([x[2] for x in lista_final]),
-        'obras_grafico': json.dumps([x[0].nome for x in lista_final]),
-        'grafico_img': img_base64,  # Incluindo a imagem gerada no HTML
+        'obras_grafico': obras_grafico,
+        'entradas': entradas,
+        'saidas': saidas,
+        'grafico_img': img_base64,
+        'sort_obras': lista_final,
     })
 
-    # Converte o HTML para PDF#
-    pdf_file = HTML(string=html_string).write_pdf()
-
-    # Retorna o PDF como uma resposta HTTP
-    response = HttpResponse(pdf_file, content_type='application/pdf')
+    # Geração do PDF usando xhtml2pdf
+    response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="relatorio.pdf"'
+
+    pisa_status = pisa.CreatePDF(html_string, dest=response)
+    if pisa_status.err:
+        return HttpResponse('Erro ao gerar PDF', status=500)
+
     return response
 
 from xhtml2pdf import pisa
