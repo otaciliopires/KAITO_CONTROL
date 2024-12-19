@@ -119,12 +119,14 @@
           
        </nav>
        <nav>
-        
+            {{data_inicio}}
 
           <ol class="breadcrumb">
              <li style="margin-top: 10px; margin-right: 10px;"><a href="index.html">Filtrar saídas:</a></li>
              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#basicModal"> Filtro Saídas </button>
-             <a class="btn btn-danger" href="{% url 'saidas_pdf' %}">ExportPDF</a>
+             <a href="{% url 'saidas_pdf' %}?data_inicio={{ data_inicio|date:"Y-m-d" }}&data_fim={{ data_fim|date:"Y-m-d" }}&obra={{ obras_list }}&equipamento={{ equipamentos_list }}" target="_blank" class="btn" style="background-color:#e65f4f;color:white; margin-left:15px">Gerar PDF</a>
+
+
              <div style="margin-left: 450px; margin-top:8px; color:black; font-size:20px">TOTAL {{total_saidas|floatformat:"2g"}} Litros</div>
              <div  class="modal fade" id="basicModal" tabindex="-1">
               <form method='GET' action="{% url 'saidas' %}"> {% csrf_token %}

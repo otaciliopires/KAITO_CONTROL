@@ -631,10 +631,7 @@ def saidas(request):
     filtro_equipamento = request.GET.getlist('equipamento')
     
     if request.GET.get('data_inicio') or request.GET.get('data_fim') or request.GET.getlist('equipamento') or request.GET.getlist('obra'):
-        if not data_inicio:
-            data_inicio = date(2020,1,1)
-        if not data_fim:
-            data_fim = date.today()
+
         if not filtro_equipamento:
             filtro_equipamento = list_equipamentos
         if not filtro_obras:
@@ -653,12 +650,28 @@ def saidas(request):
     print(type(data_fim), data_fim)
     print(type(data_inicio), data_inicio)
     print(type(saidas))
+
+
+    if not request.GET.getlist('obra'):
+        obras_selecionadas = []
+    else:
+        obras_selecionadas = ",".join(filtro_obras)
+
+    if not request.GET.getlist('equipamento'):
+        equipamentos_selecionados=[]
+    else:
+        equipamentos_selecionados =  ",".join(filtro_equipamento)
+
     
     return render(request, 'saidas.html', {'saidas': saidas, 
                                            'obras': obras, 
                                            'equipamentos':equipamentos, 
                                            "user":user, 
-                                           'total_saidas':total_saidas})
+                                           'total_saidas':total_saidas,
+                                           'obras_list':obras_selecionadas,
+                                           'equipamentos_list': equipamentos_selecionados,
+                                           'data_inicio':data_inicio,
+                                           'data_fim':data_fim})
  
  elif request.user.status == 'o': 
     return HttpResponse('acesso negado')
@@ -668,45 +681,55 @@ def entradas(request):
   if request.user.status=='c':
 
     obras = Obras.objects.all()
+    list_obras =[]
 
-    list_obras = []
-    for i in obras: list_obras.append(i)
+    for o in obras: list_obras.append(o)
+    
 
-    #filtro
-    filtro_obra = request.GET.getlist('obra')
     data_inicio = request.GET.get('data_inicio')
+    if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
+    else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+        
     data_fim = request.GET.get('data_fim')
+    if data_fim == None or data_fim == '': data_fim = date.today()
+    else: data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
 
-    if data_inicio or data_fim or filtro_obra:
-            if not data_inicio:
-                data_inicio = date(2020,1,1)
-            elif data_inicio == None:
-                data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
-            if not data_fim:
-                data_fim = date.today()
-            elif data_fim == None:
-                data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
-            if not filtro_obra:
-                filtro_obra = list_obras
-            entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
-            total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
+
+    filtro_obra = request.GET.getlist('obra')
+    
+    if request.GET.get('data_inicio') or request.GET.get('data_fim') or request.GET.getlist('obra'):
+
+        if not filtro_obra:
+            filtro_obra= list_obras
+
+
+        entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
+        total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
 
         
     else:
-            entradas = Entrada.objects.all().order_by('numero')
-            total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
+        entradas = Entrada.objects.all().order_by('numero')
+        total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
+
+    if not request.GET.getlist('obra'):
+        obras_selecionadas = []
+    else:
+        obras_selecionadas = ",".join(filtro_obra)
 
 
     # print(f"{filtro_obra} and {type(filtro_obra)}")
     # print(f"{data_inicio} and {type(data_inicio)}")
     user = request.user
     obra_user=Obras.objects.filter(usuario=user.id)
-    # print(entradas)
+    print(data_inicio, data_fim, "!!!!!!!!!!!!!!!!!!!!!")
 
     return render(request, 'entradas.html', {'entradas':entradas, 
                                              'obras': obras, 
                                              "user":user, 
-                                             'total_entradas':total_entradas})
+                                             'total_entradas':total_entradas,
+                                             'obras_list':obras_selecionadas,
+                                             'data_inicio':data_inicio,
+                                             'data_fim': data_fim})
   else: return HttpResponse("<h1>Acesso negado</h1>")
 
 def transferencias(request):
@@ -1249,6 +1272,7 @@ def saidas_pdf(request):
     
 
     data_inicio = request.GET.get('data_inicio')
+    print(data_inicio, "!!!!!!!!!!!!!!!!!!!!!!")
     if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
     else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
         
@@ -1257,18 +1281,18 @@ def saidas_pdf(request):
     else: data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
 
 
-    filtro_obras = request.GET.getlist('obra')
-    filtro_equipamento = request.GET.getlist('equipamento')
-    
+    filtro_obras = obras = request.GET.get('obra', '').split(',') if request.GET.get('obra') else []
+    filtro_equipamento = request.GET.get('equipamento', '').split(',') if request.GET.get('equipamento') else []
+    print(data_inicio, data_fim, "aaaaaaaaaaakcaldmakslmdakndkasnldkakls")
     if request.GET.get('data_inicio') or request.GET.get('data_fim') or request.GET.getlist('equipamento') or request.GET.getlist('obra'):
         if not data_inicio:
             data_inicio = date(2020,1,1)
         if not data_fim:
             data_fim = date.today()
-        if not filtro_equipamento:
+        if filtro_equipamento == ["[]"]:
             filtro_equipamento = list_equipamentos
-        if not filtro_obras:
-            filtro_obras= list_obras
+        if filtro_obras == ["[]"]:
+            filtro_obras= list_obras[:100]
 
 
         saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).filter(equipamento__in=filtro_equipamento).filter(obra__in=filtro_obras).order_by('numero')
@@ -1277,7 +1301,6 @@ def saidas_pdf(request):
     else:
         saidas = Abastecimento.objects.all().order_by('-numero')[:100]
         total_saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).aggregate(Sum('litros'))['litros__sum']
-
 
 
     # Renderizar o HTML
@@ -1306,21 +1329,30 @@ def entradas_pdf(request):
     for i in obras: list_obras.append(i)
 
     #filtro
+    data_inicio = request.GET.get('data_inicio1')
+    data_fim = request.GET.get('data_fim1')
+
     filtro_obra = request.GET.getlist('obra')
-    data_inicio = request.GET.get('data_inicio')
-    data_fim = request.GET.get('data_fim')
+
+
+    print(data_inicio,data_fim, "!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+
+
+    if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
+    else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+        
+    if data_fim == None or data_fim == '': data_fim = date.today()
+    else: data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
+
+    filtro_obra = obras = request.GET.get('obra', '').split(',') if request.GET.get('obra') else []
 
     if request.GET.getlist('obra') or request.GET.get('data_inicio') or request.GET.get('data_fim'):
-            if not data_inicio:
-                data_inicio = date(2020,1,1)
-            elif data_inicio == None:
-                data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
-            if not data_fim:
-                data_fim = date.today()
-            elif data_fim == None:
-                data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
-            if not filtro_obra:
-                filtro_obra = list_obras
+
+            if filtro_obra == ["[]"]:
+                filtro_obra= list_obras
+                
+            
             entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
             total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
 
@@ -1333,14 +1365,14 @@ def entradas_pdf(request):
     # Renderizar o HTML
     html_index = render_to_string('entradas_pdf.html', {'entradas': entradas, 'total_entradas': total_entradas})
     
-    # Criação do PDF
+    # # Criação do PDF
     response = HttpResponse(content_type='application/pdf')
     response['Content-Disposition'] = 'attachment; filename="documento.pdf"'
 
-    # Converter HTML para PDF
+    # # Converter HTML para PDF
     pisa_status = pisa.CreatePDF(html_index, dest=response)
     
-    # Verificar erros
+    # # Verificar erros
     if pisa_status.err:
         return HttpResponse('Erro ao gerar PDF', status=500)
     
