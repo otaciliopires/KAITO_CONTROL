@@ -53,18 +53,30 @@
    </header>
    <aside id="sidebar" class="sidebar">
       <ul class="sidebar-nav" id="sidebar-nav">
-         <li class="nav-item"> <a class="nav-link " href="{%url 'home_manutencao'%}"> <i class="bi bi-grid"></i> <span>HOME Manutenção</span> </a></li>
+         <li class="nav-item"> <a class="nav-link " href="{%url 'servicos_manutencao'%}"> <i class="bi bi-grid"></i> <span>Home Manutenção</span> </a></li>
+         
+         <li class="nav-item">
+            <a class="nav-link collapsed" href="{%url 'servicos_manutencao'%}" data-bs-target="#components-nav"  > <i class="bi bi-tools"></i></i><span>Serviços Manutenção</span> </a>
+
+         </li>
+         
          <li class="nav-item">
             <a class="nav-link collapsed" href="{%url 'solicitacoes'%}" data-bs-target="#components-nav"  > <i class="bi bi-archive"></i></i><span>Solicitações</span> </a>
 
          </li>
          <li class="nav-item">
-            <a class="nav-link collapsed" href="{%url 'analise_mecanicos'%}" data-bs-target="#forms-nav" > <i class="bi bi-tools"></i></i><span>Mecânicos</span></a>
+            <a class="nav-link collapsed" href="{%url 'analise_mecanicos'%}" data-bs-target="#forms-nav" > <i class="bi bi-person-fill-gear"></i></i><span>Mecânicos</span></a>
 
          </li>
 
          <li class="nav-item">
-            <a class="nav-link collapsed" href="{%url 'servicos_post'%}" data-bs-target="#forms-nav" > <i class="bi bi-layout-text-sidebar-reverse"></i></i><span>Serviços Finalizados</span></a>
+            <a class="nav-link collapsed" href="{%url 'servicos_post'%}" data-bs-target="#forms-nav" > <i class="bi bi-gear-wide-connected"></i></i></i><span>Serviços Finalizados</span></a>
+
+         </li>
+
+         
+         <li class="nav-item">
+            <a class="nav-link collapsed" href="{%url 'pendencias'%}" data-bs-target="#forms-nav" > <i class="bi bi-gear-fill"></i></i><span>Pendências</span></a>
 
          </li>
          {% comment %} <li class="nav-item">

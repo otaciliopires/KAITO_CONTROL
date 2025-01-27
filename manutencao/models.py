@@ -165,5 +165,14 @@ class Registro_Tempo_Servico(models.Model):
 
     
 
-
+class Pendencias(models.Model):
+    equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING)
+    descricao = models.CharField(max_length=500)
+    status = models.CharField(max_length=50)
+    situacao = models.CharField(max_length=50)
+    data_inicio = models.DateTimeField(null=True, blank=True)
+    data_fim = models.DateTimeField(null=True, blank=True)
+    
+    def __str__(self):
+        return self.equipamento.prefixo
     

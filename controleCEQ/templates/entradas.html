@@ -53,7 +53,7 @@
           <ol class="breadcrumb">
              <li style="margin-top: 10px; margin-right: 10px;"><a href="index.html">Filtrar entradas:</a></li>
              <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#basicModal"> Filtro Entradas </button>
-             <a href="{% url 'entradas_pdf' %}?data_inicio1={{ data_inicio|date:"Y-m-d" }}&data_fim1={{ data_fim|date:"Y-m-d" }}&obra={{ obras_list }}" target="_blank" class="btn" style="background-color:#e65f4f;color:white; margin-left:15px">Baixar PDF</a>             <div style="margin-left: 400px; margin-top:8px; color:black; font-size:20px">TOTAL {{total_entradas|floatformat:"2g"}} Litros</div>
+             <a href="{% url 'entradas_pdf' %}?data_inicio1={{ data_inicio|date:"Y-m-d" }}&data_fim1={{ data_fim|date:"Y-m-d" }}&obra={{ obras_list }}" target="_blank" class="btn" style="background-color:#e65f4f;color:white; margin-left:15px"><i class="bi bi-file-earmark-pdf-fill"></i> Gerar PDF</a>             <div style="margin-left: 400px; margin-top:8px; color:black; font-size:20px">TOTAL {{total_entradas|floatformat:"2g"}} Litros</div>
              <div  class="modal fade" id="basicModal" tabindex="-1">
               <form method='GET' action="{% url 'entradas' %}"> {% csrf_token %}
                 <div  class="modal-dialog">

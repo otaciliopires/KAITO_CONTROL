@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva, Registro_Tempo_Servico
+from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva, Registro_Tempo_Servico, Pendencias
 from .models import Equipamentos, Obras
 from django.db.models import Max
 from datetime import datetime, timezone, date, timedelta
@@ -10,7 +10,7 @@ from django.db.models import Sum, Max
 # Create your views here.
 
 
-def home_manutencao(request):
+def servicos_manutencao(request):
 
     if request.method == 'GET':
         list_equip=[]
@@ -75,7 +75,7 @@ def home_manutencao(request):
 
 
 
-        return render(request, 'home_manutencao.html', {'list_equip':list_equip,
+        return render(request, 'servicos_manutencao.html', {'list_equip':list_equip,
                                                     'os_oficina_aberta':os_oficina_abertas,
                                                     'dados_zip':dados_zip,
                                                     'serv_a':lista_servicos_a,
@@ -115,7 +115,7 @@ def home_manutencao(request):
                                         numero=numero+1)
             osoficina.save()
 
-            return redirect('/manutencao/home_manutencao')
+            return redirect('/manutencao/servicos_manutencao')
     
         if form_socorro:
             obra_id = request.POST.get('obra')
@@ -134,7 +134,7 @@ def home_manutencao(request):
             socorro.save()
             
             
-            return redirect('/manutencao/home_manutencao')
+            return redirect('/manutencao/servicos_manutencao')
         
         if form_preventiva:
             obra_id = request.POST.get('obra')
@@ -157,7 +157,7 @@ def home_manutencao(request):
             preventiva.save()
 
 
-            return redirect('/manutencao/home_manutencao')
+            return redirect('/manutencao/servicos_manutencao')
 
 
 def servico_oficina(request, id):
@@ -165,7 +165,7 @@ def servico_oficina(request, id):
         if Ordem_Oficina.objects.all().exists():
             ordem_oficina_aberta = Ordem_Oficina.objects.get(id=id)
         else:
-            return redirect("/manutencao/home_manutencao") 
+            return redirect("/manutencao/servicos_manutencao") 
 
         servico_oficina = Servico_Oficina.objects.filter(ordem_servico = id).filter(data_fim__isnull=True)
         for service in servico_oficina:
@@ -348,7 +348,7 @@ def servico_oficina(request, id):
             os_oficina.data_fim = data_fim
             print(data_fim)
             os_oficina.save()
-            return redirect('/manutencao/home_manutencao/')
+            return redirect('/manutencao/servicos_manutencao/')
             
 
 def atualizacao_horarios(request):
@@ -389,7 +389,7 @@ def atualizacao_horarios(request):
 
 
 
-        return redirect('/manutencao/home_manutencao/')
+        return redirect('/manutencao/servicos_manutencao/')
 
 
 
@@ -546,7 +546,7 @@ def socorro(request, id):
                                                     'terceirizados':terceirizados})
 
         else:
-            return redirect('/manutencao/home_manutencao/')
+            return redirect('/manutencao/servicos_manutencao/')
     
     elif request.method == 'POST':
         form_abrir_servico = request.POST.get('form_abrir_servico')
@@ -640,12 +640,11 @@ def socorro(request, id):
             data_chegada = request.POST.get('data_chegada')
             data_chegada = datetime.strptime(data_chegada, "%Y-%m-%dT%H:%M")
             data_chegada = data_chegada.replace(tzinfo=None)
-            print(data_chegada, data_saida, '@@@@@@@@@@@@@@@@@@@@@@@@')
             socorro.data_chegada = data_chegada
             socorro.tempo_socorro = (data_chegada.timestamp() - data_saida.timestamp())/3600
             socorro.save()
 
-            return redirect('/manutencao/home_manutencao/')
+            return redirect('/manutencao/servicos_manutencao/')
 
 def preventiva(request, id):
 
@@ -859,64 +858,152 @@ def servicos_post(request):
     elif request.method == "POST":
 
         form = request.POST.get('form')
+        equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+        tipo_servicos = ['Oficina', 'Socorro', 'Preventiva']
+        grupos = Grupo_Servico.objects.all()
 
         #coletando os POSTS
         if form:
+
             all_equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
             all_grupos = Grupo_Servico.objects.all()
             all_servicos = ['Oficina', 'Socorro', 'Preventiva']
 
+            list_equipamentos = []
+            list_grupos = []
+
+            for e in all_equipamentos: list_equipamentos.append(e)
+            for e in all_grupos: list_grupos.append(e)
+
             tipo_servico = request.POST.get('tipo')
             equipamento_rocha_id = request.POST.get('equipamento')
-            # if equipamento_rocha_id == "None":
-            #     equipamento_rocha = None
-            # else:
-            # equipamento_rocha = Equipamentos.objects.get(id = equipamento_rocha_id)
-            tipo = request.POST.get('tipo')
             grupo_id = request.POST.get('grupo')
 
-            # if grupo_id == "None":
-            #     grupo = None
-            # else:
-            # grupo = Grupo_Servico.objects.get(id=grupo_id)
             data_inicial = request.POST.get('data_inicial')
             data_final = request.POST.get('data_final')
-            print( tipo,  data_inicial, data_final, "okokokokok")
+            print( tipo_servico,  data_inicial, data_final, "okokokokok")
             lista_servicos = []
 
-
-            if equipamento_rocha_id or grupo_id or data_final or data_inicial or tipo_servico:
-                if not equipamento_rocha_id:
-                    equipamento_rocha_id = all_equipamentos
-                if not grupo_id:
-                    grupo_id = all_grupos
-                if not data_inicial:
+            if not equipamento_rocha_id:
+                    equipamento_rocha_id = list_equipamentos
+            if not grupo_id:
+                    grupo_id = list_grupos
+            if not data_inicial:
                     data_inicial = date.today() - timedelta(days=7)
-                if not data_final:
+            if not data_final:
                     data_final = date.today()
+            print(equipamento_rocha_id, grupo_id, data_final, data_inicial, "dados")
 
-            servicos_oficina = Servico_Oficina.objects.filter(ordem_servico__equipamento__in = equipamento_rocha_id).filter(grupo_servico__in = grupo_id).filter(data_inicio__gte=data_inicial).filter(data_fim__lte=data_final)
+            servicos_oficina = Servico_Oficina.objects.filter(ordem_servico__equipamento__in = equipamento_rocha_id).filter(grupo_servico__in = grupo_id).filter(data_fim__gte=data_inicial).filter(data_fim__lte=data_final)
             servico_socorro = Servico_Socorro.objects.filter(equipamento__in = equipamento_rocha_id).filter(grupo_servico__in = grupo_id).filter(data_inicio__gte = data_inicial).filter(data_fim__lte = data_final)
             preventiva = Preventiva.objects.filter(ordem__equipamento__in = equipamento_rocha_id).filter(data_inicio__gte = data_inicial).filter(data_fim__lte = data_final)
-            print(servicos_oficina)
+            print(servicos_oficina, 'servico oficina query')
             print(servico_socorro)
-            print(preventiva)
-            print(equipamento_rocha_id, grupo_id, data_final, data_inicial, tipo)
+            print(preventiva,'preventiva')
+            print(equipamento_rocha_id, grupo_id, data_final, data_inicial,)
             
 
             #adiquirindo lista com as informações de serviços oficina
             serv_oficina_list=[]
+            serv_socorro_list=[]
             for serv_oficina in servicos_oficina:
-                serv_oficina_list.append(serv_oficina.ordem_servico.equipamento.prefixo)
-                serv_oficina_list.append(serv_oficina.grupo_servico.grupo)
-                serv_oficina_list.append(serv_oficina.data_inicio)
-                serv_oficina_list.append(serv_oficina.data_fim)
-                serv_oficina_list.append(serv_oficina.tempo_em_servico)
-                serv_oficina_list.append(serv_oficina.descricao)
-                
-            print(serv_oficina_list)
+                s_o = []
+                s_o.append("Oficina")
+                s_o.append(serv_oficina.ordem_servico.equipamento.prefixo)
+                s_o.append(serv_oficina.grupo_servico.grupo)
+                s_o.append(serv_oficina.data_inicio)
+                s_o.append(serv_oficina.data_fim)
+                s_o.append(serv_oficina.tempo_em_servico)
+                s_o.append(serv_oficina.descricao)
+                serv_oficina_list.append(s_o)
+            for serv_socorro in servico_socorro:
+                 s_s = []
+                 s_s.append("Socorro")
+                 s_s.append(serv_socorro.equipamento)
+                 s_s.append(serv_socorro.grupo_servico)
+                 s_s.append(serv_socorro.data_inicio)
+                 s_s.append(serv_socorro.data_fim)
+                 s_s.append(serv_socorro.tempo_servico)
+                 s_s.append(serv_socorro.descricao)
+                 serv_oficina_list.append(s_s)
+            for serv_preventiva in preventiva:
+                 p = []
+                 p.append("Preventiva")
+                 p.append(serv_preventiva.ordem.equipamento)
+                 p.append('preventiva')
+                 p.append(serv_preventiva.data_inicio)
+                 p.append(serv_preventiva.data_fim)
+                 p.append(serv_preventiva.tempo_servico)
+                 p.append(serv_preventiva.ordem)
+                 serv_oficina_list.append(p)
+                 print(p, "preventiva")
 
 
 
 
-            return redirect("/manutencao/servicos_post/")
+
+            return render(request, 'servicos_post.html', {'serv_oficina_list':serv_oficina_list,
+                                                          'equipamentos':equipamentos_rocha,
+                                                          'tipo_servicos':tipo_servicos,
+                                                          'grupos': grupos})
+
+
+def pendencias(request):
+    if request.method == 'GET':     
+
+     equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+     pendencias = Pendencias.objects.filter(data_fim__isnull=True)
+     situacoes = ['Parado', 'Trabalhando']
+     status = ['Aguardando Peças', 'Aguardando Serviços']
+
+     
+     
+
+     return render(request, 'pendencias.html', {'equipamentos':equipamentos,
+                                                'situacoes':situacoes,
+                                                'status':status,
+                                                'pendencias':pendencias})
+    if request.method == 'POST':
+
+        form_add_pendencias = request.POST.get('form_add_pendencias')
+        form_att_pendencias = request.POST.get('form_att_pendencias')
+        
+        if form_add_pendencias:
+            equipamento_id = request.POST.get('equipamento')
+            equipamento = Equipamentos.objects.get(id=equipamento_id)
+            data_inicio = request.POST.get('data_inicio')
+            descricao = request.POST.get('descricao')
+            status = request.POST.get('status')
+            situacao = request.POST.get('situacao')
+
+            pendencia = Pendencias(equipamento = equipamento,
+                                   status = status,
+                                   situacao = situacao,
+                                   data_inicio = data_inicio,
+                                   descricao = descricao)
+            pendencia.save()
+
+        return redirect('/manutencao/pendencias/') 
+    
+    if form_att_pendencias:
+        id_pendencia = request.POST.get('id_pendencia')
+        pendencia = Pendencias.objects.get(id=id_pendencia)
+        pendencia.status = request.POST.get('status')
+        pendencia.situacao = request.POST.get('situacao')
+        add_descricao = request.POST.get('descricao')
+        pendencia.descricao = pendencia.descricao + add_descricao
+
+        if request.POST.get('data_fim') == "":
+            pass
+        else:
+            pendencia.data_fim = request.POST.get('data_fim')
+
+        pendencia.save()
+
+        return redirect('/manutencao/pendencias/')   
+    
+
+def home_manutencao(request):
+
+
+    return render(request, 'home_manutencao.html')

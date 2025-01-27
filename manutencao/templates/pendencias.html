@@ -1,0 +1,299 @@
+{%extends 'base_manutencao.html'%}
+
+{%load static%}
+
+{%block 'head'%}
+<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{%endblock%}
+
+
+{%block 'body'%}
+  <!-- MENSAGENS -->
+  <main id="main" class="main">
+    <div class="pagetitle">
+      {% if messages %}
+        {%for i in messages%}
+          <div class="{{i.tags}}" role='alert'>
+              {{i}}
+          </div>
+        {%endfor%}
+      {%endif%}  
+ <!-- MENSAGENS --> 
+
+
+
+ <section class="section dashboard">
+    <div class="row">
+       <div class="col-lg-12">
+          <div class="row">
+
+
+            <div class="col-xxl-6 col-md-12" >
+               <div class="card info-card sales-card">
+                  <div class="card-body">
+                     <div class='card-title'>PENDÊNCIAS <span>|EM ABERTO</span>
+                     </div>
+                     <div class="d-flex align-items-c enter">
+                        
+                        <div class="d-flex align-items-left justify-content-left"> 
+                         <!-- BOTÃO MODAL ADIÇÃO DE SERVIÇO -->
+                           <button style="margin-left:50px; margin-right:10px" type="button" class="btn btn-primary btn-md" data-bs-toggle="modal" data-bs-target="#adicao_pendencias">
+                              Adicionar Pendencias
+                            </button>
+                        </div>
+
+
+                      </div>
+
+                     </div>
+                  </div>
+               </div>
+            </div>
+      
+            <div class="col-xxl-6 col-md-12 font-weight-bold " style="height:65px; font-size:15px" >
+              <div style='margin-bottom:10px;height:40px'class="">
+                 <div class="card-body">
+                       <div class="d-flex">
+           
+                             <div class="col-2">Equipamento</div>
+                             <div class="col-2">Status</div>
+                             <div class="col-2">Situação</div>
+                             <div class="col-2">Data Inicio</div>
+                             <div class="col-3">Descrição</div>
+
+                       </div>
+                 </div>
+              </div>
+           </div>
+
+             {% for pendencia in pendencias %}
+             <div class="col-xxl-6 col-md-12" style='margin-bottom:0px'>
+                <div class="card">
+                   <div class="card-body">
+
+                      <div class="d-flex align-items-c enter" style='font-size:15px'>
+                          <div class='col-2 border-right'>{{pendencia.equipamento}}</div> 
+                          <div class='col-2 border-right'>{{pendencia.status}}</div>
+                          <div class='col-2 border-right'>{{pendencia.situacao}}</div>
+                          <div class='col-2 border-right' style='font-size:12px'>{{pendencia.data_inicio|date:"d/m - H:i"}}</div> 
+                          <div class='col-3 border-right' style='font-size:10px'>{{pendencia.descricao}}</div> 
+                          <div class='col-1 border-right'>
+                            <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#pendencia{{pendencia.id}}">
+                              Status Serviço
+                            </button> </div>
+                          </div>                                                  
+                   </div>
+                </div>
+             </div>
+
+
+
+  <!-- MODAL status serviço // colocar o modal dentro do for loop, para que ele funcione em cada item gerado pelo for -->
+  <div class="modal fade" id="pendencia{{pendencia.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Atualizar informações</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+<!-- FORM AQUI -->
+<form method='POST' action="{%url 'pendencias'%}">{% csrf_token %}
+  <input type='hidden' name='form_att_pendencias' value='form_att_pendencias'>
+  <input class="form-control" id="disabledInput" type="hidden" placeholder="Disabled input here..." name="id_pendencia" value={{pendencia.id}}>
+
+
+
+  <div class="mb-3">
+    <label class="form-label">Status:</label>
+    <select name='status'>
+        {%for statu in status%} 
+        <option value={{statu}}>{{statu}}</option>
+        {%endfor%}
+    </select>
+<div>
+    <div class="mb-3">
+        <label class="form-label">Situação:</label>
+        <select name='situacao'>
+            {%for s in situacoes%} 
+            <option value={{s}}>{{s}}</option>
+            {%endfor%}
+        </select>
+    <div>                    
+    
+
+<div class='mb-3'></div>
+
+
+  <!-- Outros campos do formulário -->
+
+
+  <div class="mb-3">
+      <label for="exampleFormControlTextarea1" class="form-label">Adicionar descrição:</label>
+      <label for="exampleFormControlTextarea1" class="form-label">{{servico.descricao}}</label>
+      <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
+  </div>
+
+  <div class="mb-3">
+      <label class="form-label">Data fim:</label>
+      <input style='width:300px' type="datetime-local" name="data_fim"></input>
+  </div>
+
+  <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      <input type="submit" class="btn btn-primary"></input>
+  </div>  
+</form>
+
+
+             {%endfor%}
+            
+             
+          </div>
+       </div>
+      
+          </div>
+
+          
+          </div>
+       </div>
+    </div>
+ </section>
+
+
+
+
+  
+  <!-- MODAL OS CORRETIVA OFICINA -->
+  <div class="modal fade" id="adicao_pendencias" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Adição Pendencia</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- FORM AQUI -->
+                <form method='POST' action="{%url 'pendencias'%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+                    <input type='hidden' name='form_add_pendencias' value='form_add_pendencias'>
+                    <div class="mb-3">
+                        <label class="form-label">Equipamentos:</label>
+                        <select name='equipamento'>
+                            {%for equip in equipamentos%} 
+                            <option value={{equip.id}}>{{equip}}</option>
+                            {%endfor%}
+                        </select>
+                    <div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Status:</label>
+                        <select name='status'>
+                            {%for statu in status%} 
+                            <option value={{statu}}>{{statu}}</option>
+                            {%endfor%}
+                        </select>
+                    <div>
+                        <div class="mb-3">
+                            <label class="form-label">Situação:</label>
+                            <select name='situacao'>
+                                {%for s in situacoes%} 
+                                <option value={{s}}>{{s}}</option>
+                                {%endfor%}
+                            </select>
+                        <div>                    
+                        
+
+                    <div class='mb-3'></div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Data Início:</label>
+                        <input style='width:300px' type="datetime-local" name="data_inicio"></input>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="exampleFormControlTextarea1" class="form-label">Descrição do serviço:</label>
+                        <textarea class="form-control" id="exampleFormControlTextarea1" rows="2" name='descricao'></textarea>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <input type="submit" class="btn btn-primary"></input>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleSelects() {
+        const funcionarioSelect = document.getElementById('selectFuncionario');
+        const terceirizadoSelect = document.getElementById('selectTerceirizado');
+        const isFuncionario = document.getElementById('flexRadioFuncionario').checked;
+
+        if (isFuncionario) {
+            funcionarioSelect.style.display = 'block';
+            terceirizadoSelect.style.display = 'none';
+        } else {
+            funcionarioSelect.style.display = 'none';
+            terceirizadoSelect.style.display = 'block';
+        }
+    }
+
+    // Executa a função ao carregar a página para definir o estado inicial
+    document.addEventListener('DOMContentLoaded', toggleSelects);
+</script>
+
+
+
+  <!-- MODAL FINALIZAR OS -->
+  <div class="modal fade" id="finalizar_os" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Finalizar O.S</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <!-- FORM AQUI -->
+            <form method='POST' action="{%url 'pendencias'%}">{% csrf_token %}    <!-- para passar uma url em um form com id, utilizar esse método -->
+               <input type='hidden' name='form_fim_os' value='form_osoficina_fim'>
+
+              <div class='mb-3'></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Data Fim:</label>
+                    <input style='width:300px' type="datetime-local" name="data_fim"></input>
+                </div>
+
+  
+
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <input type="submit" class="btn btn-primary"></input>
+                </div>  
+            </form>
+
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+
+
+ 
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+  
+  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+
+{%endblock%}

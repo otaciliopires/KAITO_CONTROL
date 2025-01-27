@@ -54,11 +54,11 @@
                             </div>
                             <div class="mb-3">
                                 <label style='width:100px' class="form-label">Data Inicial:</label>
-                                <input style='width:300px' type="date" name="data_inicio"></input>
+                                <input style='width:300px' type="date" name="data_inicial"></input>
                             </div>
                             <div class="mb-3">
                                 <label style='width:100px' class="form-label">Data Final:</label>
-                                <input style='width:300px' type="date" name="data_fim"></input>
+                                <input style='width:300px' type="date" name="data_final"></input>
                             </div>
                         </div>
                         <div class='col-6'>
@@ -129,24 +129,31 @@
                            </div>
                         </div>
                      </div>
-                            {% comment %} {%for serv in serv_a%} {% endcomment %}
+                            {% for serv in serv_oficina_list%}
+                            {% if serv.0 == "Oficina"%}
                             <div style="margin-bottom:15px; background-color:#ADD8E6" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
-
+                            {%elif serv.0 == "Socorro"%}
+                            <div style="margin-bottom:15px; background-color:#FFFF80" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
+                            {%elif serv.0 == "Preventiva"%}
+                            <div style="margin-bottom:15px; background-color:#66FF33" class="col-xxl-6 col-md-12 border border-primary rounded-2 ">
+  
+                              {%endif%}
 
                                 <div class="row align-items-start text-center">
+                            
 
-                            <div class="col-2">Equipamento</div>
-                            <div class="col-2">Grupo</div>
-                            <div class="col-1">inicio</div>
-                            <div class="col-1">Fim</div>
-                            <div class="col-1">Tempo</div>
+                            <div class="col-2">{{serv.1}}</div>
+                            <div class="col-1">{{serv.2}}</div>
+                            <div class="col-1">{{serv.3}}</div>
+                            <div class="col-1">{{serv.4}}</div>
                             <div class="col-2">Custo</div>
-                            <div class="col-2">Descrição</div>
+                            <div class="col-2">{{serv.5}}</div>
+                            <div class="col-2">{{serv.6}}</div>
 
                            </div>
                         </div>
 
-                            {% comment %} {%endfor%} {% endcomment %}
+                           {%endfor%} 
                         </div>
                     </div>
                 </div>

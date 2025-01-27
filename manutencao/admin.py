@@ -1,5 +1,5 @@
 from django.contrib import admin
-from.models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva, Registro_Tempo_Servico
+from.models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva, Registro_Tempo_Servico, Pendencias
 
 # Register your models here.
 
@@ -21,3 +21,7 @@ admin.site.register(Servico_Preventiva)
 @admin.register(Ordem_Preventiva)
 class Servico_Ordem_PreventivaAdmin(admin.ModelAdmin):
     list_display=('equipamento', 'periodo')
+
+@admin.register(Pendencias)
+class PendenciasAdmin(admin.ModelAdmin):
+    list_display=('equipamento', 'status', 'situacao', 'data_inicio')
