@@ -14,7 +14,7 @@ def servicos_manutencao(request):
 
     if request.method == 'GET':
         list_equip=[]
-        equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+        equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA').order_by('prefixo')
         obras = Obras.objects.all()
         print("xxxxxxxxxx", obras, equipamentos_rocha)
         for i in equipamentos_rocha:
@@ -69,7 +69,7 @@ def servicos_manutencao(request):
 
 
         #Tratamento PREVENTIVAS
-        equipamentos_preventiva= Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
+        equipamentos_preventiva= Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA').order_by('prefixo')
         preventivas = Preventiva.objects.filter(data_fim=None)
 
 
@@ -286,11 +286,7 @@ def servico_oficina(request, id):
             servico_oficina.executante_terceiro = executante_terceiro
             # servico_oficina.status = status_servico
 
-            #FECHAR OBJETO DE REGISTRO DE TEMPO DO MECANICO - UTILIZAR SERVICO OFICINA.
-            registro_tempo_servico = Registro_Tempo_Servico.objects.get(servico_oficina=servico_oficina.id, data_final=None)
-            registro_tempo_servico.data_final = data_status
-            registro_tempo_servico.tempo_servico = (data_status.timestamp() - registro_tempo_servico.data_inicial.timestamp())/3600
-            registro_tempo_servico.save()
+
 
 
             if servico_oficina.status == "Em Serviço":
@@ -324,7 +320,11 @@ def servico_oficina(request, id):
                         #colocar a função antes de salvar as informações no BD garante que o valor calculado de tempo seja contabilizado para o status anterior(correto)  
                 
         
-              
+            #FECHAR OBJETO DE REGISTRO DE TEMPO DO MECANICO - UTILIZAR SERVICO OFICINA.
+            registro_tempo_servico = Registro_Tempo_Servico.objects.get(servico_oficina=servico_oficina.id, data_final=None)
+            registro_tempo_servico.data_final = data_status
+            registro_tempo_servico.tempo_servico = (data_status.timestamp() - registro_tempo_servico.data_inicial.timestamp())/3600
+            registro_tempo_servico.save() 
 
         
                                 
