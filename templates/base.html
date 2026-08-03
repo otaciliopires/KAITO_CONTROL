@@ -34,7 +34,7 @@
             <li class="nav-item dropdown">
             </li>
             <li class="nav-item dropdown pe-3">
-               <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown"> <img style='width:50px' src="{{user.foto.url}}" alt="Profile" class="rounded-circle"> <span style='font-size:20px' class="d-none d-md-block dropdown-toggle ps-2">{{user}}</span> </a>
+               <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown"> {% if user.foto %}<img style='width:50px' src="{{user.foto.url}}" alt="Profile" class="rounded-circle">{% else %}<i class="bi bi-person-circle" style="font-size:32px"></i>{% endif %} <span style='font-size:20px' class="d-none d-md-block dropdown-toggle ps-2">{{user}}</span> </a>
                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
                   <li class="dropdown-header">
                      <h6>{{obra_user}}</h6>
@@ -83,9 +83,9 @@
          </li>
          <li class="nav-item">
             <a class="nav-link collapsed" href="{%url 'relatorio'%}" data-bs-target="#forms-nav" > <i class="bi bi-layout-text-sidebar-reverse"></i><span>Relatórios</span> </a>
-           
+
          </li>
-         
+
    </aside>
         {%endif%}
 

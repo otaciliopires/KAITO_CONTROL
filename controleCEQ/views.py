@@ -14,7 +14,8 @@ from operator import itemgetter
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.template.loader import render_to_string
-from weasyprint import HTML
+from django.core.paginator import Paginator
+from django.db import transaction
 
 
 
@@ -638,12 +639,19 @@ def saidas(request):
             filtro_obras= list_obras
 
 
-        saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).filter(equipamento__in=filtro_equipamento).filter(obra__in=filtro_obras).order_by('numero')
+        saidas_qs = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).filter(equipamento__in=filtro_equipamento).filter(obra__in=filtro_obras).order_by('numero')
         total_saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).filter(equipamento__in=filtro_equipamento).filter(obra__in=filtro_obras).aggregate(Sum('litros'))['litros__sum']
 
     else:
-        saidas = Abastecimento.objects.all().order_by('-numero')[:100]
+        saidas_qs = Abastecimento.objects.all().order_by('-numero')
         total_saidas = Abastecimento.objects.filter(data__range=[data_inicio, data_fim]).aggregate(Sum('litros'))['litros__sum']
+
+    paginator = Paginator(saidas_qs, 100)
+    saidas = paginator.get_page(request.GET.get('page'))
+
+    querystring = request.GET.copy()
+    querystring.pop('page', None)
+    querystring = querystring.urlencode()
 
     user = request.user
     obra_user=Obras.objects.filter(usuario=user.id)
@@ -662,16 +670,23 @@ def saidas(request):
     else:
         equipamentos_selecionados =  ",".join(filtro_equipamento)
 
-    
-    return render(request, 'saidas.html', {'saidas': saidas, 
-                                           'obras': obras, 
-                                           'equipamentos':equipamentos, 
-                                           "user":user, 
+    obra_ids_selecionados = request.GET.getlist('obra')
+    equipamento_ids_selecionados = request.GET.getlist('equipamento')
+
+    return render(request, 'saidas.html', {'saidas': saidas,
+                                           'obras': obras,
+                                           'equipamentos':equipamentos,
+                                           "user":user,
                                            'total_saidas':total_saidas,
                                            'obras_list':obras_selecionadas,
                                            'equipamentos_list': equipamentos_selecionados,
+                                           'obra_ids_selecionados': obra_ids_selecionados,
+                                           'equipamento_ids_selecionados': equipamento_ids_selecionados,
+                                           'data_inicio_raw': request.GET.get('data_inicio', ''),
+                                           'data_fim_raw': request.GET.get('data_fim', ''),
                                            'data_inicio':data_inicio,
-                                           'data_fim':data_fim})
+                                           'data_fim':data_fim,
+                                           'querystring':querystring})
  
  elif request.user.status == 'o': 
     return HttpResponse('acesso negado')
@@ -703,13 +718,20 @@ def entradas(request):
             filtro_obra= list_obras
 
 
-        entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
+        entradas_qs = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).order_by('numero')
         total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
 
-        
+
     else:
-        entradas = Entrada.objects.all().order_by('numero')
+        entradas_qs = Entrada.objects.all().order_by('-numero')
         total_entradas = Entrada.objects.filter(data_entrega__range=[data_inicio, data_fim], obra__in=filtro_obra).aggregate(Sum('quantidade'))['quantidade__sum']
+
+    paginator = Paginator(entradas_qs, 100)
+    entradas = paginator.get_page(request.GET.get('page'))
+
+    querystring = request.GET.copy()
+    querystring.pop('page', None)
+    querystring = querystring.urlencode()
 
     if not request.GET.getlist('obra'):
         obras_selecionadas = []
@@ -723,19 +745,20 @@ def entradas(request):
     obra_user=Obras.objects.filter(usuario=user.id)
     print(data_inicio, data_fim, "!!!!!!!!!!!!!!!!!!!!!")
 
-    return render(request, 'entradas.html', {'entradas':entradas, 
-                                             'obras': obras, 
-                                             "user":user, 
+    return render(request, 'entradas.html', {'entradas':entradas,
+                                             'obras': obras,
+                                             "user":user,
                                              'total_entradas':total_entradas,
                                              'obras_list':obras_selecionadas,
                                              'data_inicio':data_inicio,
-                                             'data_fim': data_fim})
+                                             'data_fim': data_fim,
+                                             'querystring': querystring})
   else: return HttpResponse("<h1>Acesso negado</h1>")
 
 def transferencias(request):
  if request.user.status == "c":
 
-    transferencias = Transferencia.objects.all()
+    transferencias_qs = Transferencia.objects.all().order_by('-data', '-id')
     tanque_fixo = Tanque.objects.filter(tipo='F')
     tanque_movel = Tanque.objects.filter(tipo='M')
 
@@ -744,7 +767,7 @@ def transferencias(request):
     data_fim = request.POST.get('data_fim')
     tanque = request.POST.getlist('tanque_fixo')
     comboio = request.POST.getlist('tanque_movel')
-    
+
     if data_inicio or data_fim or tanque or comboio:
         if not data_inicio:
             data_inicio = date(2022,1,1)
@@ -758,12 +781,17 @@ def transferencias(request):
             tanque = tanque_fixo
         if not comboio:
             comboio = tanque_movel
-        
-        transferencias = Transferencia.objects.filter(movel__in=comboio, fixo__in=tanque, data__range=[data_inicio, data_fim])
-            
 
+        transferencias_qs = Transferencia.objects.filter(movel__in=comboio, fixo__in=tanque, data__range=[data_inicio, data_fim]).order_by('-data', '-id')
 
-    return render(request, 'transferencias.html', {'transferencias': transferencias, 'tanque_fixo':tanque_fixo, 'tanque_movel':tanque_movel})
+    paginator = Paginator(transferencias_qs, 100)
+    transferencias = paginator.get_page(request.GET.get('page'))
+
+    querystring = request.GET.copy()
+    querystring.pop('page', None)
+    querystring = querystring.urlencode()
+
+    return render(request, 'transferencias.html', {'transferencias': transferencias, 'tanque_fixo':tanque_fixo, 'tanque_movel':tanque_movel, 'querystring': querystring})
  else: return HttpResponse('<h1>Acesso Negado</h1>')
 
 
@@ -911,120 +939,228 @@ def obras_ano(request):
                                               'grafico_vunit':g_vunit})
 
  else: return HttpResponse("<h1>Acesso Negado</h1>")
+def _numero_ou_texto(valor):
+    if isinstance(valor, (int, float)) and not isinstance(valor, bool):
+        return valor
+    return f"'{valor}'" if valor is not None else "(vazio)"
+
+
+def _validar_entradas(sheet):
+    """Valida a aba ENTRADAS linha a linha. Retorna (linhas_validas, erros)."""
+    validas = []
+    erros = []
+    for linha_num, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+        ent = row[:10]
+        if ent[0] is None:
+            break
+
+        linha_erros = []
+        tanque = Tanque.objects.filter(prefixo=ent[0]).first()
+        if tanque is None:
+            linha_erros.append(f"tanque {_numero_ou_texto(ent[0])} não encontrado")
+
+        obra = Obras.objects.filter(nome=ent[8]).first()
+        if obra is None:
+            linha_erros.append(f"obra {_numero_ou_texto(ent[8])} não encontrada")
+
+        if not ent[3]:
+            linha_erros.append("fornecedor não informado")
+        if not ent[4]:
+            linha_erros.append("nota fiscal não informada")
+        if ent[5] is None:
+            linha_erros.append("data da nota fiscal não informada")
+        if ent[1] is None:
+            linha_erros.append("data de entrega não informada")
+        if not isinstance(ent[2], (int, float)):
+            linha_erros.append(f"quantidade inválida ({_numero_ou_texto(ent[2])})")
+        if not isinstance(ent[6], (int, float)):
+            linha_erros.append(f"preço unitário inválido ({_numero_ou_texto(ent[6])})")
+        if not isinstance(ent[7], (int, float)):
+            linha_erros.append(f"preço total inválido ({_numero_ou_texto(ent[7])})")
+
+        if linha_erros:
+            erros.append(f"ENTRADAS, linha {linha_num}: " + "; ".join(linha_erros))
+        else:
+            validas.append({'tanque': tanque, 'obra': obra, 'dados': ent})
+
+    return validas, erros
+
+
+def _validar_transferencias(sheet):
+    validas = []
+    erros = []
+    for linha_num, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+        tr = row[:7]
+        if tr[0] is None:
+            break
+
+        linha_erros = []
+        tanque_fixo = Tanque.objects.filter(prefixo=tr[0]).first()
+        if tanque_fixo is None:
+            linha_erros.append(f"tanque fixo {_numero_ou_texto(tr[0])} não encontrado")
+
+        tanque_movel = Tanque.objects.filter(prefixo=tr[1]).first()
+        if tanque_movel is None:
+            linha_erros.append(f"tanque móvel {_numero_ou_texto(tr[1])} não encontrado")
+
+        if not isinstance(tr[2], (int, float)):
+            linha_erros.append(f"contador inicial inválido ({_numero_ou_texto(tr[2])})")
+        if not isinstance(tr[3], (int, float)):
+            linha_erros.append(f"contador final inválido ({_numero_ou_texto(tr[3])})")
+        if isinstance(tr[2], (int, float)) and isinstance(tr[3], (int, float)) and tr[3] < tr[2]:
+            linha_erros.append("contador final menor que o contador inicial")
+        if tr[5] is None:
+            linha_erros.append("data não informada")
+
+        if linha_erros:
+            erros.append(f"TRANSFERENCIAS, linha {linha_num}: " + "; ".join(linha_erros))
+        else:
+            validas.append({'tanque_fixo': tanque_fixo, 'tanque_movel': tanque_movel, 'dados': tr})
+
+    return validas, erros
+
+
+def _validar_saidas(sheet):
+    validas = []
+    erros = []
+    for linha_num, row in enumerate(sheet.iter_rows(min_row=3, values_only=True), start=3):
+        sds = row[:11]
+        if sds[0] is None:
+            break
+
+        linha_erros = []
+        tanque = Tanque.objects.filter(prefixo=sds[0]).first()
+        if tanque is None:
+            linha_erros.append(f"tanque {_numero_ou_texto(sds[0])} não encontrado")
+
+        obra = Obras.objects.filter(nome=sds[2]).first()
+        if obra is None:
+            linha_erros.append(f"obra {_numero_ou_texto(sds[2])} não encontrada")
+
+        equipamento = Equipamentos.objects.filter(prefixo=sds[3]).first()
+        if equipamento is None:
+            linha_erros.append(f"equipamento {_numero_ou_texto(sds[3])} não encontrado")
+
+        if sds[1] is None:
+            linha_erros.append("data não informada")
+        if not isinstance(sds[4], (int, float)):
+            linha_erros.append(f"contador inicial inválido ({_numero_ou_texto(sds[4])})")
+        if not isinstance(sds[5], (int, float)):
+            linha_erros.append(f"contador final inválido ({_numero_ou_texto(sds[5])})")
+        if isinstance(sds[4], (int, float)) and isinstance(sds[5], (int, float)) and sds[5] < sds[4]:
+            linha_erros.append("contador final menor que o contador inicial")
+        if not sds[9]:
+            linha_erros.append("operador não informado")
+
+        if linha_erros:
+            erros.append(f"SAIDAS, linha {linha_num}: " + "; ".join(linha_erros))
+        else:
+            horimetro = sds[7] if isinstance(sds[7], (int, float)) else 0
+            lubrificacao = sds[8] is not None
+            validas.append({
+                'tanque': tanque, 'obra': obra, 'equipamento': equipamento,
+                'horimetro': horimetro, 'lubrificacao': lubrificacao, 'dados': sds,
+            })
+
+    return validas, erros
+
+
 def importexcel(request):
     if request.method == 'POST':
-        
         if 'excel' in request.FILES:
             excelfile = request.FILES['excel']
-            workbook = openpyxl.load_workbook(excelfile)
-            saidas = workbook['SAIDAS']
-            entradas = workbook['ENTRADAS']
-            transferencias = workbook['TRANSFERENCIAS']
+            try:
+                workbook = openpyxl.load_workbook(excelfile)
+            except Exception:
+                messages.add_message(request, constants.ERROR,
+                    "Não foi possível ler o arquivo. Verifique se é um .xlsx válido.")
+                return redirect('home/')
+
+            abas_esperadas = ['ENTRADAS', 'TRANSFERENCIAS', 'SAIDAS']
+            abas_faltando = [a for a in abas_esperadas if a not in workbook.sheetnames]
+            if abas_faltando:
+                messages.add_message(request, constants.ERROR,
+                    f"Planilha inválida: aba(s) não encontrada(s): {', '.join(abas_faltando)}")
+                return redirect('home/')
+
             user_id = request.user
 
-            #numeros:
+            entradas_validas, erros_entradas = _validar_entradas(workbook['ENTRADAS'])
+            transferencias_validas, erros_transferencias = _validar_transferencias(workbook['TRANSFERENCIAS'])
+            saidas_validas, erros_saidas = _validar_saidas(workbook['SAIDAS'])
 
-            
-            for i in entradas.iter_rows(min_row=3,values_only=True):
-                
-                ent = i[:10]
-                print(ent)
-                if ent[0] == None:
-                        break
-                else:
-                
-                        tanque = Tanque.objects.filter(prefixo=ent[0])[0]
-                        obra = Obras.objects.filter(nome=ent[8])[0]
-                        num_entrada = Entrada.objects.aggregate(Max('numero'))
-                        num_entrada = num_entrada['numero__max']+1
+            erros = erros_entradas + erros_transferencias + erros_saidas
 
-                        entrada = Entrada(tanque=tanque,
-                                            nota_fiscal=ent[4],
-                                            fornecedor=ent[3],
-                                            data_nf=ent[5],
-                                            data_entrega=ent[1],
-                                            obra=obra,
-                                            quantidade=ent[2],
-                                            preco_unitario=ent[6],
-                                            preco_total=ent[7],
-                                            colaborador=user_id,
-                                            descricao=ent[9],
-                                            numero = num_entrada)
-                                            
-                        entrada.save() 
+            if erros:
+                messages.add_message(request, constants.ERROR,
+                    f"Importação cancelada: {len(erros)} erro(s) encontrado(s). Nenhum lançamento foi feito. Corrija a planilha e envie novamente.")
+                for erro in erros:
+                    messages.add_message(request, constants.ERROR, erro)
+                return redirect('home/')
 
-            for i in transferencias.iter_rows(min_row=3, values_only=True):
-                    
-                    
-                    tr = i[:7]
-                    if tr[0] == None:
-                        break
-                    else:
-                        tanque_fixo = Tanque.objects.get(prefixo=tr[0])
-                        tanque_movel= Tanque.objects.get(prefixo=tr[1])
+            if not entradas_validas and not transferencias_validas and not saidas_validas:
+                messages.add_message(request, constants.WARNING, "Nenhum lançamento encontrado na planilha.")
+                return redirect('home/')
 
+            with transaction.atomic():
+                for item in entradas_validas:
+                    ent = item['dados']
+                    num_entrada = Entrada.objects.aggregate(Max('numero'))['numero__max']
+                    num_entrada = (num_entrada or 0) + 1
+                    Entrada.objects.create(
+                        tanque=item['tanque'],
+                        nota_fiscal=ent[4],
+                        fornecedor=ent[3],
+                        data_nf=ent[5],
+                        data_entrega=ent[1],
+                        obra=item['obra'],
+                        quantidade=ent[2],
+                        preco_unitario=ent[6],
+                        preco_total=ent[7],
+                        colaborador=user_id,
+                        descricao=ent[9] or "",
+                        numero=num_entrada,
+                    )
 
-                        transferencia = Transferencia(fixo=tanque_fixo,
-                                        movel=tanque_movel,
-                                        contador_inicio=tr[2],
-                                        contador_fim=tr[3],
-                                        litros=tr[3]-tr[2],
-                                        contador_comboio=tr[6],
-                                        colaborador=user_id,
-                                        data=tr[5])
-                        transferencia.save()
+                for item in transferencias_validas:
+                    tr = item['dados']
+                    Transferencia.objects.create(
+                        fixo=item['tanque_fixo'],
+                        movel=item['tanque_movel'],
+                        contador_inicio=tr[2],
+                        contador_fim=tr[3],
+                        litros=tr[3] - tr[2],
+                        contador_comboio=tr[6] or 0,
+                        colaborador=user_id,
+                        data=tr[5],
+                    )
 
-            for i in saidas.iter_rows(min_row=3,values_only=True):
-                    sds = i[:11]
-                    print(sds)
+                for item in saidas_validas:
+                    sds = item['dados']
+                    num_saida = Abastecimento.objects.aggregate(Max('numero'))['numero__max']
+                    num_saida = (num_saida or 0) + 1
+                    Abastecimento.objects.create(
+                        litros=sds[5] - sds[4],
+                        contador_inicio=sds[4],
+                        contador_fim=sds[5],
+                        horimetro=item['horimetro'],
+                        data=sds[1],
+                        tanque=item['tanque'],
+                        obra=item['obra'],
+                        equipamento=item['equipamento'],
+                        lubrificacao=item['lubrificacao'],
+                        operador=sds[9],
+                        colaborador=user_id,
+                        status=True,
+                        observacao=sds[10] or "",
+                        numero=num_saida,
+                    )
 
-                    if sds[0] == None:
-                        break
-                    else:
-                        tanque_saida = Tanque.objects.get(prefixo=sds[0])
-                        obra_saida = Obras.objects.get(nome=sds[2])
-                        try:
-                            equipamento_saida = Equipamentos.objects.get(prefixo=sds[3])
-                            if sds[8] == None: lubrificacao = False
-                            else: lubrificacao = True
-
-                            if type(sds[7]) != int and type(sds[7]) != float:
-                                horimetro = 0
-                            else: horimetro =sds[7]
-
-                        except:
-                            print(sds[3], "erro")
-
-
-
-                        num_saida = Abastecimento.objects.aggregate(Max('numero')) 
-                        num_saida = (num_saida["numero__max"]+1)
-                        print(num_saida)
-
-                        saida = Abastecimento(litros=sds[5]-sds[4],
-                                            contador_inicio=sds[4],
-                                            contador_fim=sds[5],
-                                            horimetro=horimetro,
-                                            data=sds[1],
-                                            tanque=tanque_saida,
-                                            obra=obra_saida,
-                                            equipamento=equipamento_saida,
-                                            lubrificacao=lubrificacao,
-                                            operador=sds[9],
-                                            colaborador=user_id,
-                                            status=True,
-                                            observacao=sds[10],
-                                            numero = num_saida
-                                            )
-                        
-                        try:
-                            saida.save()  
-                            messages.add_message(request, constants.SUCCESS, "Arquivo importado com sucesso!" )  
-                        except:
-                            messages.add_message(request, constants.ERROR, "Erro na saída!" ) 
-
-    else:
-        pass
+            messages.add_message(request, constants.SUCCESS,
+                f"Arquivo importado com sucesso! {len(entradas_validas)} entrada(s), "
+                f"{len(transferencias_validas)} transferência(s), {len(saidas_validas)} abastecimento(s) lançados.")
+        else:
+            messages.add_message(request, constants.ERROR, "Nenhum arquivo enviado.")
     return redirect('home/')
 
 
@@ -1137,8 +1273,6 @@ def relatorio(request):
 import json
 from datetime import datetime
 from django.http import HttpResponse
-from django.template.loader import render_to_string
-import weasyprint
 from django.template.loader import render_to_string
 from io import BytesIO
 from django.core.files.storage import default_storage

@@ -39,10 +39,10 @@
                         <th class='okok' scope="col">QUANTIDADE</th>
                         <th class='okok' scope="col">HORÍMETRO/KM</th>
                         <th class='okok' scope="col">OPERADOR/MOTORISTA</th>
-                        <th class='okok' scope="col">STATUS</th>
+                        <th class='okok' scope="col">AÇÃO</th>
                         <th class='okok' scope='col'>ADICIONAR COMENTÁRIO</th>
                         <th class='okok' scope='col'>COMENTÁRIO
-                        
+
                       </tr>
                     </thead>
                     <tbody>
@@ -58,10 +58,8 @@
                           <td class='okok'>{{saida.litros}}</td>
                           <td class='okok'>{{saida.horimetro}}</td>
                           <td class='okok'>{{saida.operador}}</td>
-                          <td class='okok'><span><a href="{% url 'status' saida.id %}"><img src="{% if saida.status %} {%static '/ceq/img/check.png'%}
-                                                                                            {%else%} {%static '/ceq/img/exit.png'%}
-                                                                                            {%endif%}"></a></span></td>
-                          {%if not saida.status%}                                                                 
+                          <td class='okok'><a href="{% url 'status' saida.id %}" class="btn btn-sm btn-success">Resolvido</a></td>
+                          {%if not saida.status%}
                           <td class='okok'><form action="{% url 'comentario' saida.id%}" method="POST"> {% csrf_token %}
                                 <input style='width:92px; height:50px' type='text' name='comentario'>  
                                 <br>

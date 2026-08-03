@@ -144,6 +144,39 @@
                         {%endfor%}
                          </tbody>
                     </table>
+
+                    {% if entradas.paginator.num_pages > 1 %}
+                    <nav aria-label="Paginação de entradas">
+                      <ul class="pagination justify-content-center">
+                        {% if entradas.has_previous %}
+                        <li class="page-item">
+                          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">Primeira</a>
+                        </li>
+                        <li class="page-item">
+                          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ entradas.previous_page_number }}">Anterior</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Primeira</span></li>
+                        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                        {% endif %}
+                        <li class="page-item disabled">
+                          <span class="page-link">Página {{ entradas.number }} de {{ entradas.paginator.num_pages }}</span>
+                        </li>
+                        {% if entradas.has_next %}
+                        <li class="page-item">
+                          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ entradas.next_page_number }}">Próxima</a>
+                        </li>
+                        <li class="page-item">
+                          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ entradas.paginator.num_pages }}">Última</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+                        <li class="page-item disabled"><span class="page-link">Última</span></li>
+                        {% endif %}
+                      </ul>
+                    </nav>
+                    {% endif %}
+
                 </div>
               </div>
             </div>

@@ -311,56 +311,6 @@
 
            
 
-           <div class="card">
-
-  
-              <div class="card-body pb-0">
-                 <h5 class="card-title" style='font-size:25px; align-text:center'>Consumo Obras - {{mes_atual}}</h5>
-                
-                 <div class="chart-container" style="position: relative; height:300px;">
-                    <canvas id="EquipChart"></canvas>
-                  </div>
-                  <script>
-                    // Dados para o gráfico
-                    var data = {
-                       labels: {{list_obras|safe}},
-                       datasets: [{
-                       data: {{list_consumo}},   
-                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#33FF99', '#ed3c0d']
-                      }]
-                    };
-                    
-                    // Configuração do gráfico
-                    var options = {
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          display: false
-                        }
-                      }
-                    };
-                    
-                    // Criando o gráfico de rosca
-                    var ctx = document.getElementById('EquipChart').getContext('2d');
-                    var myDoughnutChart = new Chart(ctx, {
-                      type: 'doughnut',
-                      data: data,
-                      options: options
-                    });
-                    
-                    // Criando o rótulo com cores ao lado do gráfico
-                    var legendContainer = document.getElementById('legend');
-                    data.labels.forEach(function(label, index) {
-                      var colorBox = '<span class="color-box" style="background-color:' + data.datasets[0].backgroundColor[index] + '"></span>';
-                      var labelWithColor = '<div class="label-with-color">' + colorBox + label + '</div>';
-                      legendContainer.innerHTML += labelWithColor;
-                    });
-                    </script>
-              </div>
-              
-           </div>
-           
         </div>
         
      </div>

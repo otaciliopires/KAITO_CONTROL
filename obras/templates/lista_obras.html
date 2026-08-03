@@ -2,116 +2,112 @@
 
 {% load static %}
 {% block 'titulo' %}painel_obras{% endblock %}
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
 {%block 'head'%}
 <link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
 <link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<style>
+    .obra-card {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .obra-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    }
+    .obra-card .card-header {
+        background: #00008B;
+        color: #fff;
+        border-radius: 14px 14px 0 0;
+        font-size: 20px;
+        font-weight: 600;
+    }
+    .obra-card .card-header a {
+        color: #fff;
+        text-decoration: none;
+    }
+    .obra-saldo-label {
+        font-size: 13px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-bottom: 2px;
+    }
+    .obra-saldo-valor {
+        font-size: 26px;
+        font-weight: 700;
+        color: #00008B;
+    }
+    .obra-chart-wrapper {
+        position: relative;
+        height: 220px;
+    }
+</style>
 {%endblock%}
 
 
 
 {%block 'plataforma' %}
 
-<main style='margin-left:0  ' id="main" class="main">
+<main style='margin-left:0' id="main" class="main">
     <div class="pagetitle">
-       <h1 style='font-size:40px; margin-bottom:40px'>Obras:</h1>
-       <nav>
-    {%for obra, consumo_mes in zipped_segments%}      
-    <section class="section dashboard">
-       <div class="row">
-          <div class="col-lg-10">
-             <div class="row">
-                <div class="col-xxl-4 col-xl-12">
-                   <div class="card info-card customers-card">
-                      <div class="card-body">
-                         <h5 class="card-title" style='font-size:22px'><a href="/obra/{{obra.id}}" style='text-decoration:none; color:#00008B'>{{obra.nome}} </h5>
-                         <div class="d-flex align-items-center">
-                            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i style='color:#00008B;' class="bi bi-building"></i>
-                            </div>
-                            <div class="ps-3">
-                               <h6>{{obra.saldo|floatformat:"2g"}} </h6>
-                            </div>
-                            <div style='margin-left:50px; ' class="ps-3">
-                                <div style='' class="card-body">
-                                    <h5 class="card-title">Consumo Mensal</h5>
-                                    <canvas  id="{{obra.id}}ok" width="500" height="150"></canvas>
-                                        <script>
-                                        var ctx = document.getElementById('{{obra.id}}ok').getContext('2d');
-                                        var myChart = new Chart(ctx, {
-                                            type: 'bar',
-                                            data: {
-                                                labels: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGT', 'SET', 'OUT', 'NOV', 'DEZ'],
-                                                datasets: [{
-                                                    label: 'Saidas em litros',
-                                                    data: {{consumo_mes}},
-                                                    
-                                                    borderWidth: 1
-                                                }]
-                                            },
-                                            options: {
-                                                
-                                                scales: {
-                                                    yAxes: [{
-                                                        ticks: {
-                                                            beginAtZero: true
-                                                        }
-                                                    }]
-                                                }
-                                            }
-                                        });
-                                        </script>
-                                 </div>
-                             </div>
+        <h1 style='font-size:40px; margin-bottom:10px'>Obras</h1>
+        <p style="color:#6c757d; margin-bottom:30px">Consumo mensal de diesel em {{ ano_atual }}</p>
 
-                            
-                            <div style='margin-left:100px'>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+            {%for obra, consumo_mes in zipped_segments%}
+            <div class="col">
+                <div class="card obra-card h-100">
+                    <div class="card-header">
+                        <a href="/obra/{{obra.id}}">{{obra.nome}}</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="obra-saldo-label">Saldo atual</div>
+                        <div class="obra-saldo-valor">{{obra.saldo|floatformat:"2g"}} L</div>
 
-                            </div>
+                        <div class="obra-chart-wrapper mt-3">
+                            <canvas id="grafico-obra-{{obra.id}}"></canvas>
                         </div>
-
-
-
-                        
-                   </div>
+                    </div>
                 </div>
             </div>
+            <script>
+                (function () {
+                    var ctx = document.getElementById('grafico-obra-{{obra.id}}').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'],
+                            datasets: [{
+                                label: 'Litros consumidos ({{ ano_atual }})',
+                                data: {{consumo_mes}},
+                                backgroundColor: 'rgba(0, 0, 139, 0.75)',
+                                borderRadius: 4,
+                                maxBarThickness: 28
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false }
+                            },
+                            scales: {
+                                y: { beginAtZero: true }
+                            }
+                        }
+                    });
+                })();
+            </script>
+            {%endfor%}
         </div>
     </div>
-</section>
+</main>
 
-
-
-
-
-{%endfor%}
-
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-  
 <script src="{% static 'ceq/javascript/js.js' %}"></script>
-  
-  
-  
-  
-  {%endblock%}
 
-
-
+{%endblock%}

@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
 from controleCEQ.models import Abastecimento, Entrada
-from ativos.models import Obras
+from ativos.models import Obras, Equipamentos
 from openpyxl import Workbook
 from io import BytesIO
 from django.db.models import Sum
-from datetime import datetime
+from datetime import datetime, date
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
+from django.core.paginator import Paginator
 import json
 from django.contrib import messages
 from django.contrib.messages import constants
@@ -16,25 +17,80 @@ from django.contrib.messages import constants
 
 
 def obra(request,id):  #Recebi o id da página html lista_obra: href="/obra/{{obra.id}}"
-    
+
     obra = Obras.objects.get(id=id)#objeto - obra do usuario logado
     obra_name = obra
-    saidas = Abastecimento.objects.filter(obra=obra_name)
-    saidasx = Abastecimento.objects.filter(obra=obra_name, status=False)
-    entradas = Entrada.objects.filter(obra=obra_name)
     obras = Obras.objects.filter(nome=obra_name)
     user = request.user
 
     if request.method == 'POST':
         data_inicio = request.POST.get('data_inicio')
-        data_fim = request.POST.get('data_fim') 
-    return render(request, 'obra.html', {'obra': obra, 
-                                         'saidas':saidas,
-                                         'saidasx':saidasx, 
-                                         'entradas':entradas, 
-                                         'obras':obras, 
-                                         'user':user, 
+        data_fim = request.POST.get('data_fim')
+    return render(request, 'obra.html', {'obra': obra,
+                                         'obras':obras,
+                                         'user':user,
                                          'obra_user':obra})
+
+
+def obra_entradas(request, id):
+    obra_obj = Obras.objects.get(id=id)
+    entradas_qs = Entrada.objects.filter(obra=obra_obj).order_by('-numero')
+
+    paginator = Paginator(entradas_qs, 50)
+    entradas = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'obra_entradas.html', {'obra': obra_obj, 'entradas': entradas})
+
+
+def obra_abastecimentos(request, id):
+    obra_obj = Obras.objects.get(id=id)
+    problemas = Abastecimento.objects.filter(obra=obra_obj, status=False).order_by('-numero')
+
+    equipamentos = Equipamentos.objects.filter(abastecimento__obra=obra_obj).distinct()
+
+    data_inicio = request.GET.get('data_inicio')
+    if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
+    else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
+
+    data_fim = request.GET.get('data_fim')
+    if data_fim == None or data_fim == '': data_fim = date.today()
+    else: data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
+
+    filtro_equipamento = request.GET.getlist('equipamento')
+
+    if request.GET.get('data_inicio') or request.GET.get('data_fim') or request.GET.getlist('equipamento'):
+        if not filtro_equipamento:
+            filtro_equipamento = equipamentos
+        saidas_qs = Abastecimento.objects.filter(obra=obra_obj, status=True, data__range=[data_inicio, data_fim]).filter(equipamento__in=filtro_equipamento).order_by('-numero')
+    else:
+        saidas_qs = Abastecimento.objects.filter(obra=obra_obj, status=True).order_by('-numero')
+
+    paginator = Paginator(saidas_qs, 50)
+    saidas = paginator.get_page(request.GET.get('page'))
+
+    querystring = request.GET.copy()
+    querystring.pop('page', None)
+    querystring = querystring.urlencode()
+
+    return render(request, 'obra_abastecimentos.html', {
+        'obra': obra_obj,
+        'saidas': saidas,
+        'problemas': problemas,
+        'equipamentos': equipamentos,
+        'equipamento_ids_selecionados': request.GET.getlist('equipamento'),
+        'data_inicio_raw': request.GET.get('data_inicio', ''),
+        'data_fim_raw': request.GET.get('data_fim', ''),
+        'querystring': querystring,
+    })
+
+def reportar_problema(request, id):
+    abastecimento = Abastecimento.objects.get(id=id)
+    if request.method == 'POST':
+        problema = request.POST.get('problema')
+        abastecimento.status = False
+        abastecimento.observacao = f"Problema reportado por {request.user.first_name or request.user.username}: {problema}"
+        abastecimento.save()
+    return redirect('obra_abastecimentos', id=abastecimento.obra.id)
 
 def status(request, id):
 
@@ -240,11 +296,12 @@ def renderiza_grafico(request):
 def lista_obras(request):
     obras = Obras.objects.filter(usuario=request.user)
     meses = [1,2,3,4,5,6,7,8,9,10,11,12]
+    ano_atual = datetime.now().year
     consumo_meses = []
     consumo_mes = []
     for obra in obras:
         for mes in meses:
-            saida = Abastecimento.objects.filter(data__month=mes).filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
+            saida = Abastecimento.objects.filter(data__month=mes).filter(data__year=ano_atual).filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
             if saida == None:
                 saida = 0
             else:pass
@@ -253,10 +310,10 @@ def lista_obras(request):
         consumo_mes = []
 
 
-    
+
     zipped_segments = zip(obras, consumo_meses)
     print(consumo_meses)
-    
 
-    return render(request, 'lista_obras.html', {'obras':obras, 'consumo_meses':consumo_meses, 'zipped_segments':zipped_segments})
+
+    return render(request, 'lista_obras.html', {'obras':obras, 'consumo_meses':consumo_meses, 'zipped_segments':zipped_segments, 'ano_atual':ano_atual})
 

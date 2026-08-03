@@ -22,8 +22,6 @@
 <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 
-
-
 {%endblock%}
 {% block 'titulo' %}Saídas{% endblock %}
 
@@ -31,82 +29,6 @@
 
 {%block 'body'%}
 <div>
-
-
-  <div class="modal fade" id="saidas-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">FILTRAR SAÍDAS</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form method='POST' action="{% url 'saidas' %}"> {% csrf_token %}
-
-            <div class="mb-3">
-              <label for="recipient-name" class="col-form-label">Inicial:</label>
-              <input type="date" name="data" />
-            </div>
-
-            <div class="mb-3">
-                <label for="recipient-name" class="col-form-label">Final:</label>
-                <input type="date" name="data_fim" />
-              </div>
-
-
-            <div class="mb-3">
-                <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Obras
-                </button>
-                <ul class="dropdown-menu">
-                    {%for obra in obras%}
-                    <li>
-                        <div class="mb-3 form-check">
-                            <input name='obra' type="checkbox" class="form-check-input" id="exampleCheck1" value="{{obra.id}}">
-                            <label class="form-check-label" for="exampleCheck1">{{obra}}</label>
-                        </div>
-                    </li>
-                    {%endfor%}
-
-                    
-                </ul>
-              </div>
-                </button>
-            </div>
-
-            <div class="mb-3">
-                <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                  Equipamentos
-                </button>
-                <ul class="dropdown-menu">
-                    
-                    {%for equipamento in equipamentos%}
-                    <li>
-                        <div class="mb-3 form-check">
-                            <input name='equipamento' type="checkbox" class="form-check-input" id="exampleCheck1" value="{{equipamento.id}}">
-                            <label class="form-check-label" for="exampleCheck1">{{equipamento}}</label>
-                        </div>
-                    </li>
-                    {%endfor%}
-                </ul>
-              </div>
-                </button>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <input type="submit" class="btn btn-primary" value='ENVIAR'></input>
-              </div>
-          </form>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-
-
 
 
 
@@ -137,79 +59,58 @@
                       </div>
                       <div class="row mb-3">
                          <label for="inputDate" class="col-sm-2 col-form-label">Start Date:</label>
-                         <div class="col-sm-10"> <input style="width:150px" name='data_inicio' type="date" class="form-control"></div>
-                      </div>          
+                         <div class="col-sm-10"> <input style="width:150px" name='data_inicio' type="date" class="form-control" value="{{ data_inicio_raw }}"></div>
+                      </div>
                       <div class="row mb-3">
                          <label for="inputDate" class="col-sm-2 col-form-label">End Date:</label>
-                         <div class="col-sm-10"> <input style="width:150px" name='data_fim' type="date" class="form-control"></div>
+                         <div class="col-sm-10"> <input style="width:150px" name='data_fim' type="date" class="form-control" value="{{ data_fim_raw }}"></div>
                       </div>
                       <div class="row mb-3">
                          <label class="col-sm-2 col-form-label">Obras:</label>
                          <div class="col-sm-10">
-                            
-            <div class="mb-3">
-              <div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Obras
-              </button>
-              <ul style='width:300px' class="dropdown-menu">
-                  {%for obra in obras%}
-                  <li>
-                      <div style='margin-left:20px' class="mb-3 form-check">
-                          <input name='obra' type="checkbox" class="form-check-input" id="exampleCheck1" value="{{obra.id}}">
-                          <label class="form-check-label" for="exampleCheck1">{{obra}}</label>
-                      </div>
-                  </li>
-                  {%endfor%}
-
-                  
-              </ul>
-            </div>
-              </button>
-          </div>
+                            <div class="dropdown">
+                              <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                Obras {% if obra_ids_selecionados %}<span class="badge bg-light text-dark">{{ obra_ids_selecionados|length }}</span>{% endif %}
+                              </button>
+                              <div class="dropdown-menu p-2" style="width:320px; max-height:320px; overflow-y:auto;">
+                                <input type="text" class="form-control form-control-sm mb-2 filtro-busca" data-target="obras-lista" placeholder="Pesquisar obra...">
+                                <ul class="list-unstyled mb-0" id="obras-lista">
+                                    {%for obra in obras%}
+                                    <li class="filtro-item">
+                                        <div class="mb-1 form-check">
+                                            <input name='obra' type="checkbox" class="form-check-input" id="obra-{{obra.id}}" value="{{obra.id}}" {% if obra.id|stringformat:"s" in obra_ids_selecionados %}checked{% endif %}>
+                                            <label class="form-check-label" for="obra-{{obra.id}}">{{obra}}</label>
+                                        </div>
+                                    </li>
+                                    {%endfor%}
+                                </ul>
+                              </div>
+                            </div>
                          </div>
                       </div>
                          <div class="row mb-3">
                             <label class="col-sm-2 col-form-label">Equipamentos:</label>
                             <div class="col-sm-10">
-                              <div class="mb-3">
-                                <div class="dropdown">
-                                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                  Equipamentos
+                              <div class="dropdown">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                  Equipamentos {% if equipamento_ids_selecionados %}<span class="badge bg-light text-dark">{{ equipamento_ids_selecionados|length }}</span>{% endif %}
                                 </button>
-                                <ul class="dropdown-menu">
-                                  <input type="text" id="searchInput" placeholder="Pesquisar...">
-                                    {%for equipamento in equipamentos%}
-
-                                        <div style='margin-left:20px' class="mb-3 form-check">
-                                            <input name='equipamento' type="checkbox" class="form-check-input" id="exampleCheck1" value="{{equipamento.id}}">
-                                            <label  class="form-check-label" for="exampleCheck1">{{equipamento}}</label>
-                                        </div>
-                                    {%endfor%}
-                                </ul>
-                                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-                                <script>
-                                    $(document).ready(function(){
-                                        $('#searchInput').on('input', function() {
-                                            var searchText = $(this).val().toLowerCase();
-                                            $('label').each(function() {
-                                                var labelText = $(this).text().toLowerCase();
-                                                if(labelText.indexOf(searchText) !== -1) {
-                                                    $(this).show();
-                                                } else {
-                                                    $(this).hide();
-                                                }
-                                            });
-                                        });
-                                    });
-                                </script>
-
-
-
-                                
+                                <div class="dropdown-menu p-2" style="width:320px; max-height:320px; overflow-y:auto;">
+                                  <input type="text" class="form-control form-control-sm mb-2 filtro-busca" data-target="equipamentos-lista" placeholder="Pesquisar equipamento...">
+                                  <ul class="list-unstyled mb-0" id="equipamentos-lista">
+                                      {%for equipamento in equipamentos%}
+                                      <li class="filtro-item">
+                                          <div class="mb-1 form-check">
+                                              <input name='equipamento' type="checkbox" class="form-check-input" id="equipamento-{{equipamento.id}}" value="{{equipamento.id}}" {% if equipamento.id|stringformat:"s" in equipamento_ids_selecionados %}checked{% endif %}>
+                                              <label class="form-check-label" for="equipamento-{{equipamento.id}}">{{equipamento}}</label>
+                                          </div>
+                                      </li>
+                                      {%endfor%}
+                                  </ul>
+                                </div>
                               </div>
                             </div>
-                         </div>                                                 
+                         </div>
                       <div class="modal-footer"><input type="submit" class="btn btn-primary" value='ENVIAR'></input></div>
                    </div>
                 </div>
@@ -264,6 +165,39 @@
                         {%endfor%}
                          </tbody>
                     </table>
+
+                    {% if saidas.paginator.num_pages > 1 %}
+                    <nav aria-label="Paginação de saídas">
+                      <ul class="pagination justify-content-center">
+                        {% if saidas.has_previous %}
+                        <li class="page-item">
+                          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">Primeira</a>
+                        </li>
+                        <li class="page-item">
+                          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ saidas.previous_page_number }}">Anterior</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Primeira</span></li>
+                        <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                        {% endif %}
+                        <li class="page-item disabled">
+                          <span class="page-link">Página {{ saidas.number }} de {{ saidas.paginator.num_pages }}</span>
+                        </li>
+                        {% if saidas.has_next %}
+                        <li class="page-item">
+                          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ saidas.next_page_number }}">Próxima</a>
+                        </li>
+                        <li class="page-item">
+                          <a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ saidas.paginator.num_pages }}">Última</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+                        <li class="page-item disabled"><span class="page-link">Última</span></li>
+                        {% endif %}
+                      </ul>
+                    </nav>
+                    {% endif %}
+
                 </div>
               </div>
             </div>
@@ -293,7 +227,20 @@
 <script src="assets/js/main.js"></script> 
 
 
-  
+
   <script src="{% static 'ceq/javascript/js.js' %}"></script>
+
+  <script>
+    document.querySelectorAll('.filtro-busca').forEach(function (input) {
+      input.addEventListener('input', function () {
+        var texto = input.value.toLowerCase();
+        var lista = document.getElementById(input.dataset.target);
+        lista.querySelectorAll('.filtro-item').forEach(function (item) {
+          var label = item.querySelector('label').textContent.toLowerCase();
+          item.style.display = label.indexOf(texto) !== -1 ? '' : 'none';
+        });
+      });
+    });
+  </script>
 
  {% endblock%}
