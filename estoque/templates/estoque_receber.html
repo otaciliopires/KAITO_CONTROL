@@ -1,0 +1,142 @@
+{% extends 'base_obra.html' %}
+
+{% load static %}
+{% block 'titulo' %}Receber / Retirar{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center" style="margin-bottom:20px">
+    <h1 style="font-size:32px">Almoxarifado</h1>
+    <div>
+      <a class="btn btn-success" href="{% url 'dar_entrada' %}">+ Dar Entrada Avulsa</a>
+      <a class="btn btn-outline-secondary" href="{% url 'estoque_home' %}">&laquo; Voltar</a>
+    </div>
+  </div>
+
+  <h5 style="color:#0d6efd">Aguardando Recebimento</h5>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Descrição</th>
+        <th>Qtd</th>
+        <th>Fornecedor</th>
+        <th>Referência</th>
+        <th>Solicitante</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in aguardando_recebimento %}
+      <tr>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.quantidade }}</td>
+        <td>{{ item.fornecedor }}</td>
+        <td>{{ item.referencia }}</td>
+        <td>{{ item.solicitacao.solicitante }}</td>
+        <td>
+          <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalReceber" data-action="{% url 'receber_item' item_id=item.id %}">
+            Receber
+          </button>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">Nenhum item aguardando recebimento.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h5 style="color:#198754; margin-top:30px">Em Estoque - Aguardando Retirada</h5>
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Descrição</th>
+        <th>Qtd</th>
+        <th>Local no estoque</th>
+        <th>Solicitante</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in aguardando_retirada %}
+      <tr>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.quantidade }}</td>
+        <td>{{ item.local_estoque }}</td>
+        <td>{{ item.solicitacao.solicitante }}</td>
+        <td>
+          <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalRetirar"
+                  data-action="{% url 'retirar_item' item_id=item.id %}"
+                  data-solicitante="{{ item.solicitacao.solicitante_id }}">
+            Marcar retirado
+          </button>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5">Nenhum item aguardando retirada.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="modal fade" id="modalReceber" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" id="formReceber">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title">Receber item</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <label class="form-label">Local no estoque (ex: Prateleira A3)</label>
+            <input type="text" name="local_estoque" class="form-control" required>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Confirmar Recebimento</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalRetirar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" id="formRetirar">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title">Marcar item como retirado</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <label class="form-label">Retirado por</label>
+            <select name="retirado_por" id="select-retirado-por" class="form-select">
+              {% for usuario in usuarios %}
+              <option value="{{ usuario.id }}">{{ usuario }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-success">Confirmar Retirada</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  document.getElementById('modalReceber').addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+    document.getElementById('formReceber').action = button.getAttribute('data-action');
+  });
+  document.getElementById('modalRetirar').addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+    document.getElementById('formRetirar').action = button.getAttribute('data-action');
+    var solicitanteId = button.getAttribute('data-solicitante');
+    if (solicitanteId) {
+      document.getElementById('select-retirado-por').value = solicitanteId;
+    }
+  });
+</script>
+{% endblock %}

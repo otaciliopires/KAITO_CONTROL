@@ -1,0 +1,73 @@
+{% extends 'base_obra.html' %}
+
+{% load static %}
+{% block 'titulo' %}Minhas Solicitações{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center" style="margin-bottom:20px">
+    <h1 style="font-size:32px">Minhas Solicitações</h1>
+    <div>
+      <a class="btn btn-success" href="{% url 'nova_solicitacao' %}">+ Nova Solicitação</a>
+      <a class="btn btn-outline-secondary" href="{% url 'estoque_home' %}">&laquo; Voltar</a>
+    </div>
+  </div>
+
+  {% for solicitacao in solicitacoes %}
+  <div class="card mb-3">
+    <div class="card-header d-flex justify-content-between">
+      <span>Solicitação #{{ solicitacao.id }} - {{ solicitacao.data_solicitacao|date:"d/m/Y H:i" }}</span>
+      {% if solicitacao.equipamento %}<span>Equipamento: {{ solicitacao.equipamento }}</span>{% endif %}
+    </div>
+    <div class="card-body">
+      <table class="table table-sm table-bordered mb-0">
+        <thead>
+          <tr>
+            <th>Descrição</th>
+            <th>Qtd</th>
+            <th>Status</th>
+            <th>Local no estoque</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in solicitacao.itens.all %}
+          <tr>
+            <td>{{ item.descricao }}{% if item.imagem %} <a href="{{ item.imagem.url }}" target="_blank"><i class="bi bi-image"></i></a>{% endif %}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>
+              {% if item.status == 'SOL' %}<span class="badge bg-secondary">Solicitado</span>
+              {% elif item.status == 'COM' %}<span class="badge bg-primary">Comprado</span>
+              {% elif item.status == 'REC' %}<span class="badge bg-info text-dark">Recebido</span>
+              {% elif item.status == 'RET' %}<span class="badge bg-success">Retirado</span>
+              {% endif %}
+            </td>
+            <td>{{ item.local_estoque }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% empty %}
+  <p>Você ainda não fez nenhuma solicitação.</p>
+  {% endfor %}
+
+  {% if solicitacoes.paginator.num_pages > 1 %}
+  <nav aria-label="Paginação de solicitações">
+    <ul class="pagination justify-content-center">
+      {% if solicitacoes.has_previous %}
+      <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.previous_page_number }}">Anterior</a></li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+      {% endif %}
+      <li class="page-item disabled"><span class="page-link">Página {{ solicitacoes.number }} de {{ solicitacoes.paginator.num_pages }}</span></li>
+      {% if solicitacoes.has_next %}
+      <li class="page-item"><a class="page-link" href="?page={{ solicitacoes.next_page_number }}">Próxima</a></li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</main>
+{% endblock %}

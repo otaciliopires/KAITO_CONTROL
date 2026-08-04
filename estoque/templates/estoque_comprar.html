@@ -1,0 +1,92 @@
+{% extends 'base_obra.html' %}
+
+{% load static %}
+{% block 'titulo' %}Comprar{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center" style="margin-bottom:20px">
+    <h1 style="font-size:32px">Itens para Comprar</h1>
+    <a class="btn btn-outline-secondary" href="{% url 'estoque_home' %}">&laquo; Voltar</a>
+  </div>
+
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Descrição</th>
+        <th>Qtd</th>
+        <th>Solicitante</th>
+        <th>Equipamento</th>
+        <th>Data solicitação</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in itens %}
+      <tr>
+        <td>{{ item.descricao }}{% if item.imagem %} <a href="{{ item.imagem.url }}" target="_blank"><i class="bi bi-image"></i></a>{% endif %}</td>
+        <td>{{ item.quantidade }}</td>
+        <td>{{ item.solicitacao.solicitante }}</td>
+        <td>{{ item.solicitacao.equipamento|default:"-" }}</td>
+        <td>{{ item.solicitacao.data_solicitacao|date:"d/m/Y H:i" }}</td>
+        <td>
+          <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#modalComprar" data-action="{% url 'comprar_item' item_id=item.id %}">
+            Comprar
+          </button>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6">Nenhum item aguardando compra.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="modal fade" id="modalComprar" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" id="formComprar">
+          {% csrf_token %}
+          <div class="modal-header">
+            <h5 class="modal-title">Registrar compra</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-2">
+              <label class="form-label">Referência</label>
+              <input type="text" name="referencia" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Fornecedor</label>
+              <input type="text" name="fornecedor" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Nota Fiscal</label>
+              <input type="text" name="nota_fiscal" class="form-control" required>
+            </div>
+            <div class="row">
+              <div class="col-6 mb-2">
+                <label class="form-label">Preço Unitário</label>
+                <input type="number" step="0.01" name="preco_unitario" id="comprar-preco-unitario" class="form-control" required>
+              </div>
+              <div class="col-6 mb-2">
+                <label class="form-label">Preço Total</label>
+                <input type="number" step="0.01" name="preco_total" id="comprar-preco-total" class="form-control" required>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Confirmar Compra</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+<script>
+  document.getElementById('modalComprar').addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+    document.getElementById('formComprar').action = button.getAttribute('data-action');
+  });
+</script>
+{% endblock %}

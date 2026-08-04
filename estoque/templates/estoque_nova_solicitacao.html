@@ -1,0 +1,95 @@
+{% extends 'base_obra.html' %}
+
+{% load static %}
+{% block 'titulo' %}Nova Solicitação{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center" style="margin-bottom:20px">
+    <h1 style="font-size:32px">Nova Solicitação</h1>
+    <a class="btn btn-outline-secondary" href="{% url 'estoque_home' %}">&laquo; Voltar</a>
+  </div>
+
+  {% if erro %}
+  <div class="alert alert-danger">{{ erro }}</div>
+  {% endif %}
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="total_itens" id="total_itens" value="1">
+
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Equipamento (opcional)</label>
+        <select name="equipamento" class="form-select">
+          <option value="">-- nenhum --</option>
+          {% for equipamento in equipamentos %}
+          <option value="{{ equipamento.id }}">{{ equipamento }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Observação geral (opcional)</label>
+        <input type="text" name="observacao" class="form-control">
+      </div>
+    </div>
+
+    <h5 style="margin-top:20px">Itens</h5>
+    <div id="itens-container">
+      <div class="card mb-2 item-row" data-index="0">
+        <div class="card-body row g-2 align-items-end">
+          <div class="col-md-5">
+            <label class="form-label">Descrição do item</label>
+            <input type="text" name="descricao_0" class="form-control" required>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Quantidade</label>
+            <input type="number" name="quantidade_0" class="form-control" value="1" min="1" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Foto (opcional)</label>
+            <input type="file" name="imagem_0" class="form-control" accept="image/*">
+          </div>
+          <div class="col-md-1">
+            <button type="button" class="btn btn-outline-danger btn-remover-item" title="Remover item">&times;</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button type="button" id="btn-adicionar-item" class="btn btn-outline-primary mb-3">+ Adicionar item</button>
+
+    <div>
+      <button type="submit" class="btn btn-success">Enviar Solicitação</button>
+    </div>
+  </form>
+</main>
+
+<script>
+  var proximoIndice = 1;
+
+  document.getElementById('btn-adicionar-item').addEventListener('click', function () {
+    var container = document.getElementById('itens-container');
+    var novaLinha = container.querySelector('.item-row').cloneNode(true);
+    novaLinha.dataset.index = proximoIndice;
+    novaLinha.querySelectorAll('input').forEach(function (input) {
+      var base = input.name.replace(/_\d+$/, '');
+      input.name = base + '_' + proximoIndice;
+      if (input.type !== 'number') { input.value = ''; }
+      else { input.value = 1; }
+    });
+    container.appendChild(novaLinha);
+    proximoIndice++;
+    document.getElementById('total_itens').value = proximoIndice;
+  });
+
+  document.getElementById('itens-container').addEventListener('click', function (event) {
+    if (event.target.classList.contains('btn-remover-item')) {
+      var linhas = document.querySelectorAll('.item-row');
+      if (linhas.length > 1) {
+        event.target.closest('.item-row').remove();
+      }
+    }
+  });
+</script>
+{% endblock %}

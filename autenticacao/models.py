@@ -10,8 +10,15 @@ class Usuario(AbstractUser):
     status = models.CharField(max_length=1, choices=qualificacao, default='c')
 
 
-    foto = models.ImageField(upload_to='fotos')
+    foto = models.ImageField(upload_to='fotos', blank=True, null=True)
     funcao = models.CharField(max_length=50, default="")
+
+    perfis_estoque = [('solicitante', 'Solicitante'),
+                       ('comprador', 'Comprador'),
+                       ('almoxarifado', 'Almoxarifado')]
+
+    perfil_estoque = models.CharField(max_length=20, choices=perfis_estoque, blank=True, default="")
+
     def __str__(self) -> str:
         return self.username
 

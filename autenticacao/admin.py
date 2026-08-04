@@ -9,6 +9,6 @@ class UsuarioAdmin(admin_auth_django.UserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
     model = Usuario
-    list_display = ("id", "username", "email", "first_name", "last_name", "is_staff", "status", 'foto')
- 
-    fieldsets = admin_auth_django.UserAdmin.fieldsets + (('Qualificação', {"fields": ("status","funcao")}), ('Imagem', {"fields": ("foto",)}))
+    list_display = ("id", "username", "email", "first_name", "last_name", "is_staff", "status", "perfil_estoque", 'foto')
+
+    fieldsets = admin_auth_django.UserAdmin.fieldsets + (('Qualificação', {"fields": ("status","funcao")}), ('Estoque', {"fields": ("perfil_estoque",)}), ('Imagem', {"fields": ("foto",)}))

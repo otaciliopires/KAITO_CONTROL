@@ -1,0 +1,64 @@
+{% extends 'base_obra.html' %}
+
+{% load static %}
+{% block 'titulo' %}Estoque{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1 style="font-size:40px; margin-bottom:30px">Estoque</h1>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+
+      {% if user.is_superuser or user.perfil_estoque == 'solicitante' %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-pencil-square"></i> Solicitante</h5>
+            <p class="card-text">Peça uma peça nova ou acompanhe suas solicitações.</p>
+            <a href="{% url 'nova_solicitacao' %}" class="btn btn-success w-100 mb-2">Nova Solicitação</a>
+            <a href="{% url 'minhas_solicitacoes' %}" class="btn btn-outline-secondary w-100">Minhas Solicitações</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if user.is_superuser or user.perfil_estoque == 'comprador' %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-cart-check"></i> Comprador</h5>
+            <p class="card-text">Veja os itens solicitados aguardando compra.</p>
+            <a href="{% url 'comprar_lista' %}" class="btn btn-primary w-100">Itens para Comprar</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if user.is_superuser or user.perfil_estoque == 'almoxarifado' %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-box-seam"></i> Almoxarifado</h5>
+            <p class="card-text">Receba peças compradas, guarde no estoque e registre retiradas.</p>
+            <a href="{% url 'receber_lista' %}" class="btn btn-primary w-100 mb-2">Receber / Retirar</a>
+            <a href="{% url 'dar_entrada' %}" class="btn btn-outline-secondary w-100">Dar Entrada Avulsa</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title"><i class="bi bi-kanban"></i> Fluxo</h5>
+            <p class="card-text">Acompanhe em que etapa cada item solicitado está.</p>
+            <a href="{% url 'fluxo' %}" class="btn btn-dark w-100">Ver Fluxo</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+{% endblock %}

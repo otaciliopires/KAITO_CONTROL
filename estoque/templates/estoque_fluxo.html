@@ -1,0 +1,106 @@
+{% extends 'base_obra.html' %}
+
+{% load static %}
+{% block 'titulo' %}Fluxo de Estoque{% endblock %}
+
+{% block 'head' %}
+<style>
+  .kanban-coluna {
+    background: #f4f5f7;
+    border-radius: 10px;
+    padding: 10px;
+    min-height: 300px;
+  }
+  .kanban-cartao {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .kanban-cartao .descricao {
+    font-weight: 600;
+  }
+  .kanban-titulo {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+</style>
+{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center" style="margin-bottom:20px">
+    <h1 style="font-size:32px">Fluxo de Estoque</h1>
+    <a class="btn btn-outline-secondary" href="{% url 'estoque_home' %}">&laquo; Voltar</a>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-4 g-3">
+    <div class="col">
+      <div class="kanban-coluna">
+        <div class="kanban-titulo" style="color:#6c757d">Solicitado ({{ colunas.SOL|length }})</div>
+        {% for item in colunas.SOL %}
+        <div class="kanban-cartao">
+          <div class="descricao">{{ item.descricao }}</div>
+          <div>Qtd: {{ item.quantidade }}</div>
+          <div>Solicitante: {{ item.solicitacao.solicitante }}</div>
+          {% if item.solicitacao.equipamento %}<div>Equipamento: {{ item.solicitacao.equipamento }}</div>{% endif %}
+        </div>
+        {% empty %}
+        <p class="text-muted">Nenhum item.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="kanban-coluna">
+        <div class="kanban-titulo" style="color:#0d6efd">Comprado ({{ colunas.COM|length }})</div>
+        {% for item in colunas.COM %}
+        <div class="kanban-cartao">
+          <div class="descricao">{{ item.descricao }}</div>
+          <div>Qtd: {{ item.quantidade }}</div>
+          <div>Fornecedor: {{ item.fornecedor }}</div>
+          <div>Comprador: {{ item.comprador }}</div>
+        </div>
+        {% empty %}
+        <p class="text-muted">Nenhum item.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="kanban-coluna">
+        <div class="kanban-titulo" style="color:#0dcaf0">Recebido ({{ colunas.REC|length }})</div>
+        {% for item in colunas.REC %}
+        <div class="kanban-cartao">
+          <div class="descricao">{{ item.descricao }}</div>
+          <div>Qtd: {{ item.quantidade }}</div>
+          <div>Local: {{ item.local_estoque }}</div>
+          <div>Solicitante: {{ item.solicitacao.solicitante }}</div>
+        </div>
+        {% empty %}
+        <p class="text-muted">Nenhum item.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="kanban-coluna">
+        <div class="kanban-titulo" style="color:#198754">Retirado ({{ colunas.RET|length }})</div>
+        {% for item in colunas.RET %}
+        <div class="kanban-cartao">
+          <div class="descricao">{{ item.descricao }}</div>
+          <div>Qtd: {{ item.quantidade }}</div>
+          <div>Retirado por: {{ item.retirado_por }}</div>
+          <div>{{ item.data_retirada|date:"d/m/Y H:i" }}</div>
+        </div>
+        {% empty %}
+        <p class="text-muted">Nenhum item.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

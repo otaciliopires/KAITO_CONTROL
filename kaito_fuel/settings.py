@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'controleCEQ',
     'obras',
     'ativos',
-    'manutencao'
+    'manutencao',
+    'estoque'
 ]
 
 MIDDLEWARE = [
