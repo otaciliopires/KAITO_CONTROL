@@ -38,9 +38,13 @@ INSTALLED_APPS = [
     'controleCEQ',
     'obras',
     'ativos',
-    'manutencao',
-    'estoque'
 ]
+
+if config('ENABLE_MANUTENCAO', cast=bool, default=True):
+    INSTALLED_APPS.append('manutencao')
+
+if config('ENABLE_ESTOQUE', cast=bool, default=True):
+    INSTALLED_APPS.append('estoque')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

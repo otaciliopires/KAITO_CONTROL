@@ -10,7 +10,13 @@ urlpatterns = [
     path('auth/', include('autenticacao.urls')),
     path('ceq/', include('controleCEQ.urls')),
     path('obra/', include('obras.urls')),
-    path('manutencao/', include('manutencao.urls')),
-    path('estoque/', include('estoque.urls')),
     path('api/', api.urls)
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 
+]
+
+if 'manutencao' in settings.INSTALLED_APPS:
+    urlpatterns.append(path('manutencao/', include('manutencao.urls')))
+
+if 'estoque' in settings.INSTALLED_APPS:
+    urlpatterns.append(path('estoque/', include('estoque.urls')))
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
