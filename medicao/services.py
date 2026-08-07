@@ -109,10 +109,9 @@ class AcumuladoMedicao:
         return self.valor_acumulado_locacao + self.valor_acumulado_diesel
 
 
-def _preco_diesel_referencia(obra, ano, mes):
-    fim = fim_mes(ano, mes)
+def _preco_diesel_referencia(obra):
     entrada = (
-        Entrada.objects.filter(obra=obra, data_entrega__lte=fim)
+        Entrada.objects.filter(obra=obra)
         .order_by('-data_entrega', '-id')
         .first()
     )
@@ -141,7 +140,7 @@ def calcular_periodo(contrato, ano, mes, incluir_tabela=True):
         obra=obra, data__year=ano, data__month=mes,
     ).aggregate(total=Sum('litros'))['total'] or 0.0
 
-    preco_diesel = _preco_diesel_referencia(obra, ano, mes)
+    preco_diesel = _preco_diesel_referencia(obra)
 
     percentual_registro = _vigente_em(list(ParametroTaxaDiesel.objects.all()), 'vigente_desde', ano, mes)
     percentual = percentual_registro.percentual if percentual_registro else 0.0
