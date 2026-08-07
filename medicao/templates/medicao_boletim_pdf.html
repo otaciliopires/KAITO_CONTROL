@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+{% load medicao_extras %}
+<style>
+  @page { size: A4 landscape; margin: 1.3cm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9pt; color: #1a1a1a; }
+
+  table { border-collapse: collapse; }
+
+  .relatorio-titulo { font-size: 12pt; font-weight: bold; text-align: center; margin-bottom: 8px; }
+
+  table.relatorio { width: 100%; margin-bottom: 6px; }
+  table.relatorio th, table.relatorio td { border: 1px solid #888; padding: 3px 6px; font-size: 8pt; }
+  table.relatorio th { background: #eef0ff; text-transform: uppercase; font-size: 7pt; }
+  table.relatorio td.right { text-align: right; }
+  table.relatorio tr.total-row td { font-weight: bold; background: #f2f2f2; }
+
+  .quebra-pagina { page-break-before: always; }
+
+  .header-table { width: 100%; margin-bottom: 3px; }
+  .header-table td { border: 1px solid #888; padding: 5px 8px; vertical-align: top; }
+  .logo-cell { width: 8%; text-align: center; vertical-align: middle; }
+  .logo-cell img { width: 42px; }
+  .company-name { font-size: 11pt; font-weight: bold; }
+  .company-meta { font-size: 7.5pt; color: #444; margin-top: 2px; }
+  .doc-title { font-size: 14pt; font-weight: bold; text-align: center; }
+  .doc-subtitle { font-size: 8pt; text-align: center; color: #333; margin-top: 2px; }
+  .field-label { font-size: 7.5pt; color: #555; font-weight: bold; }
+  .field-value { font-size: 9pt; font-weight: bold; }
+
+  table.meta-fields { width: 100%; }
+  table.meta-fields td { border: none; padding: 1px 0; font-size: 8pt; }
+  table.meta-fields td.field-label { width: 42%; }
+
+  .client-cell, .obra-cell { font-size: 8.5pt; }
+  .client-cell .field-label, .obra-cell .field-label { display: inline; }
+  .client-cell .field-value-inline, .obra-cell .field-value-inline { font-weight: bold; color: #1a3d8f; }
+  .obra-cell .obra-nome { font-weight: bold; }
+
+  table.items { width: 100%; margin-bottom: 4px; }
+  table.items th, table.items td { border: 1px solid #888; padding: 4px 5px; font-size: 8pt; }
+  table.items th { background: #eef0ff; text-transform: uppercase; font-size: 7pt; text-align: center; }
+  table.items td.right { text-align: right; }
+  table.items td.center { text-align: center; }
+
+  table.rodape-boletim { width: 27.1cm; margin-bottom: 2px; }
+  table.rodape-boletim td { padding: 3px 7px 0 7px; vertical-align: bottom; }
+  table.rodape-boletim td.txt8 { font-size: 8pt; }
+  table.rodape-boletim td.assin { text-align: center; }
+  table.rodape-boletim td.assin-marcada { border-top: 1px solid #333; padding-top: 4px; vertical-align: top; white-space: nowrap; }
+  table.rodape-boletim th.fin-head { border: 1px solid #888; background: #eef0ff; font-size: 8pt; text-transform: uppercase; padding: 5px 7px; }
+  table.rodape-boletim td.fin { border: 1px solid #888; }
+  table.rodape-boletim td.rotulo { text-align: left; }
+  table.rodape-boletim td.right { text-align: right; }
+
+  .observacoes { font-size: 8pt; margin-top: 0; }
+  .observacoes .nota { color: #555; font-size: 7.5pt; margin-top: 0; }
+</style>
+</head>
+<body>
+
+  <table class="header-table">
+    <tr>
+      <td class="logo-cell">
+        {% if empresa.logo %}<img src="{{ empresa.logo }}">{% endif %}
+      </td>
+      <td style="width: 26%">
+        <div class="company-name">{{ empresa.nome }}</div>
+        <div class="company-meta">CNPJ: {{ empresa.cnpj }}</div>
+        <div class="company-meta">END.: {{ empresa.endereco }}</div>
+      </td>
+      <td style="width: 42%">
+        <div class="doc-title">BOLETIM DE MEDIÇÃO</div>
+        <div class="doc-subtitle">PRESTAÇÃO DE SERVIÇOS - PESSOA JURÍDICA</div>
+        <div class="doc-subtitle">(LOCAÇÃO DE EQUIPAMENTOS)</div>
+      </td>
+      <td style="width: 24%">
+        <table class="meta-fields">
+          <tr><td class="field-label">MEDIÇÃO:</td><td class="field-value">Nº {{ acumulado.numero }}</td></tr>
+          <tr><td class="field-label">PERÍODO:</td><td class="field-value">01/{{ mes|stringformat:"02d" }}/{{ ano }} A {{ fim_mes|date:"d/m/Y" }}</td></tr>
+          <tr><td class="field-label">FOLHA:</td><td class="field-value">01/02</td></tr>
+          <tr><td class="field-label">DATA:</td><td class="field-value">{{ data_emissao|date:"d/m/Y" }}</td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td class="client-cell" colspan="2">
+        <span class="field-label">NOME:</span> <span class="field-value-inline">{{ empresa.nome }}</span><br>
+        <span class="field-label">CNPJ:</span> <span class="field-value-inline">{{ empresa.cnpj }}</span><br>
+        <span class="field-label">INSC. ESTADUAL:</span> <span class="field-value-inline">{{ empresa.insc_estadual }}</span>
+      </td>
+      <td class="obra-cell" colspan="2">
+        <span class="field-label">OBRA:</span> <span class="obra-nome">{{ obra.nome }}</span><br>
+        {% if obra.endereço %}
+        <span class="field-label">END:</span> <span class="field-value-inline">{{ obra.endereço }}</span><br>
+        {% endif %}
+        <span class="field-label">CAMINHÃO:</span> <span class="field-value-inline">{{ caminhao.identificacao }}</span>
+      </td>
+    </tr>
+  </table>
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th rowspan="2" style="width:3%">Item</th>
+        <th rowspan="2" style="width:26%">Serviço</th>
+        <th rowspan="2" style="width:5%">Un</th>
+        <th colspan="3">Quantidade</th>
+        <th rowspan="2" style="width:8%">Preço Unit.</th>
+        <th colspan="3">Valor (R$)</th>
+      </tr>
+      <tr>
+        <th style="width:8%">Anterior</th>
+        <th style="width:8%">Período</th>
+        <th style="width:8%">Acumulado</th>
+        <th style="width:10%">Anterior</th>
+        <th style="width:10%">Período</th>
+        <th style="width:10%">Acumulado</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="center">1</td>
+        <td>{{ caminhao.descricao_locacao }} ({{ caminhao.identificacao }})</td>
+        <td class="center">mês</td>
+        <td class="right">{{ acumulado.quantidade_anterior_locacao|floatformat:4 }}</td>
+        <td class="right">{{ periodo.fracao|floatformat:4 }}</td>
+        <td class="right">{{ acumulado.quantidade_acumulada_locacao|floatformat:4 }}</td>
+        <td class="right">{{ periodo.valor_mensal_caminhao|moeda:2 }}</td>
+        <td class="right">{{ acumulado.valor_anterior_locacao|moeda:2 }}</td>
+        <td class="right">{{ periodo.valor_locacao|moeda:2 }}</td>
+        <td class="right">{{ acumulado.valor_acumulado_locacao|moeda:2 }}</td>
+      </tr>
+      <tr>
+        <td class="center">2</td>
+        <td>Logística de fornecimento de diesel ({{ periodo.percentual_taxa_diesel|floatformat:1 }}% sobre R$ {{ periodo.preco_diesel_referencia|moeda:2 }}/L)</td>
+        <td class="center">litros</td>
+        <td class="right">{{ acumulado.quantidade_anterior_diesel|moeda:1 }}</td>
+        <td class="right">{{ periodo.litros_diesel_obra|moeda:1 }}</td>
+        <td class="right">{{ acumulado.quantidade_acumulada_diesel|moeda:1 }}</td>
+        <td class="right">{{ periodo.preco_unitario_taxa_diesel|moeda:4 }}</td>
+        <td class="right">{{ acumulado.valor_anterior_diesel|moeda:2 }}</td>
+        <td class="right">{{ periodo.valor_taxa_diesel|moeda:2 }}</td>
+        <td class="right">{{ acumulado.valor_acumulado_diesel|moeda:2 }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="rodape-boletim">
+    <colgroup>
+      <col style="width:8.2cm"><col style="width:0.5cm"><col style="width:8.2cm"><col style="width:0.5cm">
+      <col style="width:3.5cm"><col style="width:2.1cm"><col style="width:2.1cm"><col style="width:2.1cm">
+    </colgroup>
+    <tr>
+      <td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+      <th class="fin-head rotulo">&nbsp;</th><th class="fin-head">Anterior</th><th class="fin-head">Período</th><th class="fin-head">Acumulado</th>
+    </tr>
+    <tr class="destaque">
+      <td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+      <td class="fin rotulo" style="background:#fff3a3; padding:5px 7px; white-space:nowrap;"><span style="font-size:11pt; font-weight:bold; white-space:nowrap;">TOTAL LÍQUIDO</span></td>
+      <td class="fin right" style="background:#fff3a3; padding:5px 7px;"><span style="font-size:11pt; font-weight:bold;">{{ acumulado.total_anterior|moeda:2 }}</span></td>
+      <td class="fin right" style="background:#fff3a3; padding:5px 7px;"><span style="font-size:11pt; font-weight:bold;">{{ periodo.total|moeda:2 }}</span></td>
+      <td class="fin right" style="background:#fff3a3; padding:5px 7px;"><span style="font-size:11pt; font-weight:bold;">{{ acumulado.total_acumulado|moeda:2 }}</span></td>
+    </tr>
+    <tr>
+      <td class="assin assin-marcada txt8">Apontador</td><td class="txt8">&nbsp;</td><td class="assin assin-marcada txt8">Encarregado</td><td class="txt8">&nbsp;</td>
+      <td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+      <td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="assin assin-marcada txt8">Controle de Obras</td><td class="txt8">&nbsp;</td><td class="assin assin-marcada txt8">Engº Gerente da Obra</td><td class="txt8">&nbsp;</td>
+      <td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+      <td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="assin assin-marcada txt8">Setor de Equipamentos</td><td class="txt8">&nbsp;</td><td class="assin assin-marcada txt8">Fornecedor</td><td class="txt8">&nbsp;</td>
+      <td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+    </tr>
+  </table>
+
+  <div class="observacoes">
+    Observações: {{ periodo.total_abastecimentos_obra }} abastecimentos de um total de {{ periodo.total_abastecimentos_caminhao }} no período.
+    <div class="nota">1 - Esta medição só possui valor interno, não podendo assim ser negociada em banco ou qualquer instituição financeira.</div>
+  </div>
+
+  <div class="quebra-pagina"></div>
+
+  <div class="relatorio-titulo">{{ obra.nome }} — LOGÍSTICA DE ABASTECIMENTOS ({{ caminhao.identificacao }}) — {{ nome_mes|upper }}/{{ ano }} — FOLHA 02/02</div>
+
+  <table class="relatorio">
+    <thead>
+      <tr>
+        <th style="width:10%">Tanque</th>
+        <th style="width:10%">Data</th>
+        <th style="width:30%">Equipamento</th>
+        <th style="width:15%">Litros</th>
+        <th style="width:15%">Horímetro</th>
+        <th style="width:20%">Operador</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for abastecimento in periodo.abastecimentos %}
+      <tr>
+        <td>{{ abastecimento.tanque }}</td>
+        <td>{{ abastecimento.data|date:"d/m/Y" }}</td>
+        <td>{{ abastecimento.equipamento }}</td>
+        <td class="right">{{ abastecimento.litros|floatformat:"g" }}</td>
+        <td class="right">{{ abastecimento.horimetro|floatformat:"g" }}</td>
+        <td>{{ abastecimento.operador }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" style="text-align:center">Nenhum abastecimento neste período.</td></tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td colspan="3">TOTAL — {{ periodo.total_abastecimentos_obra }} abastecimento{{ periodo.total_abastecimentos_obra|pluralize }}</td>
+        <td class="right">{{ periodo.litros_via_caminhao|floatformat:1 }}</td>
+        <td colspan="2"></td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

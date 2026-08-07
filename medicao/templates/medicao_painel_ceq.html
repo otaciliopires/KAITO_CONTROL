@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'titulo' %}Painel de Medição{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'body' %}
+<main id="main" class="main">
+  <div class="med-page" style="padding-top:0">
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="{{ message.tags }}" role="alert" style="margin-bottom:16px">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="med-topbar">
+      <div>
+        <div class="med-eyebrow">Central de Equipamentos</div>
+        <h1 class="med-title">Painel de Medição</h1>
+        <div class="med-subtitle">Controle central do caminhão abastecedor em todas as obras.</div>
+      </div>
+      <form method="get" class="med-month-select">
+        <label for="med-mes-select"><i class="bi bi-calendar3"></i> Mês</label>
+        <select id="med-mes-select" name="periodo" onchange="this.form.submit()">
+          {% for opcao in opcoes_mes %}
+          <option value="{{ opcao.ano }}-{{ opcao.mes }}" {% if opcao.ano == ano_selecionado and opcao.mes == mes_selecionado %}selected{% endif %}>
+            {{ opcao.nome }}/{{ opcao.ano }}
+          </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
+    <div class="med-stat-grid">
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-truck"></i> Contratos ativos</div>
+        <div class="med-stat-value">{{ total_contratos }}</div>
+        <div class="med-stat-sub">{{ total_obras }} obra{{ total_obras|pluralize }} com medição</div>
+      </div>
+
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-cash-coin"></i> Total de {{ nome_mes_selecionado }}/{{ ano_selecionado }}</div>
+        <div class="med-stat-value">R$ {{ valor_total_mes|floatformat:2 }}</div>
+        <div class="med-stat-sub">
+          {% if mes_em_andamento %}Soma de todos os contratos, mês em andamento{% else %}Soma de todos os contratos neste mês{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="med-panel">
+      <div class="med-panel-title"><i class="bi bi-building"></i> Obras e caminhões controlados</div>
+      <div class="med-table-wrap">
+        <table class="med-table">
+          <thead>
+            <tr>
+              <th>Obra</th>
+              <th>Caminhão</th>
+              <th>{{ nome_mes_selecionado }}/{{ ano_selecionado }}{% if mes_em_andamento %} (prévia){% endif %}</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for linha in linhas %}
+            <tr>
+              <td><strong>{{ linha.contrato.obra.nome }}</strong></td>
+              <td>{{ linha.contrato.caminhao.identificacao }}</td>
+              <td>
+                {% if linha.periodo_atual %}
+                  R$ {{ linha.periodo_atual.total|floatformat:2 }}
+                  <div class="med-month-meta">{{ linha.periodo_atual.total_abastecimentos_obra }} abastecimento{{ linha.periodo_atual.total_abastecimentos_obra|pluralize }}</div>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td>
+                <a class="med-back" href="{% url 'medicao_meses' contrato_id=linha.contrato.id %}"><i class="bi bi-arrow-right"></i> Ver medições</a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center text-muted">Nenhum contrato de medição cadastrado ainda.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+{% endblock %}

@@ -46,6 +46,9 @@ if config('ENABLE_MANUTENCAO', cast=bool, default=True):
 if config('ENABLE_ESTOQUE', cast=bool, default=True):
     INSTALLED_APPS.append('estoque')
 
+if config('ENABLE_MEDICAO', cast=bool, default=True):
+    INSTALLED_APPS.append('medicao')
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -69,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'medicao.context_processors.medicao_flags',
             ],
         },
     },

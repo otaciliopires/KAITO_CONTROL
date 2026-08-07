@@ -1,0 +1,67 @@
+{% extends 'base_obra.html' %}
+{% load static %}
+
+{% block 'titulo' %}Medição {{ contrato.caminhao.identificacao }} - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main class="med-page">
+
+  <div class="med-topbar">
+    <div>
+      <div class="med-eyebrow">Medição · {{ contrato.caminhao.identificacao }}</div>
+      <h1 class="med-title">{{ obra.nome }}</h1>
+      <div class="med-subtitle">Escolha o mês para ver o relatório e o boletim de medição.</div>
+    </div>
+    {% if user.status == 'c' %}
+    <a class="med-back" href="{% url 'medicao_painel_ceq' %}"><i class="bi bi-arrow-left"></i> Voltar ao painel</a>
+    {% else %}
+    <a class="med-back" href="{% url 'medicao_obra_home' obra_id=obra.id %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+    {% endif %}
+  </div>
+
+  <div class="med-year-switch">
+    {% if ano > ano_min %}
+    <a href="?ano={{ ano|add:"-1" }}"><i class="bi bi-chevron-left"></i></a>
+    {% else %}
+    <a class="disabled"><i class="bi bi-chevron-left"></i></a>
+    {% endif %}
+    <strong>{{ ano }}</strong>
+    {% if ano < ano_max %}
+    <a href="?ano={{ ano|add:"1" }}"><i class="bi bi-chevron-right"></i></a>
+    {% else %}
+    <a class="disabled"><i class="bi bi-chevron-right"></i></a>
+    {% endif %}
+  </div>
+
+  <div class="med-month-grid">
+    {% for item in meses %}
+      {% if item.disponivel %}
+      <a class="med-month-card" href="{% url 'medicao_relatorio' contrato_id=contrato.id ano=ano mes=item.mes %}">
+        <div class="med-month-name">
+          {{ item.nome }}
+          {% if item.fechado %}
+          <span class="med-status-badge fechado" style="margin-left:6px"><i class="bi bi-lock-fill"></i> Fechada</span>
+          {% endif %}
+        </div>
+        {% if item.periodo.total_abastecimentos_obra %}
+          <div class="med-month-meta">{{ item.periodo.total_abastecimentos_obra }} abastecimento{{ item.periodo.total_abastecimentos_obra|pluralize }}</div>
+          <div class="med-month-value">R$ {{ item.periodo.total|floatformat:2 }}</div>
+        {% else %}
+          <div class="med-month-empty">Sem abastecimentos</div>
+        {% endif %}
+      </a>
+      {% else %}
+      <div class="med-month-card indisponivel">
+        <div class="med-month-name">{{ item.nome }}</div>
+        <div class="med-month-empty">Fora do período controlado</div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+</main>
+{% endblock %}

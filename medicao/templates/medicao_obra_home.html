@@ -1,0 +1,39 @@
+{% extends 'base_obra.html' %}
+{% load static %}
+
+{% block 'titulo' %}Medição - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main class="med-page">
+
+  <div class="med-topbar">
+    <div>
+      <div class="med-eyebrow">Medição</div>
+      <h1 class="med-title">{{ obra.nome }}</h1>
+      <div class="med-subtitle">Escolha o tipo de medição interna que deseja consultar.</div>
+    </div>
+    <a class="med-back" href="{% url 'obra' id=obra.id %}"><i class="bi bi-arrow-left"></i> Voltar para a obra</a>
+  </div>
+
+  <div class="med-grid">
+    <a class="med-nav-card" href="{% url 'medicao_caminhao_lista' obra_id=obra.id %}">
+      <div class="med-nav-icon"><i class="bi bi-truck"></i></div>
+      <h3>Caminhão Abastecedor</h3>
+      <p>Rateio mensal da locação do caminhão e da taxa de logística de diesel.</p>
+      <i class="bi bi-chevron-right"></i>
+    </a>
+
+    <div class="med-nav-card disabled">
+      <span class="med-badge-soon">Em breve</span>
+      <div class="med-nav-icon"><i class="bi bi-gear-wide-connected"></i></div>
+      <h3>Equipamentos</h3>
+      <p>Medição proporcional aos dias trabalhados por cada equipamento locado.</p>
+    </div>
+  </div>
+
+</main>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends 'base_obra.html' %}
+{% load static %}
+
+{% block 'titulo' %}Medição {{ nome_mes }}/{{ ano }} - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main class="med-page">
+
+  {% if messages %}
+    {% for message in messages %}
+    <div class="{{ message.tags }}" role="alert" style="margin-bottom:16px">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <div class="med-topbar">
+    <div>
+      <div class="med-eyebrow">
+        {% if fechado %}
+          <span class="med-status-badge fechado"><i class="bi bi-lock-fill"></i> Medição Nº {{ acumulado.numero }} · Fechada</span>
+        {% else %}
+          <span class="med-status-badge aberto"><i class="bi bi-pencil-fill"></i> Prévia · ainda não fechada</span>
+        {% endif %}
+        · {{ contrato.caminhao.identificacao }}
+      </div>
+      <h1 class="med-title">{{ nome_mes }} de {{ ano }}</h1>
+      <div class="med-subtitle">
+        {{ obra.nome }}
+        {% if fechamento %} · fechada em {{ fechamento.fechado_em|date:"d/m/Y H:i" }}{% if fechamento.fechado_por %} por {{ fechamento.fechado_por }}{% endif %}{% endif %}
+      </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+      <a class="med-back" href="{% url 'medicao_meses' contrato_id=contrato.id %}?ano={{ ano }}"><i class="bi bi-arrow-left"></i> Voltar aos meses</a>
+      {% if fechado %}
+      <a class="med-pdf-btn" href="{% url 'medicao_boletim_pdf' contrato_id=contrato.id ano=ano mes=mes %}"><i class="bi bi-file-earmark-pdf"></i> Baixar boletim de medição (PDF)</a>
+      {% elif pode_fechar and user.status == 'c' %}
+      <form method="POST" action="{% url 'medicao_fechar_mes' contrato_id=contrato.id ano=ano mes=mes %}" onsubmit="return confirm('Fechar a medição de {{ nome_mes }}/{{ ano }}? Confira se todos os abastecimentos do mês já foram lançados antes de confirmar.');">
+        {% csrf_token %}
+        <button type="submit" class="med-pdf-btn med-close-btn"><i class="bi bi-check2-circle"></i> Fechar mês e liberar boletim</button>
+      </form>
+      {% elif pode_fechar %}
+      <span class="med-pending-hint"><i class="bi bi-hourglass-split"></i> Aguardando fechamento pela Central de Equipamentos</span>
+      {% else %}
+      <span class="med-pending-hint"><i class="bi bi-hourglass-split"></i> Mês em andamento — fechamento libera após o mês terminar</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="med-stat-grid">
+    <div class="med-stat">
+      <div class="med-stat-label"><i class="bi bi-fuel-pump"></i> Abastecimentos da obra</div>
+      <div class="med-stat-value">{{ periodo.total_abastecimentos_obra }}</div>
+      <div class="med-stat-sub">via {{ contrato.caminhao.identificacao }}</div>
+    </div>
+
+    <div class="med-stat">
+      <div class="med-stat-label"><i class="bi bi-truck"></i> Abastecimentos do caminhão</div>
+      <div class="med-stat-value">{{ periodo.total_abastecimentos_caminhao }}</div>
+      <div class="med-stat-sub">{{ periodo.fracao_percentual|floatformat:1 }}% correspondem a esta obra</div>
+      <div class="med-progress"><div class="med-progress-bar" style="width: {{ periodo.fracao_percentual|floatformat:1 }}%"></div></div>
+    </div>
+
+    <div class="med-stat">
+      <div class="med-stat-label"><i class="bi bi-cash-coin"></i> Valor da locação</div>
+      <div class="med-stat-value">R$ {{ periodo.valor_locacao|floatformat:2 }}</div>
+      <div class="med-stat-sub">Mensal do caminhão: R$ {{ periodo.valor_mensal_caminhao|floatformat:2 }}</div>
+    </div>
+
+    <div class="med-stat">
+      <div class="med-stat-label"><i class="bi bi-droplet"></i> Litros de diesel</div>
+      <div class="med-stat-value">{{ periodo.litros_diesel_obra|floatformat:1 }} L</div>
+      <div class="med-stat-sub">Preço ref.: R$ {{ periodo.preco_diesel_referencia|floatformat:2 }}/L</div>
+    </div>
+
+    <div class="med-stat">
+      <div class="med-stat-label"><i class="bi bi-percent"></i> Taxa de logística de diesel</div>
+      <div class="med-stat-value">R$ {{ periodo.valor_taxa_diesel|floatformat:2 }}</div>
+      <div class="med-stat-sub">{{ periodo.percentual_taxa_diesel|floatformat:1 }}% sobre o diesel consumido</div>
+    </div>
+
+    <div class="med-stat med-highlight">
+      <div class="med-stat-label"><i class="bi bi-receipt"></i> Total a cobrar no mês</div>
+      <div class="med-stat-value">R$ {{ periodo.total|floatformat:2 }}</div>
+      <div class="med-stat-sub">Locação + taxa de diesel</div>
+    </div>
+  </div>
+
+  <div class="med-panel">
+    <div class="med-panel-title"><i class="bi bi-clock-history"></i> Medição acumulada</div>
+    <div class="med-table-wrap">
+      <table class="med-acumulado-table">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Qtd. Anterior</th>
+            <th>Qtd. Período</th>
+            <th>Qtd. Acumulada</th>
+            <th>Valor Anterior</th>
+            <th>Valor Período</th>
+            <th>Valor Acumulado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Locação do caminhão</td>
+            <td>{{ acumulado.quantidade_anterior_locacao|floatformat:2 }} mês</td>
+            <td>{{ periodo.fracao|floatformat:2 }} mês</td>
+            <td>{{ acumulado.quantidade_acumulada_locacao|floatformat:2 }} mês</td>
+            <td>R$ {{ acumulado.valor_anterior_locacao|floatformat:2 }}</td>
+            <td>R$ {{ periodo.valor_locacao|floatformat:2 }}</td>
+            <td>R$ {{ acumulado.valor_acumulado_locacao|floatformat:2 }}</td>
+          </tr>
+          <tr>
+            <td>Logística de diesel</td>
+            <td>{{ acumulado.quantidade_anterior_diesel|floatformat:1 }} L</td>
+            <td>{{ periodo.litros_diesel_obra|floatformat:1 }} L</td>
+            <td>{{ acumulado.quantidade_acumulada_diesel|floatformat:1 }} L</td>
+            <td>R$ {{ acumulado.valor_anterior_diesel|floatformat:2 }}</td>
+            <td>R$ {{ periodo.valor_taxa_diesel|floatformat:2 }}</td>
+            <td>R$ {{ acumulado.valor_acumulado_diesel|floatformat:2 }}</td>
+          </tr>
+          <tr>
+            <td>Total</td>
+            <td>—</td>
+            <td>—</td>
+            <td>—</td>
+            <td>R$ {{ acumulado.total_anterior|floatformat:2 }}</td>
+            <td>R$ {{ periodo.total|floatformat:2 }}</td>
+            <td>R$ {{ acumulado.total_acumulado|floatformat:2 }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="med-panel">
+    <div class="med-panel-title"><i class="bi bi-table"></i> Abastecimentos do período ({{ periodo.total_abastecimentos_obra }})</div>
+    <div class="med-table-wrap">
+      <table class="med-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Equipamento</th>
+            <th>Litros</th>
+            <th>Horímetro</th>
+            <th>Operador</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for abastecimento in periodo.abastecimentos %}
+          <tr>
+            <td>{{ abastecimento.data|date:"d/m/Y" }}</td>
+            <td>{{ abastecimento.equipamento }}</td>
+            <td>{{ abastecimento.litros|floatformat:"g" }}</td>
+            <td>{{ abastecimento.horimetro|floatformat:"g" }}</td>
+            <td>{{ abastecimento.operador }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5" class="text-center text-muted">Nenhum abastecimento neste período.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+{% endblock %}

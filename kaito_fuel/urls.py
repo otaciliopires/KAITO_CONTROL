@@ -19,4 +19,7 @@ if 'manutencao' in settings.INSTALLED_APPS:
 if 'estoque' in settings.INSTALLED_APPS:
     urlpatterns.append(path('estoque/', include('estoque.urls')))
 
+if 'medicao' in settings.INSTALLED_APPS:
+    urlpatterns.append(path('medicao/', include('medicao.urls')))
+
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

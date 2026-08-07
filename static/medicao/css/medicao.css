@@ -1,0 +1,429 @@
+/* Módulo Medição — visual dedicado, construído sobre o Bootstrap 5 já
+   carregado no base_obra.html, com uma camada própria mais moderna. */
+
+:root {
+  --med-primary: #4154f1;
+  --med-primary-dark: #2d3fd0;
+  --med-primary-light: #eef0ff;
+  --med-ink: #1f2430;
+  --med-muted: #6b7280;
+  --med-border: #e6e8f0;
+  --med-bg: #f6f7fb;
+  --med-success: #12b76a;
+  --med-success-light: #e7f9f1;
+  --med-warning: #f59e0b;
+  --med-radius: 16px;
+  --med-shadow: 0 4px 18px rgba(31, 41, 55, 0.06);
+  --med-shadow-hover: 0 12px 28px rgba(65, 84, 241, 0.16);
+}
+
+.med-page {
+  background: var(--med-bg);
+  min-height: calc(100vh - 75px);
+  padding: 28px 32px 60px;
+}
+
+.med-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+}
+
+.med-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--med-primary);
+  margin-bottom: 4px;
+}
+
+.med-title {
+  font-family: "Nunito", sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--med-ink);
+  margin: 0;
+}
+
+.med-subtitle {
+  color: var(--med-muted);
+  font-size: 15px;
+  margin-top: 2px;
+}
+
+.med-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--med-border);
+  color: var(--med-ink);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  box-shadow: var(--med-shadow);
+  transition: all .15s ease;
+}
+.med-back:hover { color: var(--med-primary); border-color: var(--med-primary-light); text-decoration: none; }
+
+/* ---------- Cards de navegação (hub / lista de caminhões) ---------- */
+
+.med-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.med-nav-card {
+  position: relative;
+  display: block;
+  background: #fff;
+  border-radius: var(--med-radius);
+  border: 1px solid var(--med-border);
+  box-shadow: var(--med-shadow);
+  padding: 26px;
+  text-decoration: none;
+  color: var(--med-ink);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  overflow: hidden;
+}
+.med-nav-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--med-shadow-hover);
+  border-color: var(--med-primary);
+  color: var(--med-ink);
+  text-decoration: none;
+}
+.med-nav-card.disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.med-nav-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--med-primary-light);
+  color: var(--med-primary);
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.med-nav-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+
+.med-nav-card p {
+  font-size: 14px;
+  color: var(--med-muted);
+  margin: 0;
+}
+
+.med-badge-soon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  background: var(--med-bg);
+  color: var(--med-muted);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.med-nav-card .bi-chevron-right {
+  position: absolute;
+  right: 22px;
+  bottom: 22px;
+  color: var(--med-primary);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all .18s ease;
+}
+.med-nav-card:hover .bi-chevron-right { opacity: 1; transform: translateX(0); }
+
+.med-empty {
+  background: #fff;
+  border: 1px dashed var(--med-border);
+  border-radius: var(--med-radius);
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--med-muted);
+}
+.med-empty i { font-size: 40px; color: var(--med-primary-light); display: block; margin-bottom: 14px; }
+
+/* ---------- Seletor de meses ---------- */
+
+.med-month-select {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid var(--med-border);
+  border-radius: 999px;
+  padding: 8px 18px;
+  box-shadow: var(--med-shadow);
+}
+.med-month-select label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--med-muted);
+  margin: 0;
+}
+.med-month-select select {
+  border: none;
+  background: transparent;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--med-ink);
+  cursor: pointer;
+}
+.med-month-select select:focus { outline: none; }
+
+.med-year-switch {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #fff;
+  border: 1px solid var(--med-border);
+  border-radius: 999px;
+  padding: 6px 10px;
+  box-shadow: var(--med-shadow);
+  width: fit-content;
+  margin-bottom: 24px;
+}
+.med-year-switch a {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--med-ink);
+  background: var(--med-bg);
+  text-decoration: none;
+}
+.med-year-switch a.disabled { opacity: .35; pointer-events: none; }
+.med-year-switch strong { font-size: 17px; min-width: 52px; text-align: center; }
+
+.med-month-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.med-month-card {
+  display: block;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--med-border);
+  box-shadow: var(--med-shadow);
+  padding: 18px 20px;
+  text-decoration: none;
+  color: var(--med-ink);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.med-month-card:hover { transform: translateY(-3px); box-shadow: var(--med-shadow-hover); border-color: var(--med-primary); color: var(--med-ink); text-decoration: none; }
+.med-month-card.indisponivel {
+  opacity: .45;
+  pointer-events: none;
+}
+.med-month-name { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+.med-month-meta { font-size: 12.5px; color: var(--med-muted); }
+.med-month-value { font-size: 18px; font-weight: 800; color: var(--med-primary); margin-top: 6px; }
+.med-month-empty { font-size: 13px; color: var(--med-muted); margin-top: 6px; font-style: italic; }
+
+/* ---------- Relatório do mês ---------- */
+
+.med-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.med-stat {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--med-border);
+  box-shadow: var(--med-shadow);
+  padding: 18px 20px;
+}
+.med-stat .med-stat-label {
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--med-muted);
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.med-stat .med-stat-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--med-ink);
+}
+.med-stat .med-stat-sub {
+  font-size: 12.5px;
+  color: var(--med-muted);
+  margin-top: 4px;
+}
+
+.med-stat.med-highlight {
+  background: linear-gradient(135deg, var(--med-primary) 0%, var(--med-primary-dark) 100%);
+  border: none;
+  color: #fff;
+}
+.med-stat.med-highlight .med-stat-label { color: rgba(255,255,255,.8); }
+.med-stat.med-highlight .med-stat-value { color: #fff; font-size: 28px; }
+.med-stat.med-highlight .med-stat-sub { color: rgba(255,255,255,.75); }
+
+.med-panel {
+  background: #fff;
+  border-radius: var(--med-radius);
+  border: 1px solid var(--med-border);
+  box-shadow: var(--med-shadow);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.med-panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.med-panel-title i { color: var(--med-primary); }
+
+.med-acumulado-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.med-acumulado-table th {
+  text-align: right;
+  font-size: 11.5px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  color: var(--med-muted);
+  font-weight: 700;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--med-border);
+}
+.med-acumulado-table th:first-child, .med-acumulado-table td:first-child { text-align: left; }
+.med-acumulado-table td {
+  text-align: right;
+  padding: 10px;
+  border-bottom: 1px solid var(--med-border);
+}
+.med-acumulado-table tr:last-child td { border-bottom: none; font-weight: 800; background: var(--med-primary-light); }
+.med-acumulado-table tr:last-child td:first-child { border-radius: 10px 0 0 10px; }
+.med-acumulado-table tr:last-child td:last-child { border-radius: 0 10px 10px 0; }
+
+.med-table-wrap { overflow-x: auto; }
+.med-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.med-table thead th {
+  background: var(--med-bg);
+  color: var(--med-muted);
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: .03em;
+  font-weight: 700;
+  padding: 12px 14px;
+  text-align: left;
+  white-space: nowrap;
+}
+.med-table tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--med-border);
+  white-space: nowrap;
+}
+.med-table tbody tr:hover { background: var(--med-bg); }
+.med-table tbody tr:last-child td { border-bottom: none; }
+
+.med-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+.med-status-badge.fechado { background: var(--med-success-light); color: var(--med-success); }
+.med-status-badge.aberto { background: #fff6e5; color: var(--med-warning); }
+
+.med-pending-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--med-muted);
+  background: #fff;
+  border: 1px dashed var(--med-border);
+  border-radius: 999px;
+  padding: 10px 18px;
+}
+
+.med-close-btn {
+  background: var(--med-success);
+  border: none;
+  cursor: pointer;
+}
+.med-close-btn:hover { background: #0e9c5c; }
+
+.med-pdf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--med-ink);
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14.5px;
+  text-decoration: none;
+  box-shadow: var(--med-shadow);
+  transition: all .15s ease;
+}
+.med-pdf-btn:hover { background: var(--med-primary); color: #fff; text-decoration: none; transform: translateY(-2px); }
+
+.med-progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--med-border);
+  overflow: hidden;
+  margin-top: 8px;
+}
+.med-progress-bar {
+  height: 100%;
+  background: var(--med-primary);
+  border-radius: 999px;
+}
+
+@media (max-width: 576px) {
+  .med-page { padding: 20px 16px 40px; }
+  .med-title { font-size: 22px; }
+}

@@ -85,6 +85,11 @@
             <a class="nav-link collapsed" href="{%url 'relatorio'%}" data-bs-target="#forms-nav" > <i class="bi bi-layout-text-sidebar-reverse"></i><span>Relatórios</span> </a>
 
          </li>
+         {% if medicao_habilitado %}
+         <li class="nav-item">
+            <a class="nav-link collapsed" href="{%url 'medicao_painel_ceq'%}" data-bs-target="#forms-nav" > <i class="bi bi-truck"></i><span>Medição</span> </a>
+         </li>
+         {% endif %}
 
    </aside>
         {%endif%}
