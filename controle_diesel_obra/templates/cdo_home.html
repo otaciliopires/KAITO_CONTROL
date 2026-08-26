@@ -1,0 +1,185 @@
+{% extends 'base_cdo.html' %}
+
+{% load static %}
+{% block 'titulo' %}Diesel - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+
+    {% include 'cdo_nav.html' %}
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted text-uppercase" style="font-size:13px">Estoque atual</div>
+                    <div style="font-size:28px; font-weight:700; color:#00008B">{{ tanque.estoque|floatformat:"2g" }} L</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted text-uppercase" style="font-size:13px">Consumo total</div>
+                    <div style="font-size:28px; font-weight:700; color:#b02a37">{{ consumo_total|floatformat:"2g" }} L</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="text-muted text-uppercase" style="font-size:13px">Entradas total</div>
+                    <div style="font-size:28px; font-weight:700; color:#146c43">{{ entradas_total|floatformat:"2g" }} L</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-wrap mb-2" style="gap:10px">
+                <h5 class="card-title" style="padding:0; margin:0">Consumo de diesel</h5>
+                <div class="d-flex align-items-center flex-wrap" style="gap:10px">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" id="cdoModoMesBtn" class="btn btn-outline-primary active">Mês</button>
+                        <button type="button" id="cdoModoDiaBtn" class="btn btn-outline-primary">Dia</button>
+                    </div>
+                    <select id="cdoSeletorMes" class="form-select form-select-sm d-none" style="width:auto"></select>
+                </div>
+            </div>
+            {% if consumo_meses_chaves %}
+            <canvas id="cdoConsumoChart" height="90"></canvas>
+            {% else %}
+            <p class="text-muted mb-0">Nenhuma saída lançada ainda.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {{ consumo_meses_labels|json_script:"cdo-meses-labels" }}
+    {{ consumo_meses_valores|json_script:"cdo-meses-valores" }}
+    {{ consumo_meses_chaves|json_script:"cdo-meses-chaves" }}
+    {{ consumo_dados_diarios|json_script:"cdo-dados-diarios" }}
+    <script>
+        (function () {
+            var canvas = document.getElementById('cdoConsumoChart');
+            if (!canvas) return;
+
+            var mesesLabels = JSON.parse(document.getElementById('cdo-meses-labels').textContent);
+            var mesesValores = JSON.parse(document.getElementById('cdo-meses-valores').textContent);
+            var mesesChaves = JSON.parse(document.getElementById('cdo-meses-chaves').textContent);
+            var dadosDiarios = JSON.parse(document.getElementById('cdo-dados-diarios').textContent);
+
+            var modoMesBtn = document.getElementById('cdoModoMesBtn');
+            var modoDiaBtn = document.getElementById('cdoModoDiaBtn');
+            var seletorMes = document.getElementById('cdoSeletorMes');
+            var ctx = canvas.getContext('2d');
+            var chart;
+
+            function graficoMensal() {
+                if (chart) chart.destroy();
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: mesesLabels,
+                        datasets: [{
+                            label: 'Consumo (L)',
+                            data: mesesValores,
+                            backgroundColor: 'rgba(176, 42, 55, 0.7)',
+                            borderColor: '#b02a37',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            function graficoDiario(chaveMes) {
+                var dados = dadosDiarios[chaveMes];
+                if (!dados) return;
+                if (chart) chart.destroy();
+                chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: dados.dias.map(function (d) { return 'Dia ' + d; }),
+                        datasets: [{
+                            label: 'Consumo (L) - ' + dados.label,
+                            data: dados.valores,
+                            backgroundColor: 'rgba(0, 123, 255, 0.7)',
+                            borderColor: '#0d6efd',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: { scales: { y: { beginAtZero: true } } }
+                });
+            }
+
+            function popularSeletorMeses() {
+                seletorMes.innerHTML = '';
+                mesesChaves.forEach(function (chave) {
+                    var opt = document.createElement('option');
+                    opt.value = chave;
+                    opt.textContent = dadosDiarios[chave].label;
+                    seletorMes.appendChild(opt);
+                });
+            }
+
+            modoMesBtn.addEventListener('click', function () {
+                seletorMes.classList.add('d-none');
+                modoMesBtn.classList.add('active');
+                modoDiaBtn.classList.remove('active');
+                graficoMensal();
+            });
+
+            modoDiaBtn.addEventListener('click', function () {
+                if (!mesesChaves.length) return;
+                seletorMes.classList.remove('d-none');
+                modoDiaBtn.classList.add('active');
+                modoMesBtn.classList.remove('active');
+                seletorMes.value = mesesChaves[mesesChaves.length - 1];
+                graficoDiario(seletorMes.value);
+            });
+
+            seletorMes.addEventListener('change', function () {
+                graficoDiario(seletorMes.value);
+            });
+
+            popularSeletorMeses();
+            graficoMensal();
+        })();
+    </script>
+
+    <h2 style="font-size:22px">Maiores consumos por equipamento</h2>
+    <table class="table table-striped table-bordered">
+        <thead style="font-size:13px">
+            <tr style='background-color: lightblue'>
+                <th scope="col">EQUIPAMENTO</th>
+                <th scope="col">UNIDADE</th>
+                <th scope="col">LITROS CONSUMIDOS</th>
+                <th scope="col">KM/HORAS RODADAS</th>
+                <th scope="col">MÉDIA (L/KM OU L/H)</th>
+            </tr>
+        </thead>
+        <tbody style="font-size:13px">
+            {% for item in ranking %}
+            <tr>
+                <td>{{ item.equipamento.prefixo }} — {{ item.equipamento.descricao }}</td>
+                <td>{{ item.equipamento.get_unidade_medicao_display }}</td>
+                <td>{{ item.litros|floatformat:"2g" }}</td>
+                <td>{{ item.percurso|floatformat:"2g" }}</td>
+                <td>{{ item.media|floatformat:"3g" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">Nenhuma saída lançada ainda.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</main>
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+{% endblock %}

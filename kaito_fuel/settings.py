@@ -49,6 +49,9 @@ if config('ENABLE_ESTOQUE', cast=bool, default=True):
 if config('ENABLE_MEDICAO', cast=bool, default=True):
     INSTALLED_APPS.append('medicao')
 
+if config('ENABLE_CONTROLE_DIESEL_OBRA', cast=bool, default=True):
+    INSTALLED_APPS.append('controle_diesel_obra')
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

@@ -1,0 +1,61 @@
+{% extends 'base_cdo.html' %}
+
+{% load static %}
+{% block 'titulo' %}Editar equipamento - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+
+    {% include 'cdo_nav.html' %}
+
+    <div class="card" style="max-width:500px">
+        <div class="card-header">Editar equipamento {{ equipamento.prefixo }}</div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'cdo_equipamento_editar' obra_id=obra.id equip_id=equipamento.id %}">
+                {% csrf_token %}
+                <div class="mb-2">
+                    <label class="form-label">Prefixo</label>
+                    <input type="text" name="prefixo" class="form-control" value="{{ equipamento.prefixo }}" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" name="descricao" class="form-control" value="{{ equipamento.descricao }}">
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Propriedade</label>
+                    <select name="tipo" class="form-control">
+                        <option value="R" {% if equipamento.tipo == 'R' %}selected{% endif %}>Rocha</option>
+                        <option value="T" {% if equipamento.tipo == 'T' %}selected{% endif %}>Terceirizado</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Medição</label>
+                    <select name="unidade_medicao" class="form-control">
+                        <option value="H" {% if equipamento.unidade_medicao == 'H' %}selected{% endif %}>Horímetro</option>
+                        <option value="KM" {% if equipamento.unidade_medicao == 'KM' %}selected{% endif %}>Quilometragem</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Contador atual</label>
+                    <input type="text" name="contador_atual" class="form-control" value="{{ equipamento.contador_atual|floatformat:'2g' }}">
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" name="ativo" class="form-check-input" id="ativo" {% if equipamento.ativo %}checked{% endif %}>
+                    <label class="form-check-label" for="ativo">Ativo</label>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <a href="{% url 'cdo_equipamentos' obra_id=obra.id %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</main>
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+{% endblock %}

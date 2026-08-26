@@ -56,6 +56,27 @@
 <main style='margin-left:0' id="main" class="main">
     <div class="pagetitle">
         <h1 style='font-size:40px; margin-bottom:10px'>Obras</h1>
+
+        {% if obras_estoque %}
+        <p style="color:#6c757d; margin-bottom:10px">Estoque de diesel na obra</p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 mb-4">
+            {% for obra_estoque in obras_estoque %}
+            <div class="col">
+                <div class="card obra-card h-100">
+                    <div class="card-header">
+                        <a href="/controle_diesel_obra/{{obra_estoque.id}}/">{{obra_estoque.nome}}</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="obra-saldo-label">Estoque atual</div>
+                        <div class="obra-saldo-valor">{{obra_estoque.estoque_atual|floatformat:"2g"}} L</div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if obras %}
         <p style="color:#6c757d; margin-bottom:30px">Consumo mensal de diesel em {{ ano_atual }}</p>
 
         <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
@@ -105,6 +126,7 @@
             </script>
             {%endfor%}
         </div>
+        {% endif %}
     </div>
 </main>
 

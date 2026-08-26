@@ -1,0 +1,119 @@
+{% extends 'base_cdo.html' %}
+
+{% load static %}
+{% block 'titulo' %}Saídas - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+
+    {% include 'cdo_nav.html' %}
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap" style="margin-bottom:15px; gap:10px">
+        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#filtroModal">Filtro</button>
+        <div style="font-size:18px">TOTAL <strong>{{ total_saidas|floatformat:"2g" }}</strong> Litros</div>
+    </div>
+
+    <div class="modal fade" id="filtroModal" tabindex="-1">
+        <form method="GET" action="{% url 'cdo_saidas' obra_id=obra.id %}">
+            <div class="modal-dialog">
+                <div class="modal-content" style="padding:20px">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Filtrar saídas</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Data início:</label>
+                        <div class="col-sm-8"><input type="date" name="data_inicio" class="form-control" value="{{ data_inicio_raw }}"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Data fim:</label>
+                        <div class="col-sm-8"><input type="date" name="data_fim" class="form-control" value="{{ data_fim_raw }}"></div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label">Equipamentos:</label>
+                        <div class="col-sm-8">
+                            <div style="max-height:200px; overflow-y:auto; border:1px solid #ced4da; border-radius:4px; padding:8px">
+                                {% for equipamento in equipamentos %}
+                                <div class="form-check">
+                                    <input name="equipamento" type="checkbox" class="form-check-input" id="cdo-equip-{{ equipamento.id }}" value="{{ equipamento.id }}" {% if equipamento.id|stringformat:"s" in equipamento_ids_selecionados %}checked{% endif %}>
+                                    <label class="form-check-label" for="cdo-equip-{{ equipamento.id }}">{{ equipamento.prefixo }}</label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer"><input type="submit" class="btn btn-primary" value="Filtrar"></div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <table class="table table-striped table-bordered">
+        <thead style="font-size:12px">
+            <tr style='background-color: lightblue'>
+                <th scope="col">Nº</th>
+                <th scope="col">DATA</th>
+                <th scope="col">EQUIPAMENTO</th>
+                <th scope="col">LITROS</th>
+                <th scope="col">CONTADOR INICIAL</th>
+                <th scope="col">CONTADOR FINAL</th>
+                <th scope="col">OPERADOR</th>
+                <th scope="col">OBSERVAÇÃO</th>
+                <th scope="col">AÇÃO</th>
+            </tr>
+        </thead>
+        <tbody style="font-size:12px">
+            {% for saida in saidas %}
+            <tr>
+                <th scope="row">{{ saida.numero }}</th>
+                <td>{{ saida.data }}</td>
+                <td>{{ saida.equipamento.prefixo }}</td>
+                <td>{{ saida.litros|floatformat:"2g" }}</td>
+                <td>{{ saida.contador_inicio|floatformat:"2g" }}</td>
+                <td>{{ saida.contador_fim|floatformat:"2g" }}</td>
+                <td>{{ saida.operador }}</td>
+                <td>{{ saida.observacao }}</td>
+                <td class="d-flex gap-1">
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'cdo_saida_editar' obra_id=obra.id saida_id=saida.id %}">Editar</a>
+                    <form method="POST" action="{% url 'cdo_saida_excluir' obra_id=obra.id saida_id=saida.id %}" onsubmit="return confirm('Excluir esta saída?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-outline-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="text-center text-muted">Nenhuma saída lançada no período.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if saidas.paginator.num_pages > 1 %}
+    <nav aria-label="Paginação de saídas">
+        <ul class="pagination justify-content-center">
+            {% if saidas.has_previous %}
+            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page=1">Primeira</a></li>
+            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ saidas.previous_page_number }}">Anterior</a></li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Primeira</span></li>
+            <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Página {{ saidas.number }} de {{ saidas.paginator.num_pages }}</span></li>
+            {% if saidas.has_next %}
+            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ saidas.next_page_number }}">Próxima</a></li>
+            <li class="page-item"><a class="page-link" href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ saidas.paginator.num_pages }}">Última</a></li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+            <li class="page-item disabled"><span class="page-link">Última</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</main>
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+{% endblock %}

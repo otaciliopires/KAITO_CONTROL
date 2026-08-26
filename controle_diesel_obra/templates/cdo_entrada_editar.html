@@ -1,0 +1,63 @@
+{% extends 'base_cdo.html' %}
+
+{% load static %}
+{% block 'titulo' %}Editar entrada - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+
+    {% include 'cdo_nav.html' %}
+
+    <div class="card" style="max-width:600px">
+        <div class="card-header">Editar entrada #{{ entrada.numero }}</div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'cdo_entrada_editar' obra_id=obra.id entrada_id=entrada.id %}">
+                {% csrf_token %}
+                <div class="mb-2">
+                    <label class="form-label">Fornecedor</label>
+                    <input type="text" name="fornecedor" class="form-control" value="{{ entrada.fornecedor }}" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Nota fiscal</label>
+                    <input type="text" name="nota_fiscal" class="form-control" value="{{ entrada.nota_fiscal }}" required>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Data da NF</label>
+                        <input type="date" name="data_nf" class="form-control" value="{{ entrada.data_nf|date:'Y-m-d' }}" required>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Data de entrega</label>
+                        <input type="date" name="data_entrega" class="form-control" value="{{ entrada.data_entrega|date:'Y-m-d' }}" required>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Quantidade (L)</label>
+                        <input type="text" name="quantidade" class="form-control" value="{{ entrada.quantidade|floatformat:'2g' }}" required>
+                    </div>
+                    <div class="col-6 mb-2">
+                        <label class="form-label">Valor por litro (R$)</label>
+                        <input type="text" name="valor_litro" class="form-control" value="{{ entrada.preco_unitario|floatformat:'4g' }}" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Observação</label>
+                    <textarea name="descricao" class="form-control" rows="2">{{ entrada.descricao }}</textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <a href="{% url 'cdo_entradas' obra_id=obra.id %}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</main>
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+{% endblock %}

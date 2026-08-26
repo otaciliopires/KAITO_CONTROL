@@ -1,0 +1,87 @@
+{% extends 'base_cdo.html' %}
+
+{% load static %}
+{% block 'titulo' %}Equipamentos - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+
+    {% include 'cdo_nav.html' %}
+
+    <div class="card mb-4">
+        <div class="card-header">Cadastrar equipamento</div>
+        <div class="card-body">
+            <form method="POST" action="{% url 'cdo_equipamentos' obra_id=obra.id %}" class="row g-2 align-items-end">
+                {% csrf_token %}
+                <div class="col-md-2">
+                    <label class="form-label">Prefixo</label>
+                    <input type="text" name="prefixo" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" name="descricao" class="form-control">
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Propriedade</label>
+                    <select name="tipo" class="form-control">
+                        <option value="R">Rocha</option>
+                        <option value="T">Terceirizado</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Medição</label>
+                    <select name="unidade_medicao" class="form-control">
+                        <option value="H">Horímetro</option>
+                        <option value="KM">Quilometragem</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Contador atual</label>
+                    <input type="text" name="contador_atual" class="form-control" value="0">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-success w-100">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <table class="table table-striped table-bordered">
+        <thead style="font-size:12px">
+            <tr style='background-color: lightblue'>
+                <th scope="col">PREFIXO</th>
+                <th scope="col">DESCRIÇÃO</th>
+                <th scope="col">PROPRIEDADE</th>
+                <th scope="col">MEDIÇÃO</th>
+                <th scope="col">CONTADOR ATUAL</th>
+                <th scope="col">ATIVO</th>
+                <th scope="col">AÇÃO</th>
+            </tr>
+        </thead>
+        <tbody style="font-size:12px">
+            {% for equipamento in equipamentos %}
+            <tr>
+                <td>{{ equipamento.prefixo }}</td>
+                <td>{{ equipamento.descricao }}</td>
+                <td>{{ equipamento.get_tipo_display }}</td>
+                <td>{{ equipamento.get_unidade_medicao_display }}</td>
+                <td>{{ equipamento.contador_atual|floatformat:"2g" }}</td>
+                <td>{% if equipamento.ativo %}Sim{% else %}Não{% endif %}</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary" href="{% url 'cdo_equipamento_editar' obra_id=obra.id equip_id=equipamento.id %}">Editar</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center text-muted">Nenhum equipamento cadastrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</main>
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+{% endblock %}

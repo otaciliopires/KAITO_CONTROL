@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse
+from django.conf import settings
 from controleCEQ.models import Abastecimento, Entrada
 from ativos.models import Obras, Equipamentos
 from openpyxl import Workbook
@@ -294,7 +295,10 @@ def renderiza_grafico(request):
     return JsonResponse({'valor':valor})
 
 def lista_obras(request):
-    obras = Obras.objects.filter(usuario=request.user)
+    obras_do_usuario = Obras.objects.filter(usuario=request.user)
+    obras = obras_do_usuario.exclude(status='E')
+    obras_estoque = obras_do_usuario.filter(status='E')
+
     meses = [1,2,3,4,5,6,7,8,9,10,11,12]
     ano_atual = datetime.now().year
     consumo_meses = []
@@ -314,6 +318,13 @@ def lista_obras(request):
     zipped_segments = zip(obras, consumo_meses)
     print(consumo_meses)
 
+    if 'controle_diesel_obra' in settings.INSTALLED_APPS and obras_estoque:
+        from controle_diesel_obra.models import TanqueObra
+        for obra_estoque in obras_estoque:
+            tanque, _created = TanqueObra.objects.get_or_create(obra=obra_estoque)
+            obra_estoque.estoque_atual = tanque.estoque
+    else:
+        obras_estoque = Obras.objects.none()
 
-    return render(request, 'lista_obras.html', {'obras':obras, 'consumo_meses':consumo_meses, 'zipped_segments':zipped_segments, 'ano_atual':ano_atual})
+    return render(request, 'lista_obras.html', {'obras':obras, 'consumo_meses':consumo_meses, 'zipped_segments':zipped_segments, 'ano_atual':ano_atual, 'obras_estoque':obras_estoque})
 

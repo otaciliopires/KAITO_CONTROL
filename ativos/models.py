@@ -22,8 +22,9 @@ class Equipamentos(models.Model):
 class Obras(models.Model):
     nome = models.CharField(max_length=50)
     saldo = models.FloatField(default=0)
-    tipo_status =  (("S","SALDO"), 
-                   ("M","MEDIÇÃO"))
+    tipo_status =  (("S","SALDO"),
+                   ("M","MEDIÇÃO"),
+                   ("E","ESTOQUE NA OBRA"))
     status = models.CharField(max_length=5, choices=tipo_status, default='S')
     usuario = models.ManyToManyField(Usuario) 
     endereço = models.CharField(max_length=100, default="" )   

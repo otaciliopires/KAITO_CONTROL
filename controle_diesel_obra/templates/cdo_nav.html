@@ -1,0 +1,9 @@
+{% load static %}
+<div class="pagetitle">
+    <h1 style="font-size:28px; margin:0">{{ obra.nome }} — Diesel</h1>
+</div>
+{% if messages %}
+    {% for i in messages %}
+    <div class="{{ i.tags }}" role="alert">{{ i }}</div>
+    {% endfor %}
+{% endif %}

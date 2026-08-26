@@ -1,0 +1,131 @@
+{% extends 'base_cdo.html' %}
+
+{% load static %}
+{% block 'titulo' %}Lançar diesel - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main id="main" class="main">
+
+    {% include 'cdo_nav.html' %}
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">Lançar entrada</div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'cdo_operacoes' obra_id=obra.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_entradas" value="form_entradas">
+                        <div class="mb-2">
+                            <label class="form-label">Fornecedor</label>
+                            <input type="text" name="fornecedor" class="form-control" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Nota fiscal</label>
+                            <input type="text" name="nota_fiscal" class="form-control" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Data da NF</label>
+                                <input type="date" name="data_nf" class="form-control" required>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Data de entrega</label>
+                                <input type="date" name="data_entrega" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Quantidade (L)</label>
+                                <input type="text" name="quantidade" class="form-control" required>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Valor por litro (R$)</label>
+                                <input type="text" name="valor_litro" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Observação</label>
+                            <textarea name="descricao" class="form-control" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Salvar entrada</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">Lançar saída (abastecimento)</div>
+                <div class="card-body">
+                    <form method="POST" action="{% url 'cdo_operacoes' obra_id=obra.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_saidas" value="form_saidas">
+                        <div class="mb-2">
+                            <label class="form-label">Equipamento</label>
+                            <select name="equipamento" class="form-control" required>
+                                {% for equipamento in equipamentos %}
+                                <option value="{{ equipamento.id }}">{{ equipamento.prefixo }} ({{ equipamento.get_unidade_medicao_display }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Contador inicial</label>
+                                <input type="text" name="contador_inicial" class="form-control" required>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Contador final</label>
+                                <input type="text" name="contador_final" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Litros</label>
+                                <input type="text" name="litros" class="form-control" required>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <label class="form-label">Data</label>
+                                <input type="date" name="data" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Operador</label>
+                            <input type="text" name="operador" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Observação</label>
+                            <textarea name="observacao" class="form-control" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Salvar saída</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">Importar planilha Excel (.xlsx)</div>
+        <div class="card-body">
+            <p class="text-muted" style="font-size:14px">
+                A planilha deve ter as abas <strong>ENTRADAS</strong> e <strong>SAIDAS</strong>, com os dados a partir da linha 3
+                (linhas 1 e 2 reservadas para título/cabeçalho). Colunas ENTRADAS: data de entrega, quantidade, fornecedor,
+                nota fiscal, data da NF, valor unitário, valor total, observação. Colunas SAIDAS: data, prefixo do equipamento
+                (já cadastrado nesta obra), contador inicial, contador final, litros, operador, observação.
+            </p>
+            <form method="POST" enctype="multipart/form-data" action="{% url 'cdo_importar' obra_id=obra.id %}" class="d-flex gap-2 flex-wrap align-items-center">
+                {% csrf_token %}
+                <input type="file" name="excel" class="form-control" style="max-width:400px" required>
+                <button type="submit" class="btn btn-primary">Importar</button>
+            </form>
+        </div>
+    </div>
+
+</main>
+<script src="{% static 'ceq/javascript/js.js' %}"></script>
+{% endblock %}
