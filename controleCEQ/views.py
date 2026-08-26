@@ -6,6 +6,7 @@ from ativos.models import Equipamentos, Obras
 from autenticacao.models import Usuario
 import datetime
 from datetime import date, datetime
+import calendar
 from django.db.models import Sum, Avg, Max
 from . utils import nonetest, grafico_vunit
 import openpyxl
@@ -109,7 +110,28 @@ def home(request):
         saidas_2 = Abastecimento.objects.filter(data__range=[data_inicio_2, data_fim_2]).aggregate(Sum('litros'))['litros__sum']
         saidas_3 = Abastecimento.objects.filter(data__range=[data_inicio_3, data_fim_3]).aggregate(Sum('litros'))['litros__sum']
         saidas_4 = Abastecimento.objects.filter(data__range=[data_inicio_4, data_fim_4]).aggregate(Sum('litros'))['litros__sum']
-        saidas = json.dumps([saidas_1, saidas_2, saidas_3, saidas_4])   
+        saidas = json.dumps([saidas_1, saidas_2, saidas_3, saidas_4])
+
+        #criação de gráfico de consumo diário e saldo final do dia no frontend
+        dias_no_mes = calendar.monthrange(ano, mes)[1]
+        dias_grafico = list(range(1, dias_no_mes + 1))
+        primeiro_dia_mes = date(ano, mes, 1)
+
+        saldo_acumulado = nonetest(Entrada.objects.filter(data_entrega__lt=primeiro_dia_mes).aggregate(Sum('quantidade'))['quantidade__sum']) - nonetest(Abastecimento.objects.filter(data__lt=primeiro_dia_mes).aggregate(Sum('litros'))['litros__sum'])
+
+        consumo_diario_valores = []
+        saldo_diario_valores = []
+        for dia in dias_grafico:
+            data_dia = date(ano, mes, dia)
+            consumo_dia = nonetest(Abastecimento.objects.filter(data=data_dia).aggregate(Sum('litros'))['litros__sum'])
+            entrada_dia = nonetest(Entrada.objects.filter(data_entrega=data_dia).aggregate(Sum('quantidade'))['quantidade__sum'])
+            saldo_acumulado = saldo_acumulado + entrada_dia - consumo_dia
+            consumo_diario_valores.append(consumo_dia)
+            saldo_diario_valores.append(saldo_acumulado)
+
+        dias_grafico = json.dumps(dias_grafico)
+        consumo_diario = json.dumps(consumo_diario_valores)
+        saldo_diario = json.dumps(saldo_diario_valores)
 
 
         lista_obras = []
@@ -207,7 +229,10 @@ def home(request):
                                              'sort_obras':sort_obras,
                                              'entradas_graph':entradas_graph,
                                              'saidas_graph':saidas_graph,
-                                             'obras_grafico':obras_grafico
+                                             'obras_grafico':obras_grafico,
+                                             'dias_grafico':dias_grafico,
+                                             'consumo_diario':consumo_diario,
+                                             'saldo_diario':saldo_diario
                                              })
     
     if request.method == 'POST':
