@@ -4,7 +4,6 @@ from django.http import HttpResponse, JsonResponse
 from .models import Abastecimento, Tanque, Transferencia, Entrada, Saldo
 from ativos.models import Equipamentos, Obras
 from autenticacao.models import Usuario
-import datetime
 from datetime import date, datetime
 import calendar
 from django.db.models import Sum, Avg, Max
@@ -17,6 +16,11 @@ from django.contrib.messages import constants
 from django.template.loader import render_to_string
 from django.core.paginator import Paginator
 from django.db import transaction
+from io import BytesIO
+import base64
+import matplotlib.pyplot as plt
+import numpy as np
+from xhtml2pdf import pisa
 
 
 
@@ -36,8 +40,6 @@ def home(request):
         tanques = Tanque.objects.all()
         obras = Obras.objects.all()
         equipamentos = Equipamentos.objects.all()
-        print(user)
-
 
         #Método para atualizar saldo dos tanques e lançar valores no frontend
         for tanque in tanques:
@@ -136,10 +138,8 @@ def home(request):
 
         lista_obras = []
         lista_consumo = []
-        lista_entradas = []
         lista_final = []
-        print(entradas, saidas, "!!!!!!!!!!!!!!!!!!")
-        
+
         #criação de tabela e grafico de consumo e entardas
         for obra in obras:
             consumo_mensal_obras = Abastecimento.objects.filter(data__month=mes).filter(data__year=ano).filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
@@ -147,14 +147,11 @@ def home(request):
             lista_obras.append(obra.nome)
             if consumo_mensal_obras == None:
                 consumo_mensal_obras = 0
-                pass
             else:
                 lista_consumo.append(consumo_mensal_obras)
 
             if entrada_mensal_obras == None:
                 entrada_mensal_obras = 0
-                pass
-                lista_entradas.append(entrada_mensal_obras)
             if entrada_mensal_obras ==0 and consumo_mensal_obras ==0:
                 pass
             else:
@@ -166,13 +163,7 @@ def home(request):
         lista_final = sorted(lista_final, key=terceiro_item)
         # TABELA ENTRADAS E SAÍDAS OBRAS
         sort_obras = lista_final
-        # sort_dict_obras = dict(sorted(sort_obras.items(), key=itemgetter(1), reverse=True))
-        print(sort_obras)
 
-
-
-
-        
         list_obras=(lista_obras)
         list_consumo = json.dumps(lista_consumo)
 
@@ -191,7 +182,6 @@ def home(request):
         dict_equip = dict(zip(list_equip,saidas_equip))
         sort_dict = dict(sorted(dict_equip.items(), key=itemgetter(1), reverse=True))
         sort_d = dict(list(sort_dict.items())[:5])
-        print(dict_equip)
 
         #DATA ATUAL
         data_ultimo_abastecimento = Abastecimento.objects.aggregate(ultima_data=Max('data'))['ultima_data']
@@ -201,12 +191,7 @@ def home(request):
         saidas_graph = [i[1] for i in lista_final]
         obras_grafico = [i[0].nome for i in lista_final]
 
-        print(entradas_graph, saidas_graph, obras_grafico)
-        
-
-
-
-        return render(request, 'home.html', {'tanques':tanques, 
+        return render(request, 'home.html', {'tanques':tanques,
                                              'obras': obras, 
                                              'meses':meses,
                                              'equipamentos':equipamentos, 
@@ -244,7 +229,6 @@ def home(request):
         form_saidas = request.POST.get('form_saidas')
 
 # método acima é para quando for necessário selecionar um form específico em um html com mais de um form
-        print(form_saidas)
 
         if form_saidas:
 
@@ -264,8 +248,6 @@ def home(request):
             num_saida = Abastecimento.objects.aggregate(Max('numero'))
             num_saida = (num_saida['numero__max'] + 1)
 
-            print('deu certo')
-
             #lançamento abastecimentos:
             abastecimento = Abastecimento(litros=litros,
                                           contador_inicio=contador_inicial,
@@ -280,21 +262,13 @@ def home(request):
                                           numero=num_saida)
             try:
                 abastecimento.save()
-                print('deu certo')
 
                 messages.add_message(request, constants.SUCCESS, "Abastecimento laçado com sucesso!" )
                 return redirect("/ceq/home")
             except:
-                print('deu errado')
                 messages.add_message(request, constants.ERROR, "ERRO AO LANÇAR O ABASTECIMENTO" )
                 return redirect("/ceq/home")
 
-
-
-
-            print(f"{tanque}, {obra}, {equipamento}, {contador_inicial}, {contador_final}, {type(litros)},{horimetro}, {operador}")
-            return HttpResponse(f"{data}, {equipamento}, {contador_inicial}, {contador_final}, {litros},{horimetro}, {operador} -- ,tanque:{tanque}  tanque.saldo: {tanque.estoque} -- obra:{obra}, saldo:{obra.saldo}")
-        
         
         if form_entradas:
 
@@ -311,8 +285,6 @@ def home(request):
             valor_total = float(valor_litro) * int(quantidade_litros)
             num_entrada = Entrada.objects.aggregate(Max('numero'))
             num_entrada = num_entrada['numero__max']+1
-
-            print('deucerto')
 
             #lançamento entradas:
             entrada = Entrada(tanque=tanque,
@@ -341,7 +313,6 @@ def home(request):
             total_saidas = nonetest(Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum'])
             obra.saldo = total_entradas - total_saidas
             obra.save()
-            print(f"obra:{obra} ---saldo_obra = {obra.saldo} --- estoque_tanque = {tanque.estoque}")
             return HttpResponse(f"{tanque}, {obra_id}, {type(data_emissao)}, {type(data_entrega)}, {fornecedor}, {nota_fiscal},{valor_litro}, {quantidade_litros}")
 
         
@@ -377,8 +348,6 @@ def home(request):
             tanque_movel.contador = float(contador_comboio)
             tanque_fixo.save()
             tanque_movel.save()
-
-            print(f"{tanque_fixo.estoque}, {tanque_movel.estoque}")
 
             return HttpResponse(f"{tanque_fixo}, {tanque_movel}, {type(contador_inicial)}, {contador_final}, {contador_comboio}, LITROS:{litros}")
 
@@ -395,85 +364,6 @@ def operacoes(request):
         tanques = Tanque.objects.all()
         obras = Obras.objects.all()
         equipamentos = Equipamentos.objects.all()
-        print(user)
-
-        """Esse script serve para verificar dentro de um excel todos os equipamentos e cadastrá-los
-        Utilizar esse código mas transformando o excel em um dictionary e cadastrando os dados do dict
-        assim ficará masis fácil o cadastro dentro do servidor
-        realizar uma verificação para se o equipamento já for cadastrado, não cadastrar mais"""
-        # delete_all = Entrada.objects.all()
-        # delete_all.delete()
-        
-        #Método para cadastrar os equipamentos
-
-        # excel = "media/fotos/equipamentos2.xlsx"
-        # workbooks = openpyxl.load_workbook(excel)
-        # equipamentss = workbooks['Equipamentos']
-        # total_list_x=[]
-        # list_x = []
-        # for i in equipamentss.iter_rows(min_row=2,values_only=True):
-        #         equip = i[:4]
-        #         print(equip)
-        #         if equip[0] == None:
-        #                 break
-        #         else:
-        #             total_list_x.append(equip) 
-        # for i in total_list_x:
-        #     print(i[3]) 
-
-        # lista_equipamentos = [('RE-02 BRASIL LOCAÇÕES', 'RETROESCAVADEIRA', 'BRASIL LOCAÇÕES', 'T'),
-        #                         ('RLU-7625', 'CAÇAMBA', 'RAMINHO', 'T'),
-        #                         ('MN-01 COSAMPA', 'MOTONIVELADORA', 'COSAMPA', 'T'),
-        #                         ('POX-3E32', 'FIAT TORO', 'MAZINHO', 'T'),
-        #                         ('KLZ-0C11', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('KAO-4455', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('EH-01 MX CONSTRUÇÕES', 'ESCAVADEIRA HIDRÁULICA', 'MX CONSTRUÇÕES', 'T'),
-        #                         ('RE-01 MX CONSTRUÇÕES', 'RETROESCAVADEIRA', 'MX CONSTRUÇÕES', 'T'),
-        #                         ('RETRO ANCHIETA', 'RETROESCAVADEIRA', 'ANCHIETA', 'T'),
-        #                         ('MIF-0636', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('JJZ-1B82', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('MNB-7C69', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
-        #                         ('RLS-6B96', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('ROLO LOCADO', 'ROLO COMPACTADOR VIBRATÓRIO', 'LOCADO', 'T'),
-        #                         ('NPW-1B68', 'CAMINHÃO MUNCK', 'INTERBLOCK ', 'T'),
-        #                         ('POX-3C62', 'CAMINHÃO CARROCERIA 3X4', 'FAZENDA ARIMATE', 'T'),
-        #                         ('MEIO FIO', 'MEIO FIO OBRA', None, 'T'),
-        #                         ('KXJ-3C40', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
-        #                         ('BALDE PARA TRATOR', 'RESERVATÓRIO NA FAZENDA', None, 'T'),
-        #                         ('WE TRANSPORTES', 'ACERTO WE LOCAÇÕES E OBRA', 'EDGLEY', 'T'),
-        #                         ('RLS-8J35', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('PEU-5344', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
-        #                         ('RESERVATÓRIO PARA TRATOR', 'RESERVATÓRIO PARA TRATOR DE ESTEIRA', None, 'T'),
-        #                         ('EH-02 REALMAQ', 'ESCAVADEIRA HIDRÁULICA', 'REALMAQ', 'T'),
-        #                         ('NTS-2338', 'CAÇAMBA TERCEIRIZADA', None, 'T'),
-        #                         ('MOB-3F89', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('MOTONIVELADORA LOCADA', 'MOTONIVELADORA', None, 'T'),
-        #                         ('NQG-3442', 'CAMINHÃO CARROCERIA 3X4', None, 'T'),
-        #                         ('OHH-4I33', 'FRETE TERCEIRIZADO', None, 'T'),
-        #                         ('SERVIÇO SILO', 'SERVIÇO SILO', None, 'T'),
-        #                         ('CARVALHO LOCAÇÕES', 'CARVALHO', 'CARVALHO LOCAÇÕES', 'T'),
-        #                         ('PC-01 MINERAÇÃO PAULISTA', 'PÁ CARREGADEIRA', 'MINERAÇÃO PAULISTA', 'T')]
-
-        # for i in lista_equipamentos:
-
-        #     cadastro_equipamentoss = Equipamentos(prefixo=i[0],
-        #                                             descricao=i[0],
-        #                                             tipo=i[3],
-        #                                             proprietario=i[2],
-        #                                             horímetro=0)
-
-        #     cadastro_equipamentoss.save()
-
-        
-        # saidas = Abastecimento.objects.all()
-        # for saida in saidas:
-        #     saida.observacao = ""
-        #     saida.save()
-
-        
-
-
-
         return render(request, 'operacoes.html', {'tanques':tanques, 
                                              'obras': obras, 
                                              'equipamentos':equipamentos, 
@@ -489,7 +379,6 @@ def operacoes(request):
         form_saidas = request.POST.get('form_saidas')
 
 # método acima é para quando for necessário selecionar um form específico em um html com mais de um form
-        print(form_saidas)
 
         if form_saidas:
 
@@ -509,8 +398,6 @@ def operacoes(request):
             num_saida = Abastecimento.objects.aggregate(Max('numero'))
             num_saida = (num_saida['numero__max'] + 1)
 
-            print('deu certo')
-
             #lançamento abastecimentos:
             abastecimento = Abastecimento(litros=litros,
                                           contador_inicio=contador_inicial,
@@ -525,21 +412,13 @@ def operacoes(request):
                                           numero=num_saida)
             try:
                 abastecimento.save()
-                print('deu certo')
 
                 messages.add_message(request, constants.SUCCESS, "Abastecimento laçado com sucesso!" )
                 return redirect("/ceq/home")
             except:
-                print('deu errado')
                 messages.add_message(request, constants.ERROR, "ERRO AO LANÇAR O ABASTECIMENTO" )
                 return redirect("/ceq/home")
 
-
-
-
-            print(f"{tanque}, {obra}, {equipamento}, {contador_inicial}, {contador_final}, {type(litros)},{horimetro}, {operador}")
-            return HttpResponse(f"{data}, {equipamento}, {contador_inicial}, {contador_final}, {litros},{horimetro}, {operador} -- ,tanque:{tanque}  tanque.saldo: {tanque.estoque} -- obra:{obra}, saldo:{obra.saldo}")
-        
         
         if form_entradas:
 
@@ -556,8 +435,6 @@ def operacoes(request):
             valor_total = float(valor_litro) * int(quantidade_litros)
             num_entrada = Entrada.objects.aggregate(Max('numero'))
             num_entrada = num_entrada['numero__max']+1
-
-            print('deucerto')
 
             #lançamento entradas:
             entrada = Entrada(tanque=tanque,
@@ -586,7 +463,6 @@ def operacoes(request):
             total_saidas = nonetest(Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum'])
             obra.saldo = total_entradas - total_saidas
             obra.save()
-            print(f"obra:{obra} ---saldo_obra = {obra.saldo} --- estoque_tanque = {tanque.estoque}")
             return HttpResponse(f"{tanque}, {obra_id}, {type(data_emissao)}, {type(data_entrega)}, {fornecedor}, {nota_fiscal},{valor_litro}, {quantidade_litros}")
 
         
@@ -622,8 +498,6 @@ def operacoes(request):
             tanque_movel.contador = float(contador_comboio)
             tanque_fixo.save()
             tanque_movel.save()
-
-            print(f"{tanque_fixo.estoque}, {tanque_movel.estoque}")
 
             return HttpResponse(f"{tanque_fixo}, {tanque_movel}, {type(contador_inicial)}, {contador_final}, {contador_comboio}, LITROS:{litros}")
 
@@ -680,10 +554,6 @@ def saidas(request):
 
     user = request.user
     obra_user=Obras.objects.filter(usuario=user.id)
-    print(type(data_fim), data_fim)
-    print(type(data_inicio), data_inicio)
-    print(type(saidas))
-
 
     if not request.GET.getlist('obra'):
         obras_selecionadas = []
@@ -764,11 +634,8 @@ def entradas(request):
         obras_selecionadas = ",".join(filtro_obra)
 
 
-    # print(f"{filtro_obra} and {type(filtro_obra)}")
-    # print(f"{data_inicio} and {type(data_inicio)}")
     user = request.user
     obra_user=Obras.objects.filter(usuario=user.id)
-    print(data_inicio, data_fim, "!!!!!!!!!!!!!!!!!!!!!")
 
     return render(request, 'entradas.html', {'entradas':entradas,
                                              'obras': obras,
@@ -787,7 +654,6 @@ def transferencias(request):
     tanque_fixo = Tanque.objects.filter(tipo='F')
     tanque_movel = Tanque.objects.filter(tipo='M')
 
-    print(tanque_movel)
     data_inicio = request.POST.get('data_inicio')
     data_fim = request.POST.get('data_fim')
     tanque = request.POST.getlist('tanque_fixo')
@@ -839,7 +705,6 @@ def obras(request):
     
     for obra in obras:
         metodo_saidas = Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
-        # print(metodo_saidas, obra)
         metodo_entradas = Entrada.objects.filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']
         if metodo_saidas == None:
             metodo_saidas = 0
@@ -856,11 +721,7 @@ def obras(request):
             obra.save()
         saidas.append(metodo_saidas)
         entradas.append(metodo_entradas)
-        print(ceq_obra.saldo,obra.nome)
 
-
-   
-    
     my_list = zip(obras, saidas, entradas)
     metodo_saidas_medicao = zip(obras_medicao, saidas_medicao)
     return render(request, 'obras.html', {'my_list': my_list,
@@ -1190,12 +1051,6 @@ def importexcel(request):
 
 
 
-import matplotlib.pyplot as plt
-import numpy as np
-import base64
-from django.core.files.base import ContentFile
-
-
 def relatorio(request):
 
       #criação de gráfico semanal no frontend
@@ -1211,14 +1066,8 @@ def relatorio(request):
         else:
             mes = meses.index(mes_atual)+1
 
-        if mes_atual == None:
-            mes_atual = meses[mes-1]
-        else:
-            mes = meses.index(mes_atual)+1
-        
         lista_obras = []
         lista_consumo = []
-        lista_entradas = []
         lista_final = []
 
         obras = Obras.objects.all()
@@ -1229,14 +1078,11 @@ def relatorio(request):
             lista_obras.append(obra.nome)
             if consumo_mensal_obras == None:
                 consumo_mensal_obras = 0
-                pass
             else:
                 lista_consumo.append(consumo_mensal_obras)
 
             if entrada_mensal_obras == None:
                 entrada_mensal_obras = 0
-                pass
-                lista_entradas.append(entrada_mensal_obras)
             if entrada_mensal_obras ==0 and consumo_mensal_obras ==0:
                 pass
             else:
@@ -1251,10 +1097,6 @@ def relatorio(request):
         lista_final = sorted(lista_final, key=terceiro_item)
         # TABELA ENTRADAS E SAÍDAS OBRAS
         sort_obras = lista_final
-        # sort_dict_obras = dict(sorted(sort_obras.items(), key=itemgetter(1), reverse=True))
-        print(sort_obras)
-
-
 
            # Gerar gráfico com Matplotlib
         entradas = [i[2] for i in lista_final]
@@ -1291,19 +1133,6 @@ def relatorio(request):
         })
 
 
-
-
-
-
-import json
-from datetime import datetime
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from io import BytesIO
-from django.core.files.storage import default_storage
-
-
-
 def pdf_relatorio(request, mes_atual):
     
       #criação de gráfico semanal no frontend
@@ -1318,14 +1147,8 @@ def pdf_relatorio(request, mes_atual):
     else:
             mes = meses.index(mes_atual)+1
 
-    if mes_atual == None:
-            mes_atual = meses[mes-1]
-    else:
-            mes = meses.index(mes_atual)+1
-        
     lista_obras = []
     lista_consumo = []
-    lista_entradas = []
     lista_final = []
 
     obras = Obras.objects.all()
@@ -1336,14 +1159,11 @@ def pdf_relatorio(request, mes_atual):
             lista_obras.append(obra.nome)
             if consumo_mensal_obras == None:
                 consumo_mensal_obras = 0
-                pass
             else:
                 lista_consumo.append(consumo_mensal_obras)
 
             if entrada_mensal_obras == None:
                 entrada_mensal_obras = 0
-                pass
-                lista_entradas.append(entrada_mensal_obras)
             if entrada_mensal_obras ==0 and consumo_mensal_obras ==0:
                 pass
             else:
@@ -1358,14 +1178,11 @@ def pdf_relatorio(request, mes_atual):
     lista_final = sorted(lista_final, key=terceiro_item)
         # TABELA ENTRADAS E SAÍDAS OBRAS
     sort_obras = lista_final
-        # sort_dict_obras = dict(sorted(sort_obras.items(), key=itemgetter(1), reverse=True))
-    print(sort_obras)
 
-               # Gerar gráfico com Matplotlib
     entradas = [i[2] for i in lista_final]
     saidas = [i[1] for i in lista_final]
     obras_grafico = [i[0].nome for i in lista_final]
-        
+
     # Gerar gráfico com Matplotlib
     fig, ax = plt.subplots(figsize=(10, 6))
     ind = np.arange(len(obras_grafico))  # Localizações no eixo x
@@ -1419,7 +1236,6 @@ def pdf_relatorio(request, mes_atual):
 
     return response
 
-from xhtml2pdf import pisa
 def saidas_pdf(request):
     obras = Obras.objects.all()
     equipamentos = Equipamentos.objects.all()
@@ -1431,10 +1247,9 @@ def saidas_pdf(request):
     
 
     data_inicio = request.GET.get('data_inicio')
-    print(data_inicio, "!!!!!!!!!!!!!!!!!!!!!!")
     if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
     else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()
-        
+
     data_fim = request.GET.get('data_fim')
     if data_fim == None or data_fim == '': data_fim = date.today()
     else: data_fim = datetime.strptime(data_fim, '%Y-%m-%d').date()
@@ -1442,7 +1257,6 @@ def saidas_pdf(request):
 
     filtro_obras = obras = request.GET.get('obra', '').split(',') if request.GET.get('obra') else []
     filtro_equipamento = request.GET.get('equipamento', '').split(',') if request.GET.get('equipamento') else []
-    print(data_inicio, data_fim, "aaaaaaaaaaakcaldmakslmdakndkasnldkakls")
     if request.GET.get('data_inicio') or request.GET.get('data_fim') or request.GET.getlist('equipamento') or request.GET.getlist('obra'):
         if not data_inicio:
             data_inicio = date(2020,1,1)
@@ -1492,11 +1306,6 @@ def entradas_pdf(request):
     data_fim = request.GET.get('data_fim1')
 
     filtro_obra = request.GET.getlist('obra')
-
-
-    print(data_inicio,data_fim, "!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
-
 
     if data_inicio == None or data_inicio == '': data_inicio = date(2020,1,1)
     else: data_inicio = datetime.strptime(data_inicio, '%Y-%m-%d').date()

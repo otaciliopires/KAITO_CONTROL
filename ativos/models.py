@@ -1,9 +1,6 @@
 from django.db import models
 from autenticacao.models import Usuario
 
-
-
-
 class Equipamentos(models.Model):
     prefixo = models.CharField(max_length=20)
     descricao = models.CharField(max_length=50, null=True)
@@ -12,8 +9,6 @@ class Equipamentos(models.Model):
     tipo = models.CharField(max_length=5 ,choices=tipo_propriedade, default="ROCHA")
     proprietario = models.CharField(max_length=50, null=True)
     horímetro = models.FloatField(default=0)
-    
-
 
 
     def __str__(self):

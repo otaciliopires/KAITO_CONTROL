@@ -11,7 +11,6 @@ urlpatterns = [
     path('obras/', views.obras, name='obras'),
     path('painel_obras/', views.painel_obras, name='painel_obras'),
     path('obras_ano/', views.obras_ano, name='obras_ano'),
-    # path('ano/', views.ano, name='ano'),
     path('', views.importexcel, name='importexcel'),
     path('grafico_vunit/', views.grafico_vunit, name='grafico_vunit'),
     path('relatorio/', views.relatorio, name='relatorio'),

@@ -158,14 +158,6 @@ MESSAGE_TAGS = {
 
 AUTH_USER_MODEL = "autenticacao.Usuario"
 
-MESSAGE_TAG = {
-    constants.DEBUG: "alert alert-primary",
-    constants.ERROR: "alert alert-danger",
-    constants.SUCCESS: "alert alert-success",
-    constants.INFO: "alert alert-info",
-    constants.WARNING: "alert alert-warning"
-}
-
 #HTTPS/SSL
 
 if not DEBUG:

@@ -1,14 +1,11 @@
 from django.db import models
 from ativos.models import Equipamentos, Obras
 
-# Create your models here.
-
 
 class Ordem_Oficina(models.Model):
     equipamento = models.ForeignKey(Equipamentos, on_delete=models.DO_NOTHING)
     data_inicio = models.DateTimeField()
     data_fim = models.DateTimeField(null=True, blank=True)
-    data_status = models.DateTimeField(null=True, blank=True)
     tempo_aguardo_peca = models.FloatField(null=True, blank=True, default=0.0)
     tempo_aguardo_servico = models.FloatField(null=True, blank=True, default=0.0)
     tempo_em_servico = models.FloatField(null=True, blank=True, default=0.0)
@@ -21,7 +18,7 @@ class Ordem_Oficina(models.Model):
 
     def __str__(self):
         return self.equipamento.prefixo
-        
+
 class Funcionario(models.Model):
 
     nome = models.CharField(max_length=50)
@@ -93,7 +90,7 @@ class Socorro(models.Model):
     data_saida = models.DateTimeField()
     data_chegada = models.DateTimeField(null=True, blank=True)
     tempo_socorro = models.FloatField(null=True, blank=True)
-    mecanicos = models.ManyToManyField(Funcionario, null=True, blank=True)
+    mecanicos = models.ManyToManyField(Funcionario, blank=True)
 
     def __str__(self):
         return self.obra.nome

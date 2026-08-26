@@ -7,17 +7,13 @@ from openpyxl import Workbook
 from io import BytesIO
 from django.db.models import Sum
 from datetime import datetime, date
-from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
+from openpyxl.styles import PatternFill, Border, Side, Alignment, Font
 from django.core.paginator import Paginator
-import json
 from django.contrib import messages
 from django.contrib.messages import constants
 
-# Create your views here.
 
-
-
-def obra(request,id):  #Recebi o id da página html lista_obra: href="/obra/{{obra.id}}"
+def obra(request, id):  # Recebe o id da página html lista_obra: href="/obra/{{obra.id}}"
 
     obra = Obras.objects.get(id=id)#objeto - obra do usuario logado
     obra_name = obra
@@ -94,43 +90,30 @@ def reportar_problema(request, id):
     return redirect('obra_abastecimentos', id=abastecimento.obra.id)
 
 def status(request, id):
-
-    # obra = Obra.objects.get(id=id)
     abastecimento = Abastecimento.objects.get(id=id)
     obra = Obras.objects.get(nome=abastecimento.obra)
-    abastecimento.status = not abastecimento.status #toda vez que clicka, inverto o atual
+    abastecimento.status = not abastecimento.status  # toda vez que clica, inverte o atual
     abastecimento.save()
-    id_user = request.user.id
     if str(request.user.status) == 'c':
         return redirect("/ceq/painel_obras")
-    else:     
+    else:
         return redirect(f"/obra/{obra.id}")
 
 def comentario(request, id):
     abastecimento = Abastecimento.objects.get(id=id)
-    
     obra = Obras.objects.get(nome=abastecimento.obra)
     comment = request.POST.get('comentario')
 
-    abastecimento.observacao = abastecimento.observacao+ "-" + request.user.first_name + ":" + comment
-
-
-
-    abastecimento.save() 
-    
-
-    id_user = request.user.id
+    abastecimento.observacao = abastecimento.observacao + "-" + request.user.first_name + ":" + comment
+    abastecimento.save()
 
     if request.user.status == 'c':
         return redirect('/ceq/painel_obras')
     else:
-        return redirect((f"/obra/{obra.id}"))
+        return redirect(f"/obra/{obra.id}")
 
 
 def exportexcel(request, id):
-    id_user = request.user.id
-    print(id)
-
     obra = Obras.objects.filter(id=id)#objeto - obra do usuario logado
     obra_name = obra[0] #Nome da obra para filtrar nas demais classes.
     saidas = Abastecimento.objects.filter(obra=obra_name)
@@ -163,8 +146,6 @@ def exportexcel(request, id):
         sd.append(saida.operador)
         sds.append(sd)
         sd = []
-    print(sds)
-    print(f'okok{sds}')
 
     todays_date = datetime.today().date()
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -306,17 +287,11 @@ def lista_obras(request):
     for obra in obras:
         for mes in meses:
             saida = Abastecimento.objects.filter(data__month=mes).filter(data__year=ano_atual).filter(obra=obra).aggregate(Sum('litros'))['litros__sum']
-            if saida == None:
-                saida = 0
-            else:pass
-            consumo_mes.append(saida)
+            consumo_mes.append(saida or 0)
         consumo_meses.append(consumo_mes)
         consumo_mes = []
 
-
-
     zipped_segments = zip(obras, consumo_meses)
-    print(consumo_meses)
 
     if 'controle_diesel_obra' in settings.INSTALLED_APPS and obras_estoque:
         from controle_diesel_obra.models import TanqueObra

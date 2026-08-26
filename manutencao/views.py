@@ -1,30 +1,21 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
 from .models import Ordem_Oficina, Servico_Oficina, Grupo_Servico, Funcionario, Servico_Terceirizado, Solicitacao, Socorro, Servico_Socorro, Preventiva, Ordem_Preventiva, Servico_Preventiva, Registro_Tempo_Servico, Pendencias
 from .models import Equipamentos, Obras
-from django.db.models import Max
 from datetime import datetime, timezone, date, timedelta
-from manutencao.utils import now, att_tempo_2, att_tempo_1_os, att_tempo_1_servico, hora_correta
+from manutencao.utils import att_tempo_1_os, hora_correta
 from django.db.models import Sum, Max
-
-# Create your views here.
 
 
 def servicos_manutencao(request):
 
     if request.method == 'GET':
-        list_equip=[]
         equipamentos_rocha = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA').order_by('prefixo')
         obras = Obras.objects.all()
-        print("xxxxxxxxxx", obras, equipamentos_rocha)
-        for i in equipamentos_rocha:
-            list_equip.append(i)
-        print(list_equip)
-        
-        
+        list_equip = list(equipamentos_rocha)
+
+
         #TRATAMENTO  OS CORRETIVAS
-        ordens = Ordem_Oficina.objects.all()        
-        os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)  
+        os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)
         num_servicos_abertos = []
         num_servicos_finalizados= []
         status_serv = []
@@ -43,11 +34,9 @@ def servicos_manutencao(request):
             elif Servico_Oficina.objects.filter(ordem_servico=os, data_fim=None, status="Aguardando Peças").exists():
                 status = "Aguardando Peças"
                 status_serv.append(status)
-                pass
             else:
                 status = "Aguardando Serviço"
                 status_serv.append(status)
-            print(status_serv)
         dados_zip = zip(os_oficina_abertas, num_servicos_finalizados, num_servicos_abertos, status_serv, lista_servicos_a, lista_servicos_f)
     
         #TRATAMENTO SOCORRO
@@ -102,10 +91,7 @@ def servicos_manutencao(request):
             horimetro = request.POST.get('horimetro')
         
             #adquirir o maior numero na lista de O.S.
-            if Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max'] == None:
-                numero = 0
-            else:
-                numero = Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max']
+            numero = Ordem_Oficina.objects.aggregate(Max('numero'))['numero__max'] or 0
 
             #adicionar o form da oficina,o de criação de da O.S.
             osoficina = Ordem_Oficina(equipamento=equipamento,
@@ -121,19 +107,15 @@ def servicos_manutencao(request):
             obra_id = request.POST.get('obra')
             obra = Obras.objects.get(id=obra_id) 
             data_saida = request.POST.get('data_saida')
-            if Socorro.objects.aggregate(Max('numero'))['numero__max'] == None:
-                numero = 0
-            else:
-                numero = Socorro.objects.aggregate(Max('numero'))['numero__max']
+            numero = Socorro.objects.aggregate(Max('numero'))['numero__max'] or 0
 
             socorro = Socorro(obra = obra,
                               data_saida = data_saida,
                               numero = numero+1,
                               data_chegada = None)
-            
+
             socorro.save()
-            
-            
+
             return redirect('/manutencao/servicos_manutencao')
         
         if form_preventiva:
@@ -144,18 +126,14 @@ def servicos_manutencao(request):
             data_emissao = request.POST.get('data_emissao')
             periodo = int(request.POST.get('periodo'))
             ordem = Ordem_Preventiva.objects.get(equipamento=equipamento, periodo=periodo)
-            if Preventiva.objects.aggregate(Max('numero'))['numero__max'] == None:
-                    numero = 0
-            else:
-                    numero = Preventiva.objects.aggregate(Max('numero'))['numero__max']
+            numero = Preventiva.objects.aggregate(Max('numero'))['numero__max'] or 0
 
             preventiva = Preventiva(local = obra,
                                     ordem = ordem ,
                                     data_emissao=data_emissao,
                                     numero=numero+1)
-            
-            preventiva.save()
 
+            preventiva.save()
 
             return redirect('/manutencao/servicos_manutencao')
 
@@ -168,23 +146,11 @@ def servico_oficina(request, id):
             return redirect("/manutencao/servicos_manutencao") 
 
         servico_oficina = Servico_Oficina.objects.filter(ordem_servico = id).filter(data_fim__isnull=True)
-        for service in servico_oficina:
-
-            if service.status == "Em Serviço":
-
-                break
-            elif service.status == "Aguardando Peças": # de todos os aguardando peças, somar o com a data mais antiga.
-                print(service.data_mudanca_status) 
-        
 
         grupo_servico = Grupo_Servico.objects.all()
         executantes = Funcionario.objects.all()
         terceiros = Servico_Terceirizado.objects.all()
 
-
-        servicos = Servico_Oficina.objects.all()
-        for servico in servicos:
-            print(servico.tempo_aguardo_servico)
         return render(request, 'os_oficina_service.html', {'ordem_oficina_aberta': ordem_oficina_aberta,
                                                        'servico_oficina': servico_oficina,
                                                        'grupo_servico': grupo_servico,
@@ -215,11 +181,8 @@ def servico_oficina(request, id):
                 terceiro_id = request.POST.get('executante_terceiro')
                 terceiro = Servico_Terceirizado.objects.get(id=terceiro_id)
             
-            numero = Servico_Oficina.objects.aggregate(Max('numero'))['numero__max']
-            if numero == None:
-                numero = 0
-            else:pass
-            
+            numero = Servico_Oficina.objects.aggregate(Max('numero'))['numero__max'] or 0
+
             servico_oficina = Servico_Oficina(numero=numero+1,
                                           status= 'Em Serviço',
                                           ordem_servico=ordem_oficina_aberta,
@@ -231,9 +194,8 @@ def servico_oficina(request, id):
                                           executante_terceiro=terceiro,
                                           executante_funcionario=funcionario)
             
-            att_tempo_1_os(ordem_oficina_aberta.id, data_inicio)        
+            att_tempo_1_os(ordem_oficina_aberta.id, data_inicio)
             servico_oficina.save()
-            print(type(data_inicio), data_inicio)
 
             #Criação de objeto registro de mecanico - tempo serviço
             registro_tempo_servico = Registro_Tempo_Servico(servico_oficina=servico_oficina,
@@ -258,8 +220,7 @@ def servico_oficina(request, id):
 
             if data_fim == "":
                 data_status = request.POST.get('data_status')
-                data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")          
-                pass
+                data_status = datetime.strptime(data_status, "%Y-%m-%dT%H:%M")
             else:
                 data_fim = datetime.strptime(data_fim, "%Y-%m-%dT%H:%M")
                 servico_oficina.data_fim = data_fim
@@ -284,10 +245,6 @@ def servico_oficina(request, id):
             servico_oficina.descricao = descricao
             servico_oficina.executante_funcionario = executante_funcionario
             servico_oficina.executante_terceiro = executante_terceiro
-            # servico_oficina.status = status_servico
-
-
-
 
             if servico_oficina.status == "Em Serviço":
                     servico_oficina.tempo_em_servico += (data_status.timestamp() - servico_oficina.data_mudanca_status.timestamp())/3600                 
@@ -316,37 +273,22 @@ def servico_oficina(request, id):
                     servico_oficina.status = status_servico
 
             servico_oficina.save()
-            # print(Servico_Oficina.objects.get(id=id_servico).status)
-                        #colocar a função antes de salvar as informações no BD garante que o valor calculado de tempo seja contabilizado para o status anterior(correto)  
-                
-        
+            #colocar a função antes de salvar as informações no BD garante que o valor calculado de tempo seja contabilizado para o status anterior(correto)
+
             #FECHAR OBJETO DE REGISTRO DE TEMPO DO MECANICO - UTILIZAR SERVICO OFICINA.
             registro_tempo_servico = Registro_Tempo_Servico.objects.get(servico_oficina=servico_oficina.id, data_final=None)
             registro_tempo_servico.data_final = data_status
             registro_tempo_servico.tempo_servico = (data_status.timestamp() - registro_tempo_servico.data_inicial.timestamp())/3600
-            registro_tempo_servico.save() 
-
-        
-                                
-
-
-        #para hoje, adicionar um datetime na mudança de status. Caso não seja adicionado esse datetime, será considerado o horário da mudança atual.
-        #com esse datetime, calcular o tempo em no status selecionado. Talvez seja necessário adicionar mais uma variável no models, o datetime de mudança de status, para que
-        #quando for necessário calcular o tempo em cada status, se basear o horário inicial no ultimo datetime cadastrado.
-
+            registro_tempo_servico.save()
 
             return redirect(f'/manutencao/osoficina/{id}')
-        
-        if form_fim_os:
 
+        if form_fim_os:
             data_fim = request.POST.get('data_fim')
             os_oficina = Ordem_Oficina.objects.get(id=id)
-            # servicos_oficina = Servico_Oficina.objects.get(id=os_oficina)
-            
 
             #verificar se tem algum serviço em aberto, caso sim, não salvar a data e fornecer uma mensagem de erro
             os_oficina.data_fim = data_fim
-            print(data_fim)
             os_oficina.save()
             return redirect('/manutencao/servicos_manutencao/')
             
@@ -359,13 +301,7 @@ def atualizacao_horarios(request):
     else:
         os_oficina_abertas = Ordem_Oficina.objects.filter(data_fim=None)
         for os in os_oficina_abertas:
-            print(os.id, os.equipamento.prefixo)
-
-        # a = Servico_Oficina.objects.all()
-        # for b in a:
-        #     print(b.data_mudanca_status)
             att_tempo_1_os(os.id, now)
-        print("good game", now.day, type(now.hour),now.timestamp())
         servicos_oficina_abertos = Servico_Oficina.objects.filter(data_fim=None)
         for servico_oficina in servicos_oficina_abertos:
 
@@ -460,11 +396,9 @@ def solicitacoes(request):
             solicitacao_atual = Solicitacao.objects.get(id = id_solicitacao)
 
             insumo = request.POST.get('insumo')
-            if insumo == "":
-                pass
-            else:
+            if insumo != "":
                 solicitacao_atual.insumo = insumo
-            
+
             equipamento_id = request.POST.get('equipamento')
             if equipamento_id == 'equipamento':
                 equipamento = None
@@ -479,49 +413,35 @@ def solicitacoes(request):
                 comprador = Funcionario.objects.get(id=comprador_id)
                 solicitacao_atual.comprador = comprador
 
-            solicitacao = request.POST.get('solicitacao')    
-            if solicitacao == "":
-                pass
-            else:
+            solicitacao = request.POST.get('solicitacao')
+            if solicitacao != "":
                 solicitacao_atual.solicitacao = solicitacao
 
             data_envio = request.POST.get('data_solicitacao')
-            if data_envio == "":
-                pass
-            else:   
-                data_envio = datetime.strptime(data_envio, "%Y-%m-%dT%H:%M")  
+            if data_envio != "":
+                data_envio = datetime.strptime(data_envio, "%Y-%m-%dT%H:%M")
                 solicitacao_atual.data_suprimentos = data_envio
 
             status = request.POST.get('status')
-            if status == "Selecionar":
-                pass
-            else:
+            if status != "Selecionar":
                 solicitacao_atual.status = status
 
             previsao = request.POST.get('data_previsao')
-            if previsao == "":
-                pass
-            else:
+            if previsao != "":
                 solicitacao_atual.data_previsao = previsao
-            
+
             link = request.POST.get('link')
-            if link == "":
-                pass
-            else:
+            if link != "":
                 solicitacao_atual.link_solicitacao = link
-            
+
             observacao = request.POST.get('observacao')
-            if observacao == "":
-                pass
-            else:
+            if observacao != "":
                 solicitacao_atual.observacao = observacao
-            
+
             atendida = request.POST.get('atendido')
             if atendida != True:
                 atendida = False
             solicitacao_atual.atendida = atendida
-            print(insumo, id_solicitacao, equipamento_id, comprador_id,solicitacao, data_envio, status, previsao, observacao, atendida)
-            print("xxxxxx", data_envio)
 
             solicitacao_atual.save()
 
@@ -586,25 +506,17 @@ def socorro(request, id):
             id_servico_socorro = request.POST.get('id_servico_socorro')
             servico_socorro = Servico_Socorro.objects.get(id=id_servico_socorro)
             mecanico_id = request.POST.get('mecanico')
-            print(mecanico_id)
 
-            if mecanico_id == 'None':
-                pass
-            else: 
+            if mecanico_id != 'None':
                 mecanico = Funcionario.objects.get(id=mecanico_id)
                 servico_socorro.mecanico = mecanico
             descricao = request.POST.get('descricao')
             servico_socorro.descricao += "-" +  descricao
 
-
             data_inicio = request.POST.get('data_inicio')
             data_fim = request.POST.get('data_fim')
-            print(data_fim,data_fim)
-            if data_inicio == "" or data_fim ==  "":
-                pass
-            else:
-
-                data_inicio = datetime.strptime(data_inicio, "%Y-%m-%dT%H:%M")    
+            if data_inicio != "" and data_fim != "":
+                data_inicio = datetime.strptime(data_inicio, "%Y-%m-%dT%H:%M")
                 servico_socorro.data_inicio = data_inicio
                 data_fim = datetime.strptime(data_fim, "%Y-%m-%dT%H:%M")    
                 servico_socorro.data_fim = data_fim
@@ -662,36 +574,26 @@ def preventiva(request, id):
             preventiva_atualizada = Preventiva.objects.get(id=id)
             
             mecanico_id = request.POST.get('mecanico')
-            if mecanico_id == 'None':
-                pass
-            else:
+            if mecanico_id != 'None':
                 mecanico = Funcionario.objects.get(id=mecanico_id)
                 preventiva_atualizada.mecanico = mecanico
-            
+
             data_insumo = request.POST.get('data_insumo')
-            if data_insumo == "":
-                pass
-            else:
+            if data_insumo != "":
                 preventiva_atualizada.data_insumo = data_insumo
-            
+
             data_inicio = request.POST.get('data_inicio')
-            if data_inicio == "":
-                pass
-            else:
-                data_inicio = datetime.strptime(data_inicio, "%Y-%m-%dT%H:%M")  
+            if data_inicio != "":
+                data_inicio = datetime.strptime(data_inicio, "%Y-%m-%dT%H:%M")
                 preventiva_atualizada.data_inicio = data_inicio
 
             data_fim = request.POST.get('data_fim')
-            if data_fim == "":
-                pass
-            else:
+            if data_fim != "":
                 data_fim = datetime.strptime(data_fim, "%Y-%m-%dT%H:%M")
                 preventiva_atualizada.data_fim = data_fim
-                
+
             horimetro = request.POST.get('horimetro')
-            if horimetro == "":
-                pass
-            else:
+            if horimetro != "":
                 horimentro = int(horimetro)
                 preventiva_atualizada.horimetro = horimetro
 
@@ -703,12 +605,8 @@ def preventiva(request, id):
             preventiva_atualizada.assinatura_responsavel = assinatura_responsavel
             tempo_servico = (data_fim.timestamp() - data_inicio.timestamp())/3600
             preventiva_atualizada.tempo_servico = tempo_servico
-            print((data_fim.timestamp() - data_inicio.timestamp())/3600)
-
-            print(mecanico_id,data_insumo,data_inicio,data_fim, assinatura_responsavel, horimetro, id, "aaaaaaaaaaaaaaaaaaaaaaaa")
 
             preventiva_atualizada.save()
-
 
             ##Criação de objeto registro de mecanico - tempo serviço
 
@@ -743,14 +641,11 @@ def analise_mecanicos(request):
 
             data_fim = datetime.strptime(data_fim, "%Y-%m-%d").date()
     periodo_dias = round((data_fim - data_inicio).total_seconds()/(2.66666666667*3600)) + 9
-    print(periodo_dias)
 
     dias_semanais = 0
     for i in range((data_fim - data_inicio).days + 1):
         data_atual = data_inicio + timedelta(days=i)
-        if data_atual.weekday() == 5 or data_atual.weekday() == 6:
-            pass
-        else:
+        if data_atual.weekday() != 5 and data_atual.weekday() != 6:
             dias_semanais += 1
     horas_disponíveis = dias_semanais*9
 
@@ -768,10 +663,7 @@ def analise_mecanicos(request):
     
     for mecanico in mecanicos:
         registros_servicos = Registro_Tempo_Servico.objects.filter(funcionario = mecanico.id).filter(data_inicial__date__gte=data_inicio).filter(data_final__date__lte=data_fim)
-        soma_tempo_servico_mecanicos = registros_servicos.aggregate(Sum('tempo_servico'))['tempo_servico__sum']
-        if soma_tempo_servico_mecanicos == None:
-            soma_tempo_servico_mecanicos = 0
-        else: pass
+        soma_tempo_servico_mecanicos = registros_servicos.aggregate(Sum('tempo_servico'))['tempo_servico__sum'] or 0
         tempos_mecanicos.append(soma_tempo_servico_mecanicos) #TEMPO EM SERVIÇOS
         servicos_mecanico.append(registros_servicos)
         qtd_servicos.append(registros_servicos.count())        
@@ -781,7 +673,6 @@ def analise_mecanicos(request):
         qtd_viagens.append(qtd_socorro)
         tempo_socorro = Socorro.objects.filter(data_saida__date__gte=data_inicio).filter(data_chegada__date__lte=data_fim).filter(mecanicos=mecanico.id).aggregate(Sum('tempo_socorro'))['tempo_socorro__sum']
         tempo_serv_socorro = Servico_Socorro.objects.filter(data_inicio__date__gte=data_inicio).filter(data_fim__date__lte=data_fim).filter(mecanico=mecanico.id).aggregate(Sum('tempo_servico'))['tempo_servico__sum']
-        print(tempo_serv_socorro, tempo_socorro, "xxxxx", mecanico)
         if tempo_socorro == None:
             tempo_socorro = 0
         if tempo_serv_socorro == None:
@@ -796,18 +687,15 @@ def analise_mecanicos(request):
         tempo_viagens_extra = 0
         hora_extra_semana = 0
         total_semana = 0
-        x = 0
         while current_date <= final_date:
             if current_date.weekday() != 5 and current_date.weekday() != 6:
-                total_semana += 9 
-                print(current_date,type(current_date.weekday()), total_semana )
+                total_semana += 9
                 query_tempo_extra_semana = Registro_Tempo_Servico.objects.filter(funcionario__gte=mecanico.id).filter(data_inicial__date__gte=current_date).filter(data_final__date__lte=current_date)
-                
+
                 if query_tempo_extra_semana:
                     for i in query_tempo_extra_semana:
                         i = i.data_final - timedelta(hours=3)
                         i = i.replace(tzinfo=None)
-                        print(i, 'hora')
                         if i.hour > 17:
 
                             hora_extra_semana += (i.timestamp() - datetime(i.year, i.month, i.day, 17,0,0).timestamp())/3600
@@ -830,18 +718,12 @@ def analise_mecanicos(request):
                 else:
                     tempo_serv_extras +=tempo_serv_extra
 
-            else:
-                pass
             current_date += timedelta(days=1)
         horas_extra.append(tempo_serv_extras+tempo_viagens_extra+hora_extra_semana)
-        print(hora_extra_semana, tempo_viagens_extra, tempo_serv_extras, "!!!!!!!!!!!!!!!!!")
         tempo_ocioso.append(total_semana - (tempo_socorro - tempo_serv_socorro) - soma_tempo_servico_mecanicos)
-        print(total_semana, tempo_ocioso,tempo_socorro, soma_tempo_servico_mecanicos, "////////////////////")
         porcentagens_tempo.append([(soma_tempo_servico_mecanicos / total_semana)*100,((tempo_socorro - tempo_serv_socorro)/total_semana)*100, (((total_semana - (tempo_socorro - tempo_serv_socorro) - soma_tempo_servico_mecanicos)/total_semana)*100), ((tempo_serv_extras+tempo_viagens_extra+hora_extra_semana)/total_semana)*100  ])
-        print(porcentagens_tempo)
     #AGREGANDO LISTAS PARA O FOR DO HTML
-    doc_zip = zip(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos, tempo_viagens, qtd_viagens, horas_extra, tempo_ocioso, porcentagens_tempo)  
-    print(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos, tempo_viagens, qtd_viagens, horas_extra)   
+    doc_zip = zip(mecanicos, servicos_mecanico, qtd_servicos, tempos_mecanicos, tempo_viagens, qtd_viagens, horas_extra, tempo_ocioso, porcentagens_tempo)
     return render(request, 'analise_mecanicos.html', {'doc_zip': doc_zip,
                                                       'total_semana':total_semana})
 
@@ -867,7 +749,6 @@ def servicos_post(request):
 
             all_equipamentos = Equipamentos.objects.filter(proprietario='CONSTRUTORA ROCHA')
             all_grupos = Grupo_Servico.objects.all()
-            all_servicos = ['Oficina', 'Socorro', 'Preventiva']
 
             list_equipamentos = []
             list_grupos = []
@@ -881,8 +762,6 @@ def servicos_post(request):
 
             data_inicial = request.POST.get('data_inicial')
             data_final = request.POST.get('data_final')
-            print( tipo_servico,  data_inicial, data_final, "okokokokok")
-            lista_servicos = []
 
             if not equipamento_rocha_id:
                     equipamento_rocha_id = list_equipamentos
@@ -892,20 +771,13 @@ def servicos_post(request):
                     data_inicial = date.today() - timedelta(days=7)
             if not data_final:
                     data_final = date.today()
-            print(equipamento_rocha_id, grupo_id, data_final, data_inicial, "dados")
 
             servicos_oficina = Servico_Oficina.objects.filter(ordem_servico__equipamento__in = equipamento_rocha_id).filter(grupo_servico__in = grupo_id).filter(data_fim__gte=data_inicial).filter(data_fim__lte=data_final)
             servico_socorro = Servico_Socorro.objects.filter(equipamento__in = equipamento_rocha_id).filter(grupo_servico__in = grupo_id).filter(data_inicio__gte = data_inicial).filter(data_fim__lte = data_final)
             preventiva = Preventiva.objects.filter(ordem__equipamento__in = equipamento_rocha_id).filter(data_inicio__gte = data_inicial).filter(data_fim__lte = data_final)
-            print(servicos_oficina, 'servico oficina query')
-            print(servico_socorro)
-            print(preventiva,'preventiva')
-            print(equipamento_rocha_id, grupo_id, data_final, data_inicial,)
-            
 
             #adiquirindo lista com as informações de serviços oficina
             serv_oficina_list=[]
-            serv_socorro_list=[]
             for serv_oficina in servicos_oficina:
                 s_o = []
                 s_o.append("Oficina")
@@ -936,10 +808,6 @@ def servicos_post(request):
                  p.append(serv_preventiva.tempo_servico)
                  p.append(serv_preventiva.ordem)
                  serv_oficina_list.append(p)
-                 print(p, "preventiva")
-
-
-
 
 
             return render(request, 'servicos_post.html', {'serv_oficina_list':serv_oficina_list,
