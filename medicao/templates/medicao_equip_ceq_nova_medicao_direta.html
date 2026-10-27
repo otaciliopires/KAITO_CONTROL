@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'titulo' %}Equipamento parado - {{ periodo }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+<link rel="stylesheet" href="{% static 'medicao/css/medicao_equip.css' %}">
+{% endblock %}
+
+{% block 'body' %}
+<main id="main" class="main">
+  <div class="med-page" style="padding-top:0">
+
+    <div class="med-topbar">
+      <div>
+        <div class="med-eyebrow">Central de Equipamentos · {{ periodo }}</div>
+        <h1 class="med-title">Equipamento parado sem obra</h1>
+        <div class="med-subtitle">Use quando a máquina passa o período inteiro na oficina ou à disposição, sem nenhuma obra envolvida.</div>
+      </div>
+      <a class="med-back" href="{% url 'medicao_equip_ceq_painel' %}?periodo={{ periodo.ano }}-{{ periodo.mes }}"><i class="bi bi-arrow-left"></i> Voltar ao painel</a>
+    </div>
+
+    {% if messages %}
+      {% for m in messages %}<div class="{{ m.tags }}" role="alert">{{ m }}</div>{% endfor %}
+    {% endif %}
+
+    <div class="med-panel" style="max-width:520px">
+      {% if equipamentos %}
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label fw-bold">Equipamento</label>
+          <select name="equipamento" class="form-select" required>
+            <option value="" disabled selected>Selecione...</option>
+            {% for equipamento in equipamentos %}
+            <option value="{{ equipamento.id }}">{{ equipamento.prefixo }} — {{ equipamento.descricao }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <p class="text-muted" style="font-size:13px">
+          Depois de abrir, lance os dias de manutenção e/ou à disposição na tela seguinte
+          (pode combinar os dois, desde que a soma feche com os dias do mês).
+        </p>
+        <button type="submit" class="btn btn-primary w-100">Abrir medição sem obra</button>
+      </form>
+      {% else %}
+      <div class="med-empty">
+        <i class="bi bi-exclamation-circle"></i>
+        <strong>Nenhum equipamento disponível.</strong>
+        <p style="margin-top:6px">Ou todos já estão sendo medidos neste mês (por alguma obra ou direto pela Central), ou nenhum equipamento está marcado como elegível.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</main>
+{% endblock %}

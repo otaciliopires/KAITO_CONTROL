@@ -39,3 +39,7 @@ class FechamentoMedicaoCaminhaoAdmin(admin.ModelAdmin):
     list_display = ('contrato', 'ano', 'mes', 'fechado_em', 'fechado_por')
     list_filter = ('ano', 'contrato')
     ordering = ('-ano', '-mes')
+
+
+# Registro dos models de medição de equipamentos, em arquivo próprio.
+from . import admin_equipamento  # noqa: F401

@@ -2,13 +2,21 @@ from django.db import models
 from autenticacao.models import Usuario
 
 class Equipamentos(models.Model):
+    tipo_propriedade = (("R","ROCHA"),
+                   ("T","TERCERIZADO"))
+    unidades_medicao = (("H", "Horímetro"),
+                    ("K", "Odômetro"))
+
     prefixo = models.CharField(max_length=20)
     descricao = models.CharField(max_length=50, null=True)
-    tipo_propriedade = (("R","ROCHA"), 
-                   ("T","TERCERIZADO"))
     tipo = models.CharField(max_length=5 ,choices=tipo_propriedade, default="ROCHA")
     proprietario = models.CharField(max_length=50, null=True)
     horímetro = models.FloatField(default=0)
+    unidade_medicao = models.CharField(max_length=1, choices=unidades_medicao, default="H")
+    elegivel_medicao = models.BooleanField(
+        default=False,
+        help_text="Marca se o equipamento participa da medição mensal (rateio de aluguel por obra).",
+    )
 
 
     def __str__(self):

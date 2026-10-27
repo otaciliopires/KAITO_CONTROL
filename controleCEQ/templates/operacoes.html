@@ -3,6 +3,26 @@
 {%load static%}
 
 {%block 'head'%}
+<style>
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-content { border: 0; border-radius: 16px; overflow: hidden; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-header { background: #f0f7f3; padding: 20px 24px; border-bottom: 1px solid #dce9e1; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .entrada-eyebrow { display: block; font-size: 10px; font-weight: 700; letter-spacing: .12em; color: #49745a; margin-bottom: 5px; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-title { color: #193c29; font-weight: 700; margin: 0; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-body { padding: 24px; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .entrada-section { margin: 0 0 24px; padding: 0; min-width: 0; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) legend { float: none; width: auto; font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 12px; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .form-label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .form-control, :is(#modal_entradas, #modal_transferencias, #modal_saidas) .form-select { width: 100%; min-width: 0; min-height: 44px; border-radius: 8px; border-color: #cbd5e1; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .form-control:focus, :is(#modal_entradas, #modal_transferencias, #modal_saidas) .form-select:focus { border-color: #438561; box-shadow: 0 0 0 3px #43856120; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .entrada-total input { background: #eef7f0; border-color: #bcd9c5; color: #1f6139; font-weight: 700; font-size: 18px; }
+:is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-footer { padding: 16px 24px; background: #f8faf9; gap: 8px; }
+@media (max-width: 575.98px) {
+ :is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-dialog { margin: 8px; height: calc(100% - 16px); }
+ :is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-header, :is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-body, :is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-footer { padding: 16px; }
+ :is(#modal_entradas, #modal_transferencias, #modal_saidas) .modal-footer button { flex: 1; margin: 0; }
+}
+</style>
+
 <link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
 <link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -94,283 +114,108 @@
 
 
 
-      <div class="modal fade" id="modal_saidas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
+<div class="modal fade" id="modal_saidas" tabindex="-1" aria-labelledby="modal_saidas_titulo" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><form class="modal-content" method="POST" action="{%url 'operacoes'%}">{% csrf_token %}<input type="hidden" name="form_saidas" value="1"><div class="modal-header"><div><span class="entrada-eyebrow">CONTROLE DE DIESEL</span><h2 class="modal-title fs-5" id="modal_saidas_titulo">Novo abastecimento</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div><div class="modal-body"><fieldset class="entrada-section"><legend>Destino do abastecimento</legend><div class="row g-3"><div class="col-12 col-md-6"><label class="form-label" for="ab_tanque">Tanque</label><select class="form-select" id="ab_tanque" name="tanque_id" required>{%for tanque in tanques%}<option value="{{tanque.id}}">{{tanque}}</option>{%endfor%}</select></div><div class="col-12 col-md-6"><label class="form-label" for="ab_obra">Obra</label><select class="form-select" id="ab_obra" name="obra" required>{%for obra in obras%}<option value="{{obra.id}}">{{obra}}</option>{%endfor%}</select></div><div class="col-12 col-md-6"><label class="form-label" for="ab_equip">Equipamento</label><select class="form-select" id="ab_equip" name="equipamento" required>{%for equipamento in equipamentos%}<option value="{{equipamento.id}}">{{equipamento}}</option>{%endfor%}</select></div><div class="col-12 col-sm-6"><label class="form-label" for="ab_data">Data do abastecimento</label><input class="form-control" id="ab_data" name="data" type="date" value="{% now 'Y-m-d' %}" required></div></div></fieldset><fieldset class="entrada-section"><legend>Leituras e quantidade</legend><div class="row g-3"><div class="col-12 col-sm-6"><label class="form-label" for="ab_inicio">Contador inicial</label><input class="form-control" id="ab_inicio" name="contador_inicial" type="text" inputmode="decimal" required></div><div class="col-12 col-sm-6"><label class="form-label" for="ab_fim">Contador final</label><input class="form-control" id="ab_fim" name="contador_final" type="text" inputmode="decimal" required></div><div class="col-12 col-sm-6"><label class="form-label" for="ab_horimetro">Horímetro / odômetro</label><input class="form-control" id="ab_horimetro" name="horimetro" type="text" inputmode="decimal" required></div><div class="col-12 col-sm-6"><label class="form-label" for="ab_litros">Quantidade (L)</label><input class="form-control" id="ab_litros" name="saida_litros" type="text" readonly aria-live="polite" placeholder="0,00"></div></div></fieldset><fieldset class="entrada-section"><legend>Responsável</legend><div class="row g-3"><div class="col-12 col-sm-6"><label class="form-label" for="ab_operador">Operador / motorista</label><input class="form-control" id="ab_operador" name="operador" type="text" maxlength="50" required></div></div></fieldset><div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="ab_lubrificacao" name="lubrificacao" value="1"><label class="form-check-label" for="ab_lubrificacao">Veículo lubrificado</label><small class="text-muted d-block">Marque se a lubrificação foi realizada neste abastecimento.</small></div><label class="form-label" for="ab_obs">Observações (opcional)</label><textarea class="form-control" id="ab_obs" name="observacao" maxlength="100" rows="3"></textarea></div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-success">Salvar</button></div></form></div></div>
+      <div class="modal fade" id="modal_entradas" tabindex="-1" aria-labelledby="entrada_titulo" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+          <form class="modal-content entrada-form" method="POST" action="{%url 'operacoes'%}">
+            {% csrf_token %}
+            <input type="hidden" name="form_entradas" value="form_entradas">
             <div class="modal-header">
-              <h1 class="modal-title fs-5">ABASTECIMENTOS</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <div><span class="entrada-eyebrow">CONTROLE DE DIESEL</span><h2 class="modal-title fs-5" id="entrada_titulo">Nova entrada</h2></div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
             </div>
             <div class="modal-body">
-              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
-                <input type='hidden' name='form_saidas' value='form_saidas'>
-                <div class="container text-left">
-                    <div class="row">
-                        <div class='col-md-8'>
-                            <div class='col'>
-                                <label style='width:120px' for='tanque'>Tanque:</label> 
-                                <select style="lenght:30px" name='tanque_id'>
-                                  {%for tanque in tanques%}
-                                    <option value="{{tanque.id}}">{{tanque}}</option>
-                                    {%endfor%}
-                                </select>
-                            </div>
-
-                            <div class='col' >
-                                <label style='width: 120px' for='obra'>Obra:</label> 
-                                <select name='obra'>
-                                  {%for obra in obras%}
-                                    <option value="{{obra.id}}">{{obra}}</option>
-                                  {%endfor%}
-                                </select>
-                            </div>
-                            <div class='col' >
-                                <label style='width: 120px' for='equipamento'>Equipamento:</label> 
-                                <select name='equipamento'>
-                                  {%for equipamento in equipamentos%}
-                                    <option value="{{equipamento.id}}">{{equipamento}}</option>
-                                  {%endfor%}
-                                </select>
-                            </div>
-                            <div class='col' >
-                              <label style='width: 120px' for='data_'>Data:</label> 
-                              <input type='date' name='data'>
-                          </div>
-  
-                        </div>
-                    </div>
-
-
-                    <hr>
-
-                    <div class='row'>
-                      <div class='col-md-6'>
-                          <div class='col'>
-                            <label style='width:120px' for='contador_inicial'>Contador inicial:</label>
-                            <input type='text' name='contador_inicial' placeholder='Contador Inicial'>
-                          </div>
-                          <div class='col'>
-                            <label style='width:120px' for='contador_final'>Contador final:</label>
-                            <input type='text' name='contador_final' placeholder='Contador Final'>
-                          </div>
-
-                          <div class='col'>
-                            <label style='width:120px' for='horímetro'>Horímetro:</label>
-                            <input type='text' name='horimetro' placeholder='Horímetro'>
-                          </div>
-                      </div>
-                              <div class='col-md-6'>
-                                  <div class='col'>
-                                    <label style='width:120px' for='saida_litros'>Litros:</label>
-                                    <input type='text' name='saida_litros' placeholder='Litros'> 
-                                  </div>
-                                  <div class='col'>
-                                    <label style='width:120px' for='operador'>Operador:</label>
-                                    <input type='text' name='operador' placeholder='Operador/Motorista'> 
-                                  </div>
-                              </div>
-                    </div>
+              <fieldset class="entrada-section">
+                <legend>Destino do combustível</legend>
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label for="entrada_tanque" class="form-label">Tanque fixo</label>
+                    <select id="entrada_tanque" name="tanque_id" class="form-select" required>
+                      {%for tanque in tanques%}{%if tanque.tipo == 'F'%}<option value="{{tanque.id}}">{{tanque}}</option>{%endif%}{%endfor%}
+                    </select>
                   </div>
-            </div>
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" value='Salvar'>
-            </div>
-          </form>
-          </div>
-        </div>
-      </div>
-
-
-
-
-      
-      
-      
-      <div class="modal fade" id="modal_entradas" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">ENTRADAS</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
-                <input type='hidden' name='form_entradas' value='form_entradas'>
-                <div class="container text-left">
-                    <div class="row">
-                        <div class='col-md-6'>
-                            <div class='col'>
-                                <label style='width:80px' for='tanque'>Tanque:</label> 
-                                <select name='tanque_id'>                                 
-                                  {%for tanque in tanques%}
-                                    {%if tanque.tipo == 'F'%}
-                                      <option value="{{tanque.id}}">{{tanque}}</option>
-                                    {%endif%}
-                                  {%endfor%}
-                                </select>
-                            </div>
-
-                            <div class='col' >
-                                <label style='width:80px' for='obra'>Obra:</label> 
-                                <select name='obra_id'>
-                                  {%for obra in obras%}
-                                    <option value="{{obra.id}}">{{obra}}</option>
-                                  {%endfor%}
-                                </select>
-                            </div>
-                            <div class='col' >
-                                <label style='width:80px' for='data_nf'>Data NF:</label> 
-                                <input type='date' name='data_nf'>
-                            </div>
-                        </div>
-
-                      <div class='col-md-6'>
-                        <div class='col'>
-                          <label style='width:100px' for='fornecedor'>Fornecedor:</label>
-                          <input type='text' name='fornecedor' placeholder='Fornecedor'>
-                        </div>
-                          <div class='col'>
-                            <label style='width:100px' for='NF'>Nota Fiscal:</label>
-                            <input type='text' name='NF' placeholder='Nota Fiscal'>
-                          </div>
-                          <div class='col' >
-                            <label style='width:100px' for='data_entrega'>Data Entrega:</label> 
-                            <input type='date' name='data_entrega'>
-                        </div>
-
-
-                      </div>
-                    </div>
-
-                    <hr>
-
-                    <div class='row'>
-                      <div class='col-md-6'>
-                          <div class='col'>
-                            <label style='width:85px' for='valor_litro'>Valor Litro:</label>
-                            <input type='text' name='valor_litro' placeholder='Valor_litro'>
-                          </div>
-                          <div class='col'>
-                            <label style='width:85px' for='quantidade'>Quantidade:</label>
-                            <input type='text' name='quantidade' placeholder='Quantidade'>
-                          </div>
-                      </div>
-                      <div class='col-md-6'>
-                      </div>
-                    </div>
-
+                  <div class="col-12 col-md-6">
+                    <label for="entrada_obra" class="form-label">Obra</label>
+                    <select id="entrada_obra" name="obra_id" class="form-select" required>
+                      {%for obra in obras%}<option value="{{obra.id}}">{{obra}}</option>{%endfor%}
+                    </select>
                   </div>
                 </div>
-
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" value='Salvar'>
-            </div>
-          </form>
-          </div>
-        </div>
-      </div>
-
-
-
-      <div class="modal fade" id="modal_transferencias" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">TRANSFERÊNCIAS</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <form method='POST' action="{%url 'home'%}">{% csrf_token %}
-                <input type='hidden' name='form_transferencias' value='form_transferencias'>
-                <div class="container text-left">
-                    <div class="row">
-                        <div class='col-md-6'>
-                            <div class='col'>
-                                <label style='width:130px' for='tanque'>Tanque Fixo:</label> 
-                                <select name='tanque_fixo_id'>                                 
-                                  {%for tanque in tanques%}
-                                    {%if tanque.tipo == 'F'%}
-                                      <option value="{{tanque.id}}">{{tanque}}</option>
-                                    {%endif%}
-                                  {%endfor%}
-                                </select>
-                            </div>
-
-                            <div class='col'>
-                              <label style='width:130px' for='tanque'>Tanque Móvel:</label> 
-                              <select name='tanque_movel_id'>                                 
-                                {%for tanque in tanques%}
-                                  {%if tanque.tipo == 'M'%}
-                                    <option value="{{tanque.id}}">{{tanque}}</option>
-                                  {%endif%}
-                                {%endfor%}
-                              </select>
-                          </div>
-
-                            <div class='col' >
-                                <label style='width:130px' for='contador_inicio'>Contador Inicial:</label>
-                                <input type='text' name='contador_inicio' placeholder='Contador Inicio'>
-                            </div>
-                            <div class='col' >
-                              <label style='width:130px' for='contador_fim'>Contador Final:</label>
-                              <input type='text' name='contador_fim' placeholder='Contador Final'>
-                          </div>
-                            
-                        </div>
-
-                      <div class='col-md-6'>
-                        <div class='col'>
-                          <label style='width:130px' for='contador_comboio'>Contador Melosa:</label>
-                          <input type='text' name='contador_comboio' placeholder='Contador'>
-                        </div>
-                          <div class='col' >
-                            <label style='width:130px' for='motorista'>Motorista:</label> 
-                            <input type='text' name='motorista' placeholder='motorista'>
-                        </div>
-
-
-                      </div>
-                    </div>
-
-                    <hr>
-
-                    <div class='row'>
-                      <div class='col-md-6'>
-                          <div class='col'>
-
-                          <div class='col'>
-
-                          </div>
-                      </div>
-                      <div class='col-md-6'>
-                      </div>
-                    </div>
-
-                  </div>
+              </fieldset>
+              <fieldset class="entrada-section">
+                <legend>Dados da nota fiscal</legend>
+                <div class="row g-3">
+                  <div class="col-12 col-md-7"><label for="entrada_fornecedor" class="form-label">Fornecedor</label><input id="entrada_fornecedor" name="fornecedor" class="form-control" maxlength="50" required></div>
+                  <div class="col-12 col-md-5"><label for="entrada_nf" class="form-label">Número da nota fiscal</label><input id="entrada_nf" name="NF" class="form-control" maxlength="20" required></div>
+                  <div class="col-12 col-sm-6"><label for="entrada_data_nf" class="form-label">Data da nota fiscal</label><input type="date" id="entrada_data_nf" name="data_nf" class="form-control" required></div>
+                  <div class="col-12 col-sm-6"><label for="entrada_data_entrega" class="form-label">Data da entrega</label><input type="date" id="entrada_data_entrega" name="data_entrega" class="form-control" required></div>
                 </div>
-
+              </fieldset>
+              <fieldset class="entrada-section">
+                <legend>Quantidade e valores</legend>
+                <div class="row g-3 align-items-end">
+                  <div class="col-12 col-sm-6 col-md-4"><label for="entrada_valor_litro" class="form-label">Valor do litro (R$)</label><input type="text" inputmode="decimal" id="entrada_valor_litro" name="valor_litro" class="form-control" placeholder="Ex.: 6,25" required></div>
+                  <div class="col-12 col-sm-6 col-md-4"><label for="entrada_quantidade" class="form-label">Quantidade (L)</label><input type="text" inputmode="decimal" id="entrada_quantidade" name="quantidade" class="form-control" placeholder="Ex.: 1.000,50" required></div>
+                  <div class="col-12 col-md-4 entrada-total"><label for="entrada_total" class="form-label">Total da nota</label><input type="text" id="entrada_total" class="form-control" readonly aria-live="polite" placeholder="R$ 0,00"></div>
+                </div>
+              </fieldset>
+              <label for="entrada_observacoes" class="form-label">Observações <span class="text-muted fw-normal">(opcional)</span></label>
+              <textarea id="entrada_observacoes" name="descricao" class="form-control" rows="3" placeholder="Informações adicionais sobre esta entrada"></textarea>
+            </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-              <input type="submit" class="btn btn-primary" value='Salvar'>
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+              <button type="submit" class="btn btn-success">Salvar entrada</button>
             </div>
           </form>
-          </div>
         </div>
       </div>
 
-
+<div class="modal fade" id="modal_transferencias" tabindex="-1" aria-labelledby="modal_transferencias_titulo" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><form class="modal-content" method="POST" action="{%url 'operacoes'%}">{% csrf_token %}<input type="hidden" name="form_transferencias" value="1"><div class="modal-header"><div><span class="entrada-eyebrow">CONTROLE DE DIESEL</span><h2 class="modal-title fs-5" id="modal_transferencias_titulo">Nova transferência</h2></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button></div><div class="modal-body"><fieldset class="entrada-section"><legend>Origem e destino</legend><div class="row g-3"><div class="col-12 col-md-6"><label class="form-label" for="tr_fixo">Tanque fixo</label><select class="form-select" id="tr_fixo" name="tanque_fixo_id" required>{%for tanque in tanques%}{%if tanque.tipo == 'F'%}<option value="{{tanque.id}}">{{tanque}}</option>{%endif%}{%endfor%}</select></div><div class="col-12 col-md-6"><label class="form-label" for="tr_movel">Tanque móvel</label><select class="form-select" id="tr_movel" name="tanque_movel_id" required>{%for tanque in tanques%}{%if tanque.tipo == 'M'%}<option value="{{tanque.id}}">{{tanque}}</option>{%endif%}{%endfor%}</select></div></div></fieldset><fieldset class="entrada-section"><legend>Dados da transferência</legend><div class="row g-3"><div class="col-12 col-sm-6"><label class="form-label" for="tr_data">Data da transferência</label><input class="form-control" id="tr_data" name="data" type="date" value="{% now 'Y-m-d' %}" required></div><div class="col-12 col-sm-6"><label class="form-label" for="tr_comboio">Contador da melosa</label><input class="form-control" id="tr_comboio" name="contador_comboio" type="text" inputmode="decimal" required></div></div></fieldset><fieldset class="entrada-section"><legend>Quantidade transferida</legend><div class="row g-3"><div class="col-12 col-sm-6"><label class="form-label" for="tr_inicio">Contador inicial</label><input class="form-control" id="tr_inicio" name="contador_inicio" type="text" inputmode="decimal" required></div><div class="col-12 col-sm-6"><label class="form-label" for="tr_fim">Contador final</label><input class="form-control" id="tr_fim" name="contador_fim" type="text" inputmode="decimal" required></div><div class="col-12 entrada-total"><label class="form-label" for="tr_litros">Quantidade de litros</label><input class="form-control" id="tr_litros" readonly aria-live="polite" placeholder="0,00 L"><small class="text-muted">Contador final menos contador inicial.</small></div></div></fieldset></div><div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-success">Salvar</button></div></form></div></div>
       </html>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
   
-  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+  <script src="{% static 'ceq/javascript/js.js' %}?v=2"></script>
 
 
 
 
+
+<script>
+(() => {
+  const valor = document.getElementById('entrada_valor_litro');
+  const quantidade = document.getElementById('entrada_quantidade');
+  const total = document.getElementById('entrada_total');
+  const moeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+  function numero(texto) {
+    texto = texto.trim();
+    if (!texto) return NaN;
+    if (texto.includes(',')) texto = texto.replace(/\./g, '').replace(',', '.');
+    return Number(texto);
+  }
+  function atualizarTotal() {
+    const preco = numero(valor.value);
+    const litros = numero(quantidade.value);
+    total.value = Number.isFinite(preco) && Number.isFinite(litros) && preco >= 0 && litros >= 0
+      ? moeda.format(preco * litros) : '';
+  }
+  valor.addEventListener('input', atualizarTotal);
+  quantidade.addEventListener('input', atualizarTotal);
+  atualizarTotal();
+})();
+</script>
+<script>(()=>{const a=document.getElementById('tr_inicio'),b=document.getElementById('tr_fim'),t=document.getElementById('tr_litros');const fmt=new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:3});function n(v){v=v.trim();return v?Number(v.includes(',')?v.replace(/\./g,'').replace(',','.'):v):NaN;}function update(){const x=n(a.value),y=n(b.value),bad=Number.isFinite(x)&&Number.isFinite(y)&&(x<0||y<=x);b.setCustomValidity(bad?'O contador final deve ser maior que o inicial, com leituras não negativas.':'');t.value=Number.isFinite(x)&&Number.isFinite(y)&&!bad?fmt.format(y-x)+' L':'';}a.addEventListener('input',update);b.addEventListener('input',update);})();</script><script>(()=>{
+ const inicio=document.getElementById('ab_inicio'),fim=document.getElementById('ab_fim'),litros=document.getElementById('ab_litros');
+ const formato=new Intl.NumberFormat('pt-BR',{maximumFractionDigits:10});
+ function numero(v){v=v.trim();return v?Number(v.includes(',')?v.replace(/\./g,'').replace(',','.'):v):NaN;}
+ function atualizar(){
+  const a=numero(inicio.value),b=numero(fim.value);
+  const valido=Number.isFinite(a)&&Number.isFinite(b)&&a>=0&&b>a;
+  fim.setCustomValidity(Number.isFinite(a)&&Number.isFinite(b)&&!valido?'O contador final deve ser maior que o inicial, com leituras não negativas.':'');
+  litros.value=valido?formato.format(Number((b-a).toFixed(10))):'';
+ }
+ inicio.addEventListener('input',atualizar);fim.addEventListener('input',atualizar);atualizar();
+})();</script>
 {%endblock%}

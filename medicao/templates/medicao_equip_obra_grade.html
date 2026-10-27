@@ -1,0 +1,198 @@
+{% extends 'base_obra.html' %}
+{% load static %}
+
+{% block 'titulo' %}{{ medicao.equipamento.prefixo }} - {{ medicao.periodo }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main class="med-page">
+
+  <div class="med-topbar">
+    <div>
+      <div class="med-eyebrow">Medição · Equipamentos · {{ medicao.periodo }}</div>
+      <h1 class="med-title">{{ medicao.equipamento.prefixo }} — {{ medicao.equipamento.descricao }}</h1>
+      <div class="med-subtitle">
+        Obra responsável: {{ medicao.obra.nome }} ·
+        {{ medicao.equipamento.get_unidade_medicao_display }} ·
+        Aluguel vigente: R$ {{ medicao.valor_aluguel_vigente }}
+      </div>
+    </div>
+    <a class="med-back" href="{% url 'medicao_equip_obra_periodo' obra_id=medicao.obra.id periodo_id=medicao.periodo.id %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+  </div>
+
+  <div style="margin-bottom:18px">
+    <span class="badge text-bg-secondary">{{ medicao.get_status_display }}</span>
+    {% if not editavel %}
+      <span class="med-pending-hint" style="margin-left:8px">
+        <i class="bi bi-lock"></i>
+        {% if medicao.status == 'FECHADA' %}Medição fechada — somente consulta.
+        {% else %}Enviada para a Central — aguardando análise. Não é possível editar.{% endif %}
+      </span>
+    {% endif %}
+    {% if medicao.status == 'FECHADA' %}
+      <a class="btn btn-outline-dark btn-sm ms-2" href="{% url 'medicao_equip_boletim_pdf' medicao_id=medicao.id %}"><i class="bi bi-file-earmark-pdf"></i> Baixar boletim (PDF)</a>
+    {% endif %}
+  </div>
+
+  {% if messages %}
+    {% for m in messages %}<div class="{{ m.tags }}" role="alert">{{ m }}</div>{% endfor %}
+  {% endif %}
+
+  <form method="POST" action="{% url 'medicao_equip_obra_salvar' medicao.id %}" id="form-grade">
+    {% csrf_token %}
+    <div class="med-table-wrap">
+      <table class="med-table" id="tabela-grade">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Contador inicial</th>
+            <th>Contador final</th>
+            <th>{% if medicao.equipamento.unidade_medicao == 'H' %}Horas trab.{% else %}Distância{% endif %}</th>
+            <th>Parada (h)</th>
+            <th>Motivo</th>
+            <th title="Só informativo — a cobrança do dia é sempre desta medição, da sua obra.">Obra do dia</th>
+            <th>Observações</th>
+            <th>Fração</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ap in apontamentos %}
+          <tr data-linha="{{ ap.id }}">
+            <td>{{ ap.data|date:"d/m" }}<br><small class="text-muted">{{ ap.data|date:"D" }}</small></td>
+            <td><input type="text" class="form-control form-control-sm campo-contador-inicial" name="dia_{{ ap.id }}_contador_inicial" value="{{ ap.contador_inicial|default_if_none:'' }}" {% if not editavel %}disabled{% endif %}></td>
+            <td><input type="text" class="form-control form-control-sm campo-contador-final" name="dia_{{ ap.id }}_contador_final" value="{{ ap.contador_final|default_if_none:'' }}" {% if not editavel %}disabled{% endif %}></td>
+            <td><span class="campo-variacao">{{ ap.variacao_contador|default_if_none:'—' }}</span></td>
+            <td><input type="text" class="form-control form-control-sm campo-parada" name="dia_{{ ap.id }}_parada" value="{{ ap.tempo_parada_horas|default:'0' }}" {% if not editavel %}disabled{% endif %}></td>
+            <td>
+              <select class="form-select form-select-sm" name="dia_{{ ap.id }}_motivo" {% if not editavel %}disabled{% endif %}>
+                <option value="">—</option>
+                {% for motivo in motivos %}
+                <option value="{{ motivo.id }}" {% if ap.motivo_parada_id == motivo.id %}selected{% endif %}>{{ motivo.descricao }} ({{ motivo.get_destino_complemento_display }})</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td>
+              <select class="form-select form-select-sm" name="dia_{{ ap.id }}_obra_do_dia" {% if not editavel %}disabled{% endif %}>
+                {% for obra_opcao in todas_obras %}
+                <option value="{{ obra_opcao.id }}" {% if ap.obra_do_dia_id == obra_opcao.id %}selected{% elif not ap.obra_do_dia_id and obra_opcao.id == medicao.obra_id %}selected{% endif %}>{{ obra_opcao.nome }}</option>
+                {% endfor %}
+              </select>
+            </td>
+            <td><input type="text" class="form-control form-control-sm" name="dia_{{ ap.id }}_observacoes" value="{{ ap.observacoes }}" {% if not editavel %}disabled{% endif %}></td>
+            <td><span class="badge text-bg-light campo-fracao">{{ ap.fracao|default_if_none:'—' }}</span></td>
+            <td>
+              <span class="badge {% if ap.tipo_dia == 'TRABALHO' %}text-bg-success{% elif ap.tipo_dia == 'MANUTENCAO' %}text-bg-warning{% elif ap.tipo_dia == 'DISPOSICAO' %}text-bg-info{% else %}text-bg-secondary{% endif %}">
+                {{ ap.get_tipo_dia_display|default:'—' }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% if editavel %}
+    <button type="submit" class="btn btn-primary mt-3"><i class="bi bi-save"></i> Salvar lançamentos</button>
+    {% endif %}
+  </form>
+
+  <div class="med-panel mt-4">
+    <div class="med-panel-title"><i class="bi bi-clipboard-data"></i> Totais apurados</div>
+    <div class="med-stat-grid">
+      {% for linha in dias_por_obra %}
+      <div class="med-stat">
+        <div class="med-stat-label">{{ linha.obra.nome }}</div>
+        <div class="med-stat-value">{{ linha.dias }}</div>
+        <div class="med-stat-sub">dias</div>
+      </div>
+      {% endfor %}
+      <div class="med-stat">
+        <div class="med-stat-label">Manutenção</div>
+        <div class="med-stat-value">{{ consolidado.dias_manutencao }}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label">À disposição</div>
+        <div class="med-stat-value">{{ consolidado.dias_disposicao }}</div>
+      </div>
+      <div class="med-stat {% if divergencia == 0 %}med-highlight{% endif %}">
+        <div class="med-stat-label">Total apurado</div>
+        <div class="med-stat-value">{{ consolidado.total_dias }}</div>
+        <div class="med-stat-sub">de {{ medicao.periodo.dias_do_mes }} dias do mês</div>
+      </div>
+    </div>
+    {% if divergencia != 0 %}
+    <div class="alert alert-warning mt-3 mb-0">
+      <i class="bi bi-exclamation-triangle"></i>
+      Divergência de {{ divergencia }} dia(s) em relação ao mês — confira os dias em branco ou duplicados antes de enviar.
+    </div>
+    {% endif %}
+  </div>
+
+  {% if editavel %}
+  <form method="POST" action="{% url 'medicao_equip_obra_enviar' medicao.id %}" class="mt-3" onsubmit="return confirm('Enviar essa medição para a Central de Equipamentos? Depois de enviada, a obra não edita mais os dias.');">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-success"><i class="bi bi-send"></i> Enviar para a Central</button>
+  </form>
+  {% endif %}
+
+</main>
+
+<script>
+(function () {
+  var jornada = parseFloat("{{ jornada_util|stringformat:'f' }}".replace(',', '.'));
+  var unidade = "{{ medicao.equipamento.unidade_medicao }}";
+
+  function parseNum(v) {
+    v = (v || '').replace(',', '.').trim();
+    if (v === '') return null;
+    var n = parseFloat(v);
+    return isNaN(n) ? null : n;
+  }
+
+  function calcularFracao(paradaH, horasTrab) {
+    if (!paradaH || paradaH === 0) return 1;
+    var fracao;
+    if (unidade === 'H') {
+      var base = Math.max(jornada - paradaH, horasTrab || 0);
+      fracao = base / jornada;
+    } else {
+      fracao = 1 - (paradaH / jornada);
+    }
+    fracao = Math.round(fracao * 100) / 100;
+    return Math.min(1, Math.max(0, fracao));
+  }
+
+  document.querySelectorAll('#tabela-grade tbody tr[data-linha]').forEach(function (linha) {
+    var inicial = linha.querySelector('.campo-contador-inicial');
+    var final_ = linha.querySelector('.campo-contador-final');
+    var parada = linha.querySelector('.campo-parada');
+    var variacaoEl = linha.querySelector('.campo-variacao');
+    var fracaoEl = linha.querySelector('.campo-fracao');
+    if (!inicial || !final_ || !parada) return;
+
+    function atualizar() {
+      var ini = parseNum(inicial.value);
+      var fim = parseNum(final_.value);
+      var par = parseNum(parada.value);
+      if (par === null) par = 0;
+
+      var variacao = (ini !== null && fim !== null) ? (fim - ini) : null;
+      variacaoEl.textContent = variacao === null ? '—' : variacao.toFixed(2);
+
+      if (fim === null) {
+        fracaoEl.textContent = '—';
+        return;
+      }
+      var fracao = calcularFracao(par, variacao);
+      fracaoEl.textContent = fracao.toFixed(2) + ' (prévia)';
+    }
+
+    [inicial, final_, parada].forEach(function (el) { el.addEventListener('input', atualizar); });
+  });
+})();
+</script>
+{% endblock %}

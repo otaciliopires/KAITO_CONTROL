@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'titulo' %}Painel de Medição de Equipamentos{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+<link rel="stylesheet" href="{% static 'medicao/css/medicao_equip.css' %}">
+{% endblock %}
+
+{% block 'body' %}
+<main id="main" class="main">
+  <div class="med-page" style="padding-top:0">
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="{{ message.tags }}" role="alert" style="margin-bottom:16px">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="med-topbar">
+      <div>
+        <div class="med-eyebrow">Central de Equipamentos · Equipamentos</div>
+        <h1 class="med-title">Painel de Medição</h1>
+        <div class="med-subtitle">Rateio mensal de aluguel de equipamentos por obra, manutenção e disposição.</div>
+      </div>
+      <form method="get" class="med-month-select">
+        <label for="med-mes-select"><i class="bi bi-calendar3"></i> Mês</label>
+        <select id="med-mes-select" name="periodo" onchange="this.form.submit()">
+          {% for opcao in opcoes_mes %}
+          <option value="{{ opcao.ano }}-{{ opcao.mes }}" {% if opcao.ano == ano_selecionado and opcao.mes == mes_selecionado %}selected{% endif %}>
+            {{ opcao.nome }}/{{ opcao.ano }}
+          </option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+
+    <div class="med-stat-grid">
+      <div class="med-stat med-highlight">
+        <div class="med-stat-label"><i class="bi bi-cash-coin"></i> Total de {{ nome_mes_selecionado }}/{{ ano_selecionado }}</div>
+        <div class="med-stat-value">R$ {{ resumo.total|floatformat:2 }}</div>
+        <div class="med-stat-sub">{% if mes_em_andamento %}Mês em andamento{% else %}Fechado ou em fechamento{% endif %}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-gear-wide-connected"></i> Equipamentos medidos</div>
+        <div class="med-stat-value">{{ linhas|length }}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-tools"></i> Manutenção</div>
+        <div class="med-stat-value">R$ {{ resumo.manutencao|floatformat:2 }}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-pause-circle"></i> À disposição</div>
+        <div class="med-stat-value">R$ {{ resumo.disposicao|floatformat:2 }}</div>
+      </div>
+      <div class="med-stat {% if total_pendencias %}equip-stat-alerta{% endif %}">
+        <div class="med-stat-label"><i class="bi bi-exclamation-triangle"></i> Divergências</div>
+        <div class="med-stat-value">{{ total_pendencias }}</div>
+        <div class="med-stat-sub">{% if total_pendencias %}precisam de ajuste antes de fechar{% else %}nenhuma pendência{% endif %}</div>
+      </div>
+    </div>
+
+    <div class="equip-grid-2">
+      <div class="med-panel">
+        <div class="med-panel-title"><i class="bi bi-bar-chart"></i> Valor por destino</div>
+        <div class="equip-chart-wrap"><canvas id="chartValores"></canvas></div>
+      </div>
+
+      <div class="med-panel">
+        <div class="med-panel-title"><i class="bi bi-building"></i> Obras neste período</div>
+        {% if resumo.por_obra %}
+        <div class="equip-pill-list">
+          {% for linha in resumo.por_obra %}
+          <a class="equip-pill" href="{% url 'medicao_equip_ceq_obra' periodo_id=periodo.id obra_id=linha.obra.id %}">
+            <span>{{ linha.obra.nome }}</span>
+            <strong>R$ {{ linha.valor|floatformat:2 }}</strong>
+          </a>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">Nenhuma obra com dias apurados ainda neste período.</p>
+        {% endif %}
+        <div class="d-flex gap-2 flex-wrap mt-3">
+          <a class="btn btn-outline-secondary btn-sm" href="{% url 'medicao_equip_ceq_localizacao' %}?periodo={{ periodo.ano }}-{{ periodo.mes }}"><i class="bi bi-grid-3x3-gap"></i> Localização</a>
+          <a class="btn btn-outline-secondary btn-sm" href="{% url 'medicao_equip_ceq_manutencao' periodo_id=periodo.id %}"><i class="bi bi-tools"></i> Visão de manutenção</a>
+          <a class="btn btn-outline-secondary btn-sm" href="{% url 'medicao_equip_ceq_disposicao' periodo_id=periodo.id %}"><i class="bi bi-pause-circle"></i> Visão à disposição</a>
+          <a class="btn btn-outline-dark btn-sm" href="{% url 'medicao_equip_ceq_resumo_pdf' periodo_id=periodo.id %}"><i class="bi bi-file-earmark-pdf"></i> Resumo do período (PDF)</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="med-panel">
+      <div class="med-panel-title d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><i class="bi bi-grid-3x3-gap"></i> Equipamentos do período</span>
+        <div class="d-flex gap-2">
+          {% if periodo.status != 'FECHADO' %}
+            <a class="btn btn-outline-primary btn-sm" href="{% url 'medicao_equip_ceq_nova_medicao_direta' periodo_id=periodo.id %}"><i class="bi bi-plus-lg"></i> Equipamento parado (sem obra)</a>
+          {% endif %}
+          {% if periodo.status == 'FECHADO' %}
+            <span class="med-status-badge fechado">Período fechado</span>
+            <form method="POST" action="{% url 'medicao_equip_ceq_reabrir_periodo' periodo_id=periodo.id %}" onsubmit="return confirm('Reabrir este período?');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-outline-warning btn-sm"><i class="bi bi-unlock"></i> Reabrir período</button>
+            </form>
+          {% else %}
+            <form method="POST" action="{% url 'medicao_equip_ceq_fechar_periodo' periodo_id=periodo.id %}" onsubmit="return confirm('Fechar o período inteiro? Só é possível se todas as medições estiverem FECHADAS.');">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-lock"></i> Fechar período</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="med-table-wrap">
+        <table class="med-table">
+          <thead>
+            <tr>
+              <th>Equipamento</th>
+              <th>Obra responsável</th>
+              <th>Status</th>
+              <th>Manutenção</th>
+              <th>Disposição</th>
+              <th>Total apurado</th>
+              <th>Divergência</th>
+              <th>Valor total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for linha in linhas %}
+            <tr class="{% if linha.divergencia != 0 %}equip-linha-erro{% endif %}">
+              <td><strong>{{ linha.medicao.equipamento.prefixo }}</strong> <div class="med-month-meta">{{ linha.medicao.equipamento.descricao }}</div></td>
+              <td>{% if linha.medicao.obra %}{{ linha.medicao.obra.nome }}{% else %}<span class="badge text-bg-dark">Central (sem obra)</span>{% endif %}</td>
+              <td><span class="badge text-bg-secondary">{{ linha.medicao.get_status_display }}</span></td>
+              <td>{{ linha.consolidado.dias_manutencao }}</td>
+              <td>{{ linha.consolidado.dias_disposicao }}</td>
+              <td>{{ linha.consolidado.total_dias }} / {{ periodo.dias_do_mes }}</td>
+              <td>
+                {% if linha.divergencia == 0 %}
+                  <span class="badge text-bg-success">ok</span>
+                {% else %}
+                  <span class="badge text-bg-danger">{{ linha.divergencia }}</span>
+                {% endif %}
+              </td>
+              <td>R$ {{ linha.valor_total|floatformat:2 }}</td>
+              <td><a class="btn btn-primary btn-sm" href="{% url 'medicao_equip_ceq_ajuste' medicao_id=linha.medicao.id %}">Analisar <i class="bi bi-chevron-right"></i></a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="9" class="text-center text-muted">Nenhuma medição de equipamento neste período.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  const chartData = {{ chart_data_json|safe }};
+  new Chart(document.getElementById('chartValores'), {
+    type: 'bar',
+    data: {
+      labels: chartData.labels,
+      datasets: [{
+        label: 'R$',
+        data: chartData.valores,
+        backgroundColor: '#4154f1',
+        borderRadius: 6,
+      }],
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true } },
+    },
+  });
+</script>
+{% endblock %}

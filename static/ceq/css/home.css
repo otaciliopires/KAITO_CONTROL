@@ -1,0 +1,91 @@
+/* Responsive Home Diesel dashboard */
+.diesel-home { min-width:0; }
+.diesel-heading { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:20px; margin-bottom:24px; }
+.diesel-heading h1 { color:#193d2b; font-size:clamp(26px,3vw,34px); margin:6px 0; font-weight:700; }
+.diesel-heading p { color:#64748b; margin:0; font-size:14px; }
+.diesel-eyebrow { color:#56806a; font-size:11px; letter-spacing:.1em; font-weight:700; }
+.diesel-month { width:180px; }
+.diesel-month label { display:block; font-size:12px; font-weight:600; color:#64748b; margin-bottom:6px; }
+.diesel-month select { min-height:44px; border-radius:8px; }
+.diesel-home .dashboard > .row { display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:20px; margin:0; }
+.diesel-home .dashboard > .row > .col-lg-6, .diesel-home .dashboard > .row > .col-lg-6 > .row { display:contents; }
+.diesel-home .dashboard > .row > .col-lg-6 > .row > div { width:auto; min-width:0; padding:0; grid-column:span 4; }
+.diesel-home .dashboard > .row > .col-lg-6 > .row > div:first-child { grid-column:1/-1; }
+.diesel-home .dashboard > .row > .col-lg-6 > .row > .col-12 { grid-column:span 6; }
+.diesel-home .dashboard > .row > .col-lg-6 > .card { grid-column:span 6; }
+.diesel-home .card { min-width:0; border:1px solid #e2eae5; border-radius:14px; margin:0; box-shadow:0 3px 12px #193d2906; overflow:hidden; }
+.diesel-home .card-body { padding:20px; }
+.diesel-home .card-title { font-size:17px; line-height:1.5; padding:0 0 16px; margin:0; color:#334155; overflow-wrap:anywhere; }
+.diesel-home .card-title span { display:inline-block; font-size:12px; color:#64748b; }
+.diesel-home .info-card h6 { font-size:clamp(20px,2.2vw,30px); overflow-wrap:anywhere; margin-bottom:4px; color:#235238; }
+.diesel-home .info-card .card-body > .d-flex { flex-wrap:wrap; gap:12px; }
+.diesel-home .info-card .ps-3 { padding-left:0!important; min-width:0; }
+.diesel-home .customers-card { background:linear-gradient(110deg,#f0f8f2,#fff); }
+.diesel-home .customers-card .card-body > .d-flex > div:last-child { margin-left:auto!important; }
+.diesel-home .tanque { width:150px; height:80px; border-color:#91b29d; }
+.diesel-home .volume { background:#7eb68c; }
+.diesel-chart { position:relative; width:100%; height:300px; min-width:0; }
+.diesel-chart canvas { display:block; max-width:100%; }
+.diesel-home .diesel-obras-chart { padding:20px; }
+.diesel-home .diesel-obras-chart .card-body { padding:0; }
+.diesel-home .filter { top:16px; right:16px; }
+.diesel-home .table-responsive { max-width:100%; overflow-x:auto; }
+.diesel-home table { font-size:13px; width:100%; margin-bottom:0; }
+.diesel-home table thead, .diesel-home table tbody { font-size:13px!important; }
+.diesel-home table thead th { background:#f5f8f6; color:#64748b; font-size:12px; }
+.diesel-home table td, .diesel-home table th { padding:12px; border-color:#e9eeeb; }
+.diesel-home table td { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; font-size:13px!important; }
+.diesel-home table th:first-child { min-width:130px; overflow-wrap:anywhere; }
+@media(max-width:991.98px) {
+ .diesel-home .dashboard > .row > .col-lg-6 > .row > .col-12, .diesel-home .dashboard > .row > .col-lg-6 > .card { grid-column:1/-1; }
+}
+@media(max-width:575.98px) {
+ #main.diesel-home { padding:20px 12px; }
+ .diesel-month { width:100%; }
+ .diesel-home .dashboard > .row { gap:14px; }
+ .diesel-home .dashboard > .row > .col-lg-6 > .row > div { grid-column:1/-1; }
+ .diesel-home .card-body { padding:16px; }
+ .diesel-home .card-title { font-size:16px; }
+ .diesel-home .tanque { width:110px; height:65px; }
+ .diesel-chart { height:270px; }
+}
+
+/* Realistic storage tank artwork with a live stock gauge. */
+.diesel-tank-visual { width:clamp(170px,22vw,280px); max-width:100%; }
+.diesel-tank-image { display:block; width:100%; height:160px; object-fit:contain; }
+.diesel-tank-caption { display:flex; justify-content:space-between; align-items:center; gap:12px; color:#64748b; font-size:11px; margin:0 8px 7px; }
+.diesel-home .diesel-tank-caption #label { position:static; font-size:14px; color:#245739; text-shadow:none; transform:none; }
+.diesel-tank-meter { height:7px; border-radius:8px; background:#dce7df; overflow:hidden; margin:0 8px; }
+.diesel-tank-meter #volume { width:0; height:100%; background:linear-gradient(90deg,#98bc6d,#397951); transition:width .5s ease; border-radius:inherit; }
+@media(max-width:575.98px) { .diesel-tank-visual { width:180px; } .diesel-tank-image { height:115px; } }
+
+/* Live cutaway window: fuel height follows the inventory percentage. */
+.diesel-tank-scene { position:relative; }
+.diesel-tank-window { position:absolute; left:28%; top:31%; width:46%; height:44%; border:2px solid #6f7977; border-radius:12px; overflow:hidden; isolation:isolate; background:linear-gradient(100deg,#223232,#485650 55%,#253734); box-shadow:inset 0 2px 7px #0008,0 1px 2px #fff9; }
+.diesel-tank-liquid { position:absolute; bottom:0; left:0; width:100%; height:0; background:linear-gradient(90deg,#bd751c,#f4c04b 48%,#cc8c23); transition:height 1.7s cubic-bezier(.22,.61,.36,1); }
+.diesel-liquid-wave { position:absolute; top:-7px; left:-100%; width:300%; height:14px; background:radial-gradient(ellipse at 50% 100%,#f8d16b 68%,transparent 71%) 0 0/34px 14px repeat-x; animation:dieselWave 3s linear infinite; }
+.diesel-liquid-wave-back { top:-9px; opacity:.5; animation-duration:4.5s; animation-direction:reverse; }
+.diesel-tank-glass { position:absolute; inset:0; z-index:3; pointer-events:none; background:linear-gradient(110deg,#fff3,transparent 30%,transparent 67%,#fff2); box-shadow:inset 0 0 5px #0005; }
+.diesel-tank-ticks { position:absolute; z-index:4; right:4px; top:10%; bottom:10%; width:9px; background:repeating-linear-gradient(to bottom,#fff9 0,#fff9 1px,transparent 1px,transparent 12px); }
+@keyframes dieselWave { from { transform:translateX(0); } to { transform:translateX(34px); } }
+@media(prefers-reduced-motion:reduce) { .diesel-liquid-wave { animation:none; } .diesel-tank-liquid { transition:none; } }
+
+/* Gentle sloshing: smooth overlapping surfaces and moving light inside diesel. */
+.diesel-tank-liquid { background:linear-gradient(90deg,#b67c22 0%,#e5ad38 28%,#f1c359 53%,#d89b2b 78%,#bc7d20 100%); }
+.diesel-liquid-wave { top:-6px; left:-25%; width:150%; height:12px; border-radius:45% 55% 0 0 / 70% 80% 0 0; background:linear-gradient(180deg,#f7d578,#e9b23c); animation:dieselSlosh 4.8s ease-in-out infinite; transform-origin:50% 70%; }
+.diesel-liquid-wave-back { top:-8px; left:-25%; width:150%; height:13px; border-radius:55% 45% 0 0 / 75% 65% 0 0; background:linear-gradient(180deg,#ffe4a0aa,#e7af3d66); opacity:.7; animation:dieselSloshBack 6.3s ease-in-out infinite; }
+.diesel-tank-liquid::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 30% 30%,#fff1 0,transparent 55%),linear-gradient(110deg,transparent 20%,#fff2 45%,transparent 70%); background-size:150% 150%,200% 100%; animation:dieselLight 7s ease-in-out infinite alternate; }
+.diesel-tank-liquid::after { content:''; position:absolute; left:-20%; right:-20%; top:1px; height:1px; background:linear-gradient(90deg,transparent,#ffe9b0b3,transparent); opacity:.7; animation:dieselSurface 4.8s ease-in-out infinite; }
+@keyframes dieselSlosh {
+  0%,100% { transform:translate(-2%,1px) rotate(-2deg) scaleY(.7); border-radius:45% 55% 0 0 / 70% 80% 0 0; }
+  25% { transform:translate(2%,-1px) rotate(.6deg) scaleY(.9); }
+  50% { transform:translate(3%,1px) rotate(2deg) scaleY(.65); border-radius:60% 40% 0 0 / 80% 60% 0 0; }
+  75% { transform:translate(-1%,-1px) rotate(-.5deg) scaleY(1); }
+}
+@keyframes dieselSloshBack {
+  0%,100% { transform:translate(3%,1px) rotate(1.4deg) scaleY(.7); }
+  50% { transform:translate(-3%,-1px) rotate(-1.5deg) scaleY(.9); }
+}
+@keyframes dieselLight { from { background-position:0% 30%,0% 0%; opacity:.45; } to { background-position:100% 70%,100% 0%; opacity:.85; } }
+@keyframes dieselSurface { 0%,100% { transform:rotate(-1.5deg) translateY(-1px); } 50% { transform:rotate(1.5deg) translateY(1px); } }
+@media(prefers-reduced-motion:reduce) { .diesel-liquid-wave,.diesel-tank-liquid::before,.diesel-tank-liquid::after { animation:none; } }

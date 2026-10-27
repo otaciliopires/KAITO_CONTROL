@@ -1,0 +1,46 @@
+.obras-page { min-width:0; }
+.obras-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:18px; margin-bottom:24px; }
+.obras-eyebrow,.obras-section-tag { color:#56806a; font-size:10px; font-weight:700; letter-spacing:.1em; }
+.obras-heading h1 { font-size:clamp(25px,3vw,34px); color:#193d2b; font-weight:700; margin:6px 0 10px; }
+.obras-heading p,.obras-panel-heading p { color:#64748b; font-size:13px; margin:0; line-height:1.6; }
+.obras-unit { background:#edf5ef; color:#437155; padding:10px 14px; border-radius:9px; font-size:12px; white-space:nowrap; }
+.obras-search { position:relative; margin-bottom:22px; max-width:480px; }
+.obras-search > i { position:absolute; left:15px; top:13px; color:#7b8b83; }
+.obras-search input { padding:12px 16px 12px 42px; min-height:46px; font-size:14px; border:1px solid #dce5df; border-radius:10px; }
+.obras-search input:focus { border-color:#5e9470; box-shadow:0 0 0 3px #5e94701a; }
+.obras-panel { background:white; border:1px solid #e1e9e4; border-radius:14px; overflow:hidden; margin-bottom:24px; box-shadow:0 3px 12px #193d2905; }
+.obras-panel-heading { padding:22px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+.obras-panel h2 { font-size:18px; color:#334155; font-weight:650; margin:0 0 6px; }
+.obras-section-tag { display:block; margin-bottom:6px; }
+.obras-legend { color:#64748b; font-size:11px; display:flex; align-items:center; gap:7px; }
+.obras-legend > span { width:7px; height:7px; background:#d75555; border-radius:50%; }
+.obras-section-icon { display:grid; place-items:center; width:40px; height:40px; background:#eff5f1; color:#56806a; border-radius:11px; font-size:20px; }
+.obras-page .obras-table { margin:0; width:100%; font-size:13px; }
+.obras-page .obras-table thead th { background:#f6f8f7; color:#738077; font-size:11px; font-weight:650; padding:14px 20px; white-space:nowrap; border-bottom:1px solid #e6ece8; }
+.obras-page .obras-table tbody td,.obras-page .obras-table tbody th { padding:18px 20px; border-bottom:1px solid #edf1ee; }
+.obras-table tr:last-child > * { border-bottom:0!important; }
+.obras-table .numeric { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.obras-table .obra-id { color:#849188; font-size:12px; }
+.obras-table .obra-nome { color:#334155; font-weight:600; min-width:180px; overflow-wrap:anywhere; }
+.obras-table .obra-data:hover > * { background:#fafcfb; }
+.saldo-badge { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border-radius:7px; font-size:13px; font-weight:700; }
+.saldo-negativo { color:#b63c3c; background:#fff0ef; }
+.saldo-positivo { color:#267248; background:#edf7f0; }
+.saldo-zero { color:#65746b; background:#f1f4f2; }
+.obras-empty td { text-align:center; color:#849188; padding:30px!important; }
+.obras-page [hidden] { display:none!important; }
+@media(max-width:575.98px) {
+ #main.obras-page { padding:20px 12px; }
+ .obras-search { max-width:none; }
+ .obras-panel-heading { padding:18px; }
+ .obras-panel h2 { font-size:17px; }
+ .obras-page .table-responsive { overflow:visible; }
+ .obras-table,.obras-table tbody { display:block; }
+ .obras-table thead { display:none; }
+ .obras-table .obra-data { display:flex; flex-direction:column; border-top:1px solid #e6ece8; padding:14px 18px; gap:10px; }
+ .obras-page .obras-table tbody td,.obras-page .obras-table tbody th { display:flex; align-items:center; justify-content:space-between; gap:14px; border:0; padding:0; min-width:0; }
+ .obras-table td[data-label]::before { content:attr(data-label); color:#7b8981; font-weight:400; font-size:12px; text-align:left; }
+ .obras-table .obra-nome { order:-1; font-size:14px; }
+ .obras-table .obras-empty { display:block; }
+ .obras-table .obras-empty td { display:block!important; }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+{% load medicao_extras %}
+<style>
+  @page { size: A4 portrait; margin: 1.5cm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9pt; color: #1a1a1a; }
+  table { border-collapse: collapse; }
+
+  .header-table { width: 100%; margin-bottom: 10px; }
+  .header-table td { border: 1px solid #888; padding: 6px 10px; vertical-align: top; }
+  .logo-cell { width: 12%; text-align: center; vertical-align: middle; }
+  .logo-cell img { width: 46px; }
+  .company-name { font-size: 11pt; font-weight: bold; }
+  .company-meta { font-size: 7.5pt; color: #444; margin-top: 2px; }
+  .doc-title { font-size: 14pt; font-weight: bold; text-align: center; }
+  .doc-subtitle { font-size: 8pt; text-align: center; color: #333; margin-top: 2px; }
+
+  table.relatorio { width: 100%; margin-bottom: 12px; }
+  table.relatorio th, table.relatorio td { border: 1px solid #888; padding: 4px 7px; font-size: 8.5pt; }
+  table.relatorio th { background: #eef0ff; text-transform: uppercase; font-size: 7.5pt; }
+  table.relatorio td.right { text-align: right; }
+  table.relatorio tr.total-row td { font-weight: bold; background: #fff3a3; }
+
+  .secao-titulo { font-size: 10pt; font-weight: bold; margin: 14px 0 6px; }
+</style>
+</head>
+<body>
+
+  <table class="header-table">
+    <tr>
+      <td class="logo-cell">
+        {% if empresa.logo %}<img src="{{ empresa.logo }}">{% endif %}
+      </td>
+      <td style="width: 30%">
+        <div class="company-name">{{ empresa.nome }}</div>
+        <div class="company-meta">CNPJ: {{ empresa.cnpj }}</div>
+      </td>
+      <td style="width: 58%">
+        <div class="doc-title">RESUMO FINANCEIRO — MEDIÇÃO DE EQUIPAMENTOS</div>
+        <div class="doc-subtitle">{{ periodo }} · Emitido em {{ data_emissao|date:"d/m/Y" }}</div>
+      </td>
+    </tr>
+  </table>
+
+  <div class="secao-titulo">Total por obra</div>
+  <table class="relatorio">
+    <thead><tr><th>Obra</th><th style="width:25%">Valor (R$)</th></tr></thead>
+    <tbody>
+      {% for linha in resumo.por_obra %}
+      <tr><td>{{ linha.obra.nome }}</td><td class="right">{{ linha.valor|moeda:2 }}</td></tr>
+      {% empty %}
+      <tr><td colspan="2" style="text-align:center">Nenhuma obra com valor apurado.</td></tr>
+      {% endfor %}
+      <tr><td>Manutenção</td><td class="right">{{ resumo.manutencao|moeda:2 }}</td></tr>
+      <tr><td>À disposição</td><td class="right">{{ resumo.disposicao|moeda:2 }}</td></tr>
+      <tr class="total-row"><td>TOTAL GERAL</td><td class="right">{{ resumo.total|moeda:2 }}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="secao-titulo">Medições do período</div>
+  <table class="relatorio">
+    <thead>
+      <tr><th>Equipamento</th><th>Obra responsável</th><th>Status</th><th>Manutenção</th><th>Disposição</th><th>Total apurado</th><th>Divergência</th><th style="width:14%">Valor</th></tr>
+    </thead>
+    <tbody>
+      {% for linha in linhas %}
+      <tr>
+        <td>{{ linha.medicao.equipamento.prefixo }}</td>
+        <td>{{ linha.medicao.obra.nome|default:"Central (sem obra)" }}</td>
+        <td>{{ linha.medicao.get_status_display }}</td>
+        <td class="right">{{ linha.consolidado.dias_manutencao }}</td>
+        <td class="right">{{ linha.consolidado.dias_disposicao }}</td>
+        <td class="right">{{ linha.consolidado.total_dias }} / {{ periodo.dias_do_mes }}</td>
+        <td class="right">{{ linha.divergencia }}</td>
+        <td class="right">{{ linha.valor_total|moeda:2 }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8" style="text-align:center">Nenhuma medição neste período.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+{% extends 'base_obra.html' %}
+{% load static %}
+
+{% block 'titulo' %}{{ periodo }} - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main class="med-page">
+
+  <div class="med-topbar">
+    <div>
+      <div class="med-eyebrow">Medição · Equipamentos · {{ periodo }}</div>
+      <h1 class="med-title">{{ obra.nome }}</h1>
+      <div class="med-subtitle">Equipamentos medidos por esta obra neste mês.</div>
+    </div>
+    <a class="med-back" href="{% url 'medicao_equip_obra_periodos' obra_id=obra.id %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+  </div>
+
+  {% if messages %}
+    {% for m in messages %}<div class="{{ m.tags }}" role="alert">{{ m }}</div>{% endfor %}
+  {% endif %}
+
+  <div style="margin-bottom:18px">
+    {% if periodo.status == 'FECHADO' %}
+      <span class="med-status-badge fechado">Período fechado pela Central</span>
+    {% else %}
+      <a class="btn btn-success" href="{% url 'medicao_equip_obra_nova_medicao' obra_id=obra.id periodo_id=periodo.id %}">
+        <i class="bi bi-plus-lg"></i> Nova medição de equipamento
+      </a>
+    {% endif %}
+  </div>
+
+  {% if medicoes %}
+  <div class="med-table-wrap">
+    <table class="med-table">
+      <thead>
+        <tr>
+          <th>Equipamento</th>
+          <th>Status</th>
+          <th>Aluguel vigente</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for medicao in medicoes %}
+        <tr>
+          <td><strong>{{ medicao.equipamento.prefixo }}</strong> {{ medicao.equipamento.descricao }}</td>
+          <td><span class="badge text-bg-secondary">{{ medicao.get_status_display }}</span></td>
+          <td>R$ {{ medicao.valor_aluguel_vigente }}</td>
+          <td>
+            <a class="btn btn-primary btn-sm" href="{% url 'medicao_equip_obra_medicao' medicao_id=medicao.id %}">
+              Abrir <i class="bi bi-chevron-right"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="med-empty">
+    <i class="bi bi-gear-wide-connected"></i>
+    <strong>Nenhum equipamento medido por esta obra ainda neste mês.</strong>
+    <p style="margin-top:6px">Use "Nova medição de equipamento" para começar.</p>
+  </div>
+  {% endif %}
+
+</main>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base_obra.html' %}
+{% load static %}
+
+{% block 'titulo' %}Medição de Equipamentos - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main class="med-page">
+
+  <div class="med-topbar">
+    <div>
+      <div class="med-eyebrow">Medição · Equipamentos</div>
+      <h1 class="med-title">{{ obra.nome }}</h1>
+      <div class="med-subtitle">Escolha o mês para lançar ou continuar a medição.</div>
+    </div>
+    <a class="med-back" href="{% url 'medicao_obra_home' obra_id=obra.id %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+  </div>
+
+  {% if messages %}
+    {% for m in messages %}<div class="{{ m.tags }}" role="alert">{{ m }}</div>{% endfor %}
+  {% endif %}
+
+  <div class="med-table-wrap">
+    <table class="med-table">
+      <thead>
+        <tr>
+          <th>Período</th>
+          <th>Status</th>
+          <th>Rascunho</th>
+          <th>Em análise</th>
+          <th>Devolvida</th>
+          <th>Fechada</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for linha in linhas %}
+        <tr>
+          <td><strong>{{ linha.periodo }}</strong>{% if linha.periodo.id == periodo_atual.id %} <span class="med-status-badge aberto">mês atual</span>{% endif %}</td>
+          <td>
+            {% if linha.periodo.status == 'FECHADO' %}
+              <span class="med-status-badge fechado">Fechado</span>
+            {% else %}
+              <span class="med-status-badge aberto">Aberto</span>
+            {% endif %}
+          </td>
+          <td>{{ linha.rascunho }}</td>
+          <td>{{ linha.em_analise }}</td>
+          <td>{{ linha.devolvida }}</td>
+          <td>{{ linha.fechada }}</td>
+          <td>
+            <a class="btn btn-primary btn-sm" href="{% url 'medicao_equip_obra_periodo' obra_id=obra.id periodo_id=linha.periodo.id %}">
+              {% if linha.total %}Continuar{% else %}Abrir{% endif %} <i class="bi bi-chevron-right"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</main>
+{% endblock %}

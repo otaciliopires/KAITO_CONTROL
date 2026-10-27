@@ -1,0 +1,282 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'titulo' %}Ajuste - {{ medicao.equipamento.prefixo }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+<link rel="stylesheet" href="{% static 'medicao/css/medicao_equip.css' %}">
+{% endblock %}
+
+{% block 'body' %}
+<main id="main" class="main">
+  <div class="med-page" style="padding-top:0">
+
+    <div class="med-topbar">
+      <div>
+        <div class="med-eyebrow">Central de Equipamentos · {{ medicao.periodo }}</div>
+        <h1 class="med-title">{{ medicao.equipamento.prefixo }} — {{ medicao.equipamento.descricao }}</h1>
+        <div class="med-subtitle">
+          {% if medicao.obra %}Obra responsável: {{ medicao.obra.nome }}{% else %}<span class="badge text-bg-dark">Central — sem obra</span>{% endif %}
+          · Aluguel vigente: R$ {{ medicao.valor_aluguel_vigente }}
+        </div>
+      </div>
+      <a class="med-back" href="{% url 'medicao_equip_ceq_painel' %}?periodo={{ medicao.periodo.ano }}-{{ medicao.periodo.mes }}"><i class="bi bi-arrow-left"></i> Voltar ao painel</a>
+    </div>
+
+    {% if messages %}
+      {% for m in messages %}<div class="{{ m.tags }}" role="alert">{{ m }}</div>{% endfor %}
+    {% endif %}
+
+    <div style="margin-bottom:18px">
+      <span class="badge text-bg-secondary">{{ medicao.get_status_display }}</span>
+      {% if medicao.status == 'FECHADA' %}
+        <a class="btn btn-outline-dark btn-sm ms-2" href="{% url 'medicao_equip_boletim_pdf' medicao_id=medicao.id %}"><i class="bi bi-file-earmark-pdf"></i> Baixar boletim (PDF)</a>
+        <button type="button" class="btn btn-outline-warning btn-sm ms-2" data-bs-toggle="modal" data-bs-target="#modalReabrir"><i class="bi bi-unlock"></i> Reabrir medição</button>
+      {% elif medicao.status == 'DEVOLVIDA' %}
+        <span class="med-pending-hint" style="margin-left:8px"><i class="bi bi-hourglass-split"></i> Aguardando confirmação da obra.</span>
+      {% elif medicao.status == 'RASCUNHO' and medicao.obra %}
+        <span class="med-pending-hint" style="margin-left:8px"><i class="bi bi-pencil"></i> Ainda em rascunho — a obra não enviou.</span>
+      {% elif medicao.status == 'RASCUNHO' and not medicao.obra %}
+        <span class="med-pending-hint" style="margin-left:8px"><i class="bi bi-tools"></i> Lance os dias de manutenção/disposição e feche quando completar o mês.</span>
+      {% endif %}
+    </div>
+
+    <div class="med-stat-grid">
+      <div class="med-stat med-highlight">
+        <div class="med-stat-label"><i class="bi bi-cash-coin"></i> Valor total apurado</div>
+        <div class="med-stat-value">R$ {{ valor_total|floatformat:2 }}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-tools"></i> Manutenção</div>
+        <div class="med-stat-value">{{ consolidado.dias_manutencao }} <small class="text-muted">dias</small></div>
+        <div class="med-stat-sub">R$ {{ valor_manutencao|floatformat:2 }}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-pause-circle"></i> À disposição</div>
+        <div class="med-stat-value">{{ consolidado.dias_disposicao }} <small class="text-muted">dias</small></div>
+        <div class="med-stat-sub">R$ {{ valor_disposicao|floatformat:2 }}</div>
+      </div>
+      <div class="med-stat {% if divergencia != 0 %}equip-stat-alerta{% endif %}">
+        <div class="med-stat-label"><i class="bi bi-clipboard-data"></i> Total apurado</div>
+        <div class="med-stat-value">{{ consolidado.total_dias }} / {{ medicao.periodo.dias_do_mes }}</div>
+        <div class="med-stat-sub">{% if divergencia == 0 %}fecha certinho{% else %}divergência de {{ divergencia }} dia(s){% endif %}</div>
+      </div>
+    </div>
+
+    {% if medicao.obra and medicao.status == 'EM_ANALISE' %}
+    <div class="med-panel">
+      <div class="med-panel-title"><i class="bi bi-sliders"></i> Ajustar dias por obra</div>
+      <p class="text-muted" style="font-size:13.5px">Altere só as obras que precisam de correção. Justificativa é obrigatória para cada obra alterada.</p>
+
+      <form method="POST" action="{% url 'medicao_equip_ceq_ajustar_devolver' medicao_id=medicao.id %}" id="form-ajuste">
+        {% csrf_token %}
+        {% for linha in dias_por_obra %}
+        <div class="equip-ajuste-card" data-original="{{ linha.dias }}">
+          <div class="equip-ajuste-head">
+            <span class="equip-ajuste-obra">{{ linha.obra.nome }}</span>
+            <span class="equip-ajuste-bruto">apurado pela obra: {{ linha.dias }} dias</span>
+          </div>
+          <div class="row g-2">
+            <div class="col-sm-3">
+              <input type="text" class="form-control form-control-sm campo-dias-admin" name="obra_{{ linha.obra.id }}_dias" value="{{ linha.dias }}">
+            </div>
+            <div class="col-sm-9">
+              <textarea class="form-control form-control-sm campo-justificativa" name="obra_{{ linha.obra.id }}_justificativa" rows="1" placeholder="Justificativa (obrigatória se alterar os dias)"></textarea>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">Nenhuma obra com dias apontados ainda.</p>
+        {% endfor %}
+        <button type="submit" class="btn btn-warning"><i class="bi bi-arrow-return-left"></i> Devolver para a obra com os ajustes</button>
+      </form>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap mb-4">
+      <form method="POST" action="{% url 'medicao_equip_ceq_aprovar' medicao_id=medicao.id %}" onsubmit="return confirm('Aprovar sem nenhum ajuste e fechar esta medição?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Aprovar sem ajuste e fechar</button>
+      </form>
+      <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalManutencao"><i class="bi bi-tools"></i> Lançar manutenção</button>
+      <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalDisposicao"><i class="bi bi-pause-circle"></i> Lançar à disposição</button>
+    </div>
+    {% elif not medicao.obra and medicao.status != 'FECHADA' %}
+    <div class="med-panel">
+      <div class="med-panel-title"><i class="bi bi-tools"></i> Medição direta da Central</div>
+      <p class="text-muted" style="font-size:13.5px">
+        Sem obra envolvida — lance quantos dias o equipamento passou em manutenção e/ou à disposição.
+        A soma precisa fechar com os {{ medicao.periodo.dias_do_mes }} dias do mês antes de fechar.
+      </p>
+      <div class="d-flex gap-2 flex-wrap">
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalManutencao"><i class="bi bi-tools"></i> Lançar manutenção</button>
+        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalDisposicao"><i class="bi bi-pause-circle"></i> Lançar à disposição</button>
+        <form method="POST" action="{% url 'medicao_equip_ceq_fechar_direto' medicao_id=medicao.id %}" onsubmit="return confirm('Fechar esta medição? Só é possível se os dias lançados fecharem com o mês.');">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success"><i class="bi bi-lock"></i> Fechar medição</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if ajustes_existentes %}
+    <div class="med-panel">
+      <div class="med-panel-title"><i class="bi bi-arrow-left-right"></i> Ajustes já registrados</div>
+      <div class="med-table-wrap">
+        <table class="med-table">
+          <thead><tr><th>Obra</th><th>Apontado</th><th>Aplicado</th><th>Justificativa</th><th>Autor</th><th>Data</th></tr></thead>
+          <tbody>
+            {% for ajuste in ajustes_existentes %}
+            <tr>
+              <td>{{ ajuste.obra.nome }}</td>
+              <td>{{ ajuste.dias_apontados_obra }}</td>
+              <td><strong>{{ ajuste.dias_aplicados_admin }}</strong></td>
+              <td>{{ ajuste.justificativa }}</td>
+              <td>{{ ajuste.autor }}</td>
+              <td>{{ ajuste.data|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if lancamentos_manutencao or lancamentos_disposicao %}
+    <div class="med-panel">
+      <div class="med-panel-title"><i class="bi bi-plus-slash-minus"></i> Lançamentos administrativos</div>
+      <div class="med-table-wrap">
+        <table class="med-table">
+          <thead><tr><th>Tipo</th><th>Dias</th><th>Origem</th><th>Justificativa</th><th>Autor</th><th>Data</th></tr></thead>
+          <tbody>
+            {% for l in lancamentos_manutencao %}
+            <tr><td>Manutenção</td><td>{{ l.dias }}</td><td class="{% if l.origem == 'ADMIN' %}equip-origem-admin{% else %}equip-origem-obra{% endif %}">{{ l.get_origem_display }}</td><td>{{ l.justificativa }}</td><td>{{ l.autor }}</td><td>{{ l.data_lancamento|date:"d/m/Y H:i" }}</td></tr>
+            {% endfor %}
+            {% for l in lancamentos_disposicao %}
+            <tr><td>À disposição</td><td>{{ l.dias }}</td><td class="{% if l.origem == 'ADMIN' %}equip-origem-admin{% else %}equip-origem-obra{% endif %}">{{ l.get_origem_display }}</td><td>{{ l.justificativa }}</td><td>{{ l.autor }}</td><td>{{ l.data_lancamento|date:"d/m/Y H:i" }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if medicao.obra %}
+    <div class="med-panel">
+      <div class="med-panel-title"><i class="bi bi-table"></i> Detalhe diário da obra (leitura)</div>
+      <div class="med-table-wrap">
+        <table class="med-table">
+          <thead>
+            <tr><th>Data</th><th>Contador inicial</th><th>Contador final</th><th>Parada (h)</th><th>Motivo</th><th>Obra do dia</th><th>Fração</th><th>Tipo</th><th>Obs.</th></tr>
+          </thead>
+          <tbody>
+            {% for ap in apontamentos %}
+            <tr>
+              <td>{{ ap.data|date:"d/m" }}</td>
+              <td>{{ ap.contador_inicial|default_if_none:'—' }}</td>
+              <td>{{ ap.contador_final|default_if_none:'—' }}</td>
+              <td>{{ ap.tempo_parada_horas }}</td>
+              <td>{{ ap.motivo_parada.descricao|default:'—' }}</td>
+              <td>{{ ap.obra_do_dia.nome }}</td>
+              <td>{{ ap.fracao|default_if_none:'—' }}</td>
+              <td>{{ ap.get_tipo_dia_display|default:'—' }}</td>
+              <td>{{ ap.observacoes }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if historico %}
+    <div class="med-panel">
+      <div class="med-panel-title"><i class="bi bi-clock-history"></i> Histórico</div>
+      <ul class="equip-timeline">
+        {% for h in historico %}
+        <li>
+          <strong>{{ h.campo }}</strong>: {{ h.valor_anterior }} → {{ h.valor_novo }}
+          {% if h.observacao %}<div>{{ h.observacao }}</div>{% endif %}
+          <div class="equip-timeline-meta">{{ h.usuario }} · {{ h.data_hora|date:"d/m/Y H:i" }}</div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+  </div>
+</main>
+
+<div class="modal fade" id="modalManutencao" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'medicao_equip_ceq_lancar_manutencao' medicao_id=medicao.id %}" class="modal-content">
+      {% csrf_token %}
+      <div class="modal-header"><h5 class="modal-title">Lançar dias de manutenção</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <label class="form-label">Dias</label>
+        <input type="text" name="dias" class="form-control mb-3" required>
+        <label class="form-label">Justificativa</label>
+        <textarea name="justificativa" class="form-control" rows="3" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Lançar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="modalDisposicao" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'medicao_equip_ceq_lancar_disposicao' medicao_id=medicao.id %}" class="modal-content">
+      {% csrf_token %}
+      <div class="modal-header"><h5 class="modal-title">Lançar dias à disposição</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <label class="form-label">Dias</label>
+        <input type="text" name="dias" class="form-control mb-3" required>
+        <label class="form-label">Justificativa</label>
+        <textarea name="justificativa" class="form-control" rows="3" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-primary">Lançar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal fade" id="modalReabrir" tabindex="-1">
+  <div class="modal-dialog">
+    <form method="POST" action="{% url 'medicao_equip_ceq_reabrir_medicao' medicao_id=medicao.id %}" class="modal-content">
+      {% csrf_token %}
+      <div class="modal-header"><h5 class="modal-title">Reabrir medição fechada</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <label class="form-label">Justificativa</label>
+        <textarea name="justificativa" class="form-control" rows="3" required></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-warning">Reabrir</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+document.getElementById('form-ajuste') && document.getElementById('form-ajuste').addEventListener('submit', function (ev) {
+  var cards = document.querySelectorAll('.equip-ajuste-card');
+  for (var i = 0; i < cards.length; i++) {
+    var card = cards[i];
+    var original = card.getAttribute('data-original');
+    var dias = card.querySelector('.campo-dias-admin');
+    var justificativa = card.querySelector('.campo-justificativa');
+    if (dias.value.trim() !== '' && dias.value.trim().replace(',', '.') !== original && justificativa.value.trim() === '') {
+      ev.preventDefault();
+      alert('Informe a justificativa para a obra "' + card.querySelector('.equip-ajuste-obra').textContent + '", já que os dias foram alterados.');
+      justificativa.focus();
+      return false;
+    }
+  }
+});
+</script>
+{% endblock %}

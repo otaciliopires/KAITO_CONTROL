@@ -158,6 +158,11 @@ MESSAGE_TAGS = {
 
 AUTH_USER_MODEL = "autenticacao.Usuario"
 
+#MEDIÇÃO DE EQUIPAMENTOS
+
+JORNADA_UTIL_HORAS = config('JORNADA_UTIL_HORAS', cast=float, default=9.0)
+MEDICAO_EQUIP_KM_DIARIO_ALERTA = config('MEDICAO_EQUIP_KM_DIARIO_ALERTA', cast=int, default=800)
+
 #HTTPS/SSL
 
 if not DEBUG:

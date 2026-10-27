@@ -5,15 +5,16 @@
 {%block 'head'%}
 <link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
 <link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<link rel="stylesheet" href="{% static 'ceq/css/home.css' %}">
 {%endblock%}
 
 {%block 'body'%}
 
 
-<main id="main" class="main">
+<main id="main" class="main diesel-home">
   <div class="pagetitle">
     {% if messages %}
       {%for i in messages%}
@@ -23,23 +24,7 @@
       {%endfor%}
     {%endif%}    
 
-    <div class='row' style="float: right;">
-      <form method='GET' id="monthform" action="{%url 'home'%}">
-        <select id='monthselector' name='month' onchange="this.form.submit()">
-          <option value="" disable select>Selecione um mês</option>
-          {%for mes in meses%}
-            <option value="{{mes}}">{{mes}}</option>
-          {%endfor%}
-        </select>
-      </form>
-    </div>
-  </div>  
-
-  <div class='row'>     
-  <div><h1>Home</h1></div>
-            
-
-
+    <div class="diesel-heading"><div><span class="diesel-eyebrow">CONTROLE DE COMBUSTÍVEL</span><h1>Home Diesel</h1><p>Estoque, movimentações e consumo por obra.</p></div><form method="GET" action="{%url 'home'%}" class="diesel-month"><label for="monthselector">Mês de referência</label><select class="form-select" id="monthselector" name="month" onchange="this.form.submit()">{%for mes in meses%}<option value="{{mes}}" {%if mes == mes_atual%}selected{%endif%}>{{mes}}</option>{%endfor%}</select><noscript><button type="submit" class="btn btn-primary">Aplicar</button></noscript></form></div>
   </div>
   <section class="section dashboard">
      <div class="row">
@@ -48,7 +33,7 @@
               <div class="col-lg-12">
                  <div class="card info-card customers-card">
                     <div class="card-body">
-                       <h5 class="card-title" style='font-size:30px'>Estoque de Diesel |<span style='font-size:16px'> Atualizado {{data_ultimo_abastecimento}}</span></h5>
+                       <h5 class="card-title">Estoque de Diesel |<span style='font-size:16px'> Atualizado {{data_ultimo_abastecimento}}</span></h5>
                        <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-database"></i></div>
                           <div class="ps-3">
@@ -57,19 +42,18 @@
                           </div>
                           <div style='margin-left:20px'>
 
-                            <div class="tanque">
-                              <div class="volume" id="volume">
-                                  <div class="ondas">
-                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 28" preserveAspectRatio="none">
-                                          <path d="M0 15 Q30 25 60 15 T120 15 V28 H0 Z" fill="rgba(255, 255, 255, 0.5)"></path>
-                                      </svg>
-                                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 28" preserveAspectRatio="none">
-                                          <path d="M0 20 Q30 10 60 20 T120 20 V28 H0 Z" fill="rgba(255, 255, 255, 0.3)"></path>
-                                      </svg>
-                                  </div>
+                            <div class="diesel-tank-visual">
+                              <div class="diesel-tank-scene">
+                              <img src="{% static 'ceq/img/tanque-diesel-realista.png' %}" alt="Tanque de armazenamento de diesel" class="diesel-tank-image" width="280" height="180">
+                                <div class="diesel-tank-window" aria-hidden="true">
+                                  <span class="diesel-tank-ticks"></span>
+                                  <div class="diesel-tank-liquid" id="tank-liquid"><span class="diesel-liquid-wave"></span><span class="diesel-liquid-wave diesel-liquid-wave-back"></span></div>
+                                  <span class="diesel-tank-glass"></span>
+                                </div>
                               </div>
-                              <div class="label" id="label">{{porcent_estoque}}%</div>
-                          </div>
+                              <div class="diesel-tank-caption"><span>Nível do estoque</span><strong id="label">{{porcent_estoque}}%</strong></div>
+                              <div class="diesel-tank-meter" aria-hidden="true"><div id="volume"></div></div>
+                            </div>
 
                           </div>
 
@@ -84,7 +68,7 @@
                  <div class="card info-card sales-card">
                     <div class="card-body">
                        <h5 class="card-title">TC-01 & TC-02 <span>| Tanque 45.000 litros</span></h5>
-                       <div class="d-flex align-items-c enter">
+                       <div class="d-flex align-items-center">
                           <div class="card-icon rounded-circle d-flex align-items-center justify-content-center"> <i class="bi bi-fuel-pump"></i></div>
                           <div style="padding-top:12px; padding-left:8px" class="ps-3">
                              <h6>{{tc_total|floatformat:"2g"}} Litros</h6>
@@ -150,7 +134,7 @@
                     </div>
                     <div class="card-body">
                        <h5 class="card-title">Consumo semanal <span>{{mes_atual}}</span></h5>
-                       <canvas id="reportsChart"></canvas>
+                       <div class="diesel-chart"><canvas id="reportsChart"></canvas></div>
                        <script>
                           // Dados para o gráfico
                           var daysOfWeek = ['1ª Sem', '2ª Sem', '3ª Sem', '4ª Sem'];
@@ -182,11 +166,11 @@
                                       }
                                   ]
                               },
-                              options: {
+                              options: { responsive: true, maintainAspectRatio: false,
                                   scales: {
                                       y: {
                                           beginAtZero: true,
-                                          max: 75000
+                                          grace: '10%'
                                       }
                                   }
                               }
@@ -220,7 +204,7 @@
                     </div>
                     <div class="card-body">
                        <h5 class="card-title">Consumo diário e saldo <span>{{mes_atual}}</span></h5>
-                       <canvas id="dailyConsumptionChart"></canvas>
+                       <div class="diesel-chart"><canvas id="dailyConsumptionChart"></canvas></div>
                        <script>
                           var dias = {{ dias_grafico|safe }};
                           var consumoDiario = {{ consumo_diario|safe }};
@@ -256,7 +240,7 @@
                                       }
                                   ]
                               },
-                              options: {
+                              options: { responsive: true, maintainAspectRatio: false,
                                   scales: {
                                       y: {
                                           type: 'linear',
@@ -278,8 +262,8 @@
                  </div>
 
 
-                <div class="card">
-                  <canvas id="OKOK"></canvas>
+                <div class="card diesel-obras-chart"><div class="card-body"><h5 class="card-title">Movimentações por obra</h5></div>
+                  <div class="diesel-chart"><canvas id="OKOK"></canvas></div>
                   <script>
                       var obras = {{ obras_grafico|safe }};
                       var values = {{ entradas_graph|safe }};
@@ -307,7 +291,7 @@
                                   }
                               ]
                           },
-                          options: {
+                          options: { responsive: true, maintainAspectRatio: false,
                               scales: {
                                   y: { beginAtZero: true }
                               }
@@ -320,8 +304,8 @@
                 <div class="card">
 
                  <div class="card-body">
-                    <h5 class="card-title" style='font-size:25px'>Entradas e Saídas Obras - {{mes_atual}}</h5>
-                    <div class="activity">
+                    <h5 class="card-title">Entradas e Saídas Obras - {{mes_atual}}</h5>
+                    <div class="activity table-responsive">
 
 
                      <table class="table table-striped table-bordered">
@@ -340,8 +324,7 @@
                          <tr>
                            <th scope="row">{{value.0}}</th>
                            <td style='font-size:12px; font-weight:bold'>{{value.1|floatformat:"2g"}}</td>
-                           <td style='font-size:12px; font-weight:bold'>{{value.2|floatformat:"2g"}}</td>
-
+                           <td style='font-size:12px; font-weight:bold'>{{value.2|floatformat:"2g"}}</td></tr>
                          {%endfor%}
                           </tbody>
                      </table>
@@ -355,8 +338,8 @@
                 <div class="card">
              
                       <div class="card-body">
-                         <h5 class="card-title" style='font-size:25px'>Equipamentos Obras - {{mes_atual}}</h5>
-                         <div class="activity">
+                         <h5 class="card-title">Equipamentos Obras - {{mes_atual}}</h5>
+                         <div class="activity table-responsive">
 
 
                   <table class="table table-striped table-bordered">
@@ -372,8 +355,7 @@
                     {%for key, value in sort_dict.items%}    
                       <tr>
                         <th scope="row">{{key}}</th>
-                        <td style='font-size:12px; font-weight:bold'>{{value|floatformat:"2g"}}</td>
-
+                        <td style='font-size:12px; font-weight:bold'>{{value|floatformat:"2g"}}</td></tr>
                       {%endfor%}
                        </tbody>
                   </table>
@@ -396,63 +378,7 @@
 
 
 
-      <style>
-        .tanque {
-            width: 200px;
-            height: 100px;
-            border: 2px solid #000;
-            border-radius: 100px; /* Para o efeito cilíndrico */
-            position: relative;
-            overflow: hidden;
-            background: #e0e0e0;
-        }
 
-        .volume {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 0%;
-            background: gold;
-            overflow: hidden;
-            transition: height 0.5s ease;
-        }
-
-        .ondas {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Animação das ondas */
-        .ondas svg {
-            position: absolute;
-            bottom: 0;
-            width: 200%;
-            height: 100%;
-            animation: ondas 4s infinite linear;
-        }
-
-        @keyframes ondas {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-50%);
-            }
-        }
-
-        .label {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            font-weight: bold;
-            color: #fff;
-            text-shadow: 1px 1px 2px #000;
-        }
-    </style>
     <div id="porcentagem_diesel" value="{{porcent_estoque}}"></div>
   
     <script>
@@ -460,7 +386,8 @@
       const porcentagem = {{porcent_estoque}}; // Insira o valor desejado aqui (0 a 100)
 
       // Atualiza o tanque com base na porcentagem
-      document.getElementById('volume').style.height = porcentagem + '%';
+      document.getElementById('volume').style.width = Math.min(100, Math.max(0, porcentagem)) + '%';
+      requestAnimationFrame(() => requestAnimationFrame(() => { document.getElementById('tank-liquid').style.height = Math.min(100, Math.max(0, porcentagem)) + '%'; }));
       document.getElementById('label').innerText = porcentagem + '%';
   </script>
 
@@ -488,7 +415,7 @@
 
 
   
-  <script src="{% static 'ceq/javascript/js.js' %}"></script>
+  <script src="{% static 'ceq/javascript/js.js' %}?v=2"></script>
 
 
 

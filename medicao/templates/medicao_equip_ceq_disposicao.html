@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'titulo' %}À disposição - {{ periodo }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+<link rel="stylesheet" href="{% static 'medicao/css/medicao_equip.css' %}">
+{% endblock %}
+
+{% block 'body' %}
+<main id="main" class="main">
+  <div class="med-page" style="padding-top:0">
+
+    <div class="med-topbar">
+      <div>
+        <div class="med-eyebrow">Central de Equipamentos · À disposição · {{ periodo }}</div>
+        <h1 class="med-title">Custo de máquina parada à disposição</h1>
+      </div>
+      <a class="med-back" href="{% url 'medicao_equip_ceq_painel' %}?periodo={{ periodo.ano }}-{{ periodo.mes }}"><i class="bi bi-arrow-left"></i> Voltar ao painel</a>
+    </div>
+
+    <div class="med-stat-grid">
+      <div class="med-stat med-highlight">
+        <div class="med-stat-label"><i class="bi bi-cash-coin"></i> Total à disposição</div>
+        <div class="med-stat-value">R$ {{ total_valor|floatformat:2 }}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-calendar3"></i> Dias totais</div>
+        <div class="med-stat-value">{{ total_dias }}</div>
+      </div>
+    </div>
+
+    <div class="med-panel">
+      <div class="med-table-wrap">
+        <table class="med-table">
+          <thead>
+            <tr><th>Equipamento</th><th>Obra responsável</th><th>Dias à disposição</th><th>Valor</th><th></th></tr>
+          </thead>
+          <tbody>
+            {% for linha in linhas %}
+            <tr>
+              <td><strong>{{ linha.medicao.equipamento.prefixo }}</strong> {{ linha.medicao.equipamento.descricao }}</td>
+              <td>{{ linha.medicao.obra.nome|default:"Central (sem obra)" }}</td>
+              <td>{{ linha.dias }}</td>
+              <td>R$ {{ linha.valor|floatformat:2 }}</td>
+              <td><a class="btn btn-outline-primary btn-sm" href="{% url 'medicao_equip_ceq_ajuste' medicao_id=linha.medicao.id %}">Detalhe <i class="bi bi-chevron-right"></i></a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">Nenhum dia à disposição apurado neste período.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+{% endblock %}

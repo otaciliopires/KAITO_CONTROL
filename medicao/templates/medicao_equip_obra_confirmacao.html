@@ -1,0 +1,148 @@
+{% extends 'base_obra.html' %}
+{% load static %}
+
+{% block 'titulo' %}Confirmar medição - {{ medicao.equipamento.prefixo }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main class="med-page">
+
+  <div class="med-topbar">
+    <div>
+      <div class="med-eyebrow">Medição · Equipamentos · {{ medicao.periodo }}</div>
+      <h1 class="med-title">{{ medicao.equipamento.prefixo }} — devolvida pela Central</h1>
+      <div class="med-subtitle">A Central ajustou os dias apontados. Confira e confirme, ou conteste se discordar.</div>
+    </div>
+    <a class="med-back" href="{% url 'medicao_equip_obra_periodo' obra_id=medicao.obra.id periodo_id=medicao.periodo.id %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+  </div>
+
+  {% if messages %}
+    {% for m in messages %}<div class="{{ m.tags }}" role="alert">{{ m }}</div>{% endfor %}
+  {% endif %}
+
+  <div class="med-panel">
+    <div class="med-panel-title"><i class="bi bi-arrow-left-right"></i> Comparativo obra × Central</div>
+    {% if ajustes %}
+    <div class="med-table-wrap">
+      <table class="med-table">
+        <thead>
+          <tr>
+            <th>Obra</th>
+            <th>Dias apontados (obra)</th>
+            <th>Dias aplicados (Central)</th>
+            <th>Diferença</th>
+            <th>Justificativa</th>
+            <th>Autor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ajuste in ajustes %}
+          <tr>
+            <td><strong>{{ ajuste.obra.nome }}</strong></td>
+            <td>{{ ajuste.dias_apontados_obra }}</td>
+            <td>{{ ajuste.dias_aplicados_admin }}</td>
+            <td>
+              {% if ajuste.dias_aplicados_admin != ajuste.dias_apontados_obra %}
+                <span class="text-danger fw-bold">{{ ajuste.dias_aplicados_admin|default_if_none:"" }}</span>
+              {% else %}
+                <span class="text-success">sem alteração</span>
+              {% endif %}
+            </td>
+            <td>{{ ajuste.justificativa }}</td>
+            <td>{{ ajuste.autor }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted mb-0">A Central devolveu esta medição sem nenhum ajuste registrado — confira os lançamentos abaixo.</p>
+    {% endif %}
+  </div>
+
+  <div class="med-panel">
+    <div class="med-panel-title"><i class="bi bi-clipboard-data"></i> Totais apurados</div>
+    <div class="med-stat-grid">
+      {% for linha in dias_por_obra %}
+      <div class="med-stat">
+        <div class="med-stat-label">{{ linha.obra.nome }}</div>
+        <div class="med-stat-value">{{ linha.dias }}</div>
+      </div>
+      {% endfor %}
+      <div class="med-stat">
+        <div class="med-stat-label">Manutenção</div>
+        <div class="med-stat-value">{{ consolidado.dias_manutencao }}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label">À disposição</div>
+        <div class="med-stat-value">{{ consolidado.dias_disposicao }}</div>
+      </div>
+      <div class="med-stat {% if divergencia == 0 %}med-highlight{% endif %}">
+        <div class="med-stat-label">Total apurado</div>
+        <div class="med-stat-value">{{ consolidado.total_dias }}</div>
+        <div class="med-stat-sub">de {{ medicao.periodo.dias_do_mes }} dias do mês</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="med-table-wrap">
+    <table class="med-table">
+      <thead>
+        <tr>
+          <th>Data</th><th>Contador inicial</th><th>Contador final</th><th>Parada (h)</th>
+          <th>Motivo</th><th>Obra do dia</th><th>Fração</th><th>Tipo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ap in medicao.apontamentos.all %}
+        <tr>
+          <td>{{ ap.data|date:"d/m" }}</td>
+          <td>{{ ap.contador_inicial|default_if_none:'—' }}</td>
+          <td>{{ ap.contador_final|default_if_none:'—' }}</td>
+          <td>{{ ap.tempo_parada_horas }}</td>
+          <td>{{ ap.motivo_parada.descricao|default:'—' }}</td>
+          <td>{{ ap.obra_do_dia.nome }}</td>
+          <td>{{ ap.fracao|default_if_none:'—' }}{% if ap.fracao_ajustada is not None %} <span class="badge text-bg-warning">ajustado</span>{% endif %}</td>
+          <td>{{ ap.get_tipo_dia_display|default:'—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="d-flex gap-2 mt-4">
+    <form method="POST" action="{% url 'medicao_equip_obra_confirmar' medicao.id %}" onsubmit="return confirm('Confirmar os valores ajustados e fechar esta medição?');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i> Confirmar e fechar</button>
+    </form>
+
+    <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalContestar">
+      <i class="bi bi-x-lg"></i> Contestar
+    </button>
+  </div>
+
+  <div class="modal fade" id="modalContestar" tabindex="-1">
+    <div class="modal-dialog">
+      <form method="POST" action="{% url 'medicao_equip_obra_contestar' medicao.id %}" class="modal-content">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Contestar medição</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <label class="form-label">Justificativa da contestação</label>
+          <textarea name="justificativa" class="form-control" rows="4" required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-danger">Enviar contestação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</main>
+{% endblock %}

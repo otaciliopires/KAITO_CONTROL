@@ -1,0 +1,130 @@
+/* Medição de Equipamentos — camada visual própria, construída sobre o
+   design system .med-* já existente (medicao.css) sem alterar nenhuma regra
+   dele. Usado só pelas telas medicao_equip_*.html (obra e CEQ). */
+
+.equip-grid-2 {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+@media (max-width: 900px) {
+  .equip-grid-2 { grid-template-columns: 1fr; }
+}
+
+.equip-chart-wrap {
+  position: relative;
+  height: 260px;
+}
+
+.equip-pill-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.equip-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--med-bg);
+  border: 1px solid var(--med-border);
+  text-decoration: none;
+  color: var(--med-ink);
+  font-size: 14px;
+  transition: all .15s ease;
+}
+.equip-pill:hover { border-color: var(--med-primary); color: var(--med-ink); text-decoration: none; transform: translateX(2px); }
+.equip-pill strong { color: var(--med-primary); }
+
+.equip-stat-alerta {
+  background: #fff2f0;
+  border-color: #ffd6d1;
+}
+.equip-stat-alerta .med-stat-value { color: #d9483c; }
+
+.equip-linha-erro td { background: #fff6f5 !important; }
+.equip-linha-erro td:first-child { box-shadow: inset 3px 0 0 #d9483c; }
+
+/* ---------- Matriz de localização (muitas colunas de obra) ---------- */
+
+.equip-matriz th:first-child, .equip-matriz td:first-child {
+  position: sticky;
+  left: 0;
+  background: #fff;
+  z-index: 1;
+}
+.equip-matriz thead th:first-child { background: var(--med-bg); z-index: 2; }
+.equip-matriz tbody tr.equip-linha-erro td:first-child { background: #fff6f5; }
+
+/* ---------- Grade / detalhe diário (leitura ou edição) ---------- */
+
+.equip-day-badge {
+  display: inline-block;
+  min-width: 26px;
+  text-align: center;
+  font-weight: 700;
+}
+
+/* ---------- Cards de ajuste por obra (tela CEQ) ---------- */
+
+.equip-ajuste-card {
+  background: #fff;
+  border: 1px solid var(--med-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+.equip-ajuste-card .equip-ajuste-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+.equip-ajuste-card .equip-ajuste-obra {
+  font-weight: 700;
+  font-size: 15px;
+}
+.equip-ajuste-card .equip-ajuste-bruto {
+  font-size: 13px;
+  color: var(--med-muted);
+}
+.equip-ajuste-diff {
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.equip-ajuste-diff.igual { background: var(--med-success-light); color: var(--med-success); }
+.equip-ajuste-diff.diferente { background: #fff2f0; color: #d9483c; }
+
+/* ---------- Linha do tempo (histórico) ---------- */
+
+.equip-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-left: 2px solid var(--med-border);
+}
+.equip-timeline li {
+  position: relative;
+  padding: 0 0 16px 20px;
+  font-size: 13.5px;
+}
+.equip-timeline li::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 3px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--med-primary);
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px var(--med-border);
+}
+.equip-timeline .equip-timeline-meta { color: var(--med-muted); font-size: 12px; }
+
+.equip-origem-admin { color: var(--med-primary); font-weight: 700; }
+.equip-origem-obra { color: var(--med-muted); font-weight: 700; }

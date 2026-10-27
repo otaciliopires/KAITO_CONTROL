@@ -5,6 +5,7 @@ from .models import Abastecimento, Tanque, Transferencia, Entrada, Saldo
 from ativos.models import Equipamentos, Obras
 from autenticacao.models import Usuario
 from datetime import date, datetime
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 import calendar
 from django.db.models import Sum, Avg, Max
 from . utils import nonetest, grafico_vunit
@@ -14,6 +15,7 @@ from operator import itemgetter
 from django.contrib import messages
 from django.contrib.messages import constants
 from django.template.loader import render_to_string
+from django.utils.formats import number_format
 from django.core.paginator import Paginator
 from django.db import transaction
 from io import BytesIO
@@ -27,6 +29,16 @@ from xhtml2pdf import pisa
 """ Para filtrar uma ForeignKey foi necessário adquirir o valor.id do respectivo item. O filtro da ForeignKey requisita que você
 faça isso. No value do formulário foi pedido o equipamento.id e a obra.id  --  em seguida, foi utilizado o 
 filter(carateristica_objeto__in=lista_variável -- Em que a lista variável é uma lista de id que quer filtrar da ForeignKey"""
+
+
+def _numero_operacao(valor):
+    texto = (valor or '').strip()
+    if ',' in texto:
+        texto = texto.replace('.', '').replace(',', '.')
+    numero = Decimal(texto)
+    if not numero.is_finite() or numero < 0:
+        raise ValueError
+    return numero
 
 
 @login_required(login_url='/auth/login/')
@@ -246,7 +258,18 @@ def home(request):
             operador = request.POST.get('operador')
             data = request.POST.get('data')
             num_saida = Abastecimento.objects.aggregate(Max('numero'))
-            num_saida = (num_saida['numero__max'] + 1)
+            num_saida = (num_saida['numero__max'] or 0) + 1
+            try:
+                contador_inicial = _numero_operacao(contador_inicial)
+                contador_final = _numero_operacao(contador_final)
+                litros = contador_final - contador_inicial
+                horimetro = _numero_operacao(horimetro)
+                data = date.fromisoformat(data)
+                if contador_final < contador_inicial or litros <= 0:
+                    raise ValueError
+            except (InvalidOperation, ValueError, TypeError):
+                messages.error(request, 'Informe data e valores válidos: litros maiores que zero e contador final não menor que o inicial.')
+                return redirect('operacoes')
 
             #lançamento abastecimentos:
             abastecimento = Abastecimento(litros=litros,
@@ -259,15 +282,26 @@ def home(request):
                                           equipamento=equipamento,
                                           operador=operador,
                                           colaborador= request.user,
-                                          numero=num_saida)
+                                          numero=num_saida,
+                                          lubrificacao=request.POST.get('lubrificacao') == '1',
+                                          observacao=request.POST.get('observacao', '').strip())
             try:
-                abastecimento.save()
+                with transaction.atomic():
+                    abastecimento.save()
 
-                messages.add_message(request, constants.SUCCESS, "Abastecimento laçado com sucesso!" )
-                return redirect("/ceq/home")
+                    obra.saldo = nonetest(Entrada.objects.filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']) - nonetest(Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum'])
+                    obra.save(update_fields=['saldo'])
+                    tanque.estoque = nonetest(Entrada.objects.filter(tanque=tanque).aggregate(Sum('quantidade'))['quantidade__sum']) + nonetest(Transferencia.objects.filter(movel=tanque).aggregate(Sum('litros'))['litros__sum']) - nonetest(Transferencia.objects.filter(fixo=tanque).aggregate(Sum('litros'))['litros__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque).aggregate(Sum('litros'))['litros__sum'])
+                    tanque.contador = contador_final
+                    tanque.save(update_fields=['estoque', 'contador'])
+                    messages.success(request,
+                        f"Abastecimento realizado em {data:%d/%m/%Y}: {number_format(litros, 2, force_grouping=True)} L em {equipamento}, obra {obra.nome}. "
+                        f"Saldo da obra: {number_format(obra.saldo, 2, force_grouping=True)} L. "
+                        f"Saldo do tanque {tanque}: {number_format(tanque.estoque, 2, force_grouping=True)} L.")
+                    return redirect('operacoes')
             except:
                 messages.add_message(request, constants.ERROR, "ERRO AO LANÇAR O ABASTECIMENTO" )
-                return redirect("/ceq/home")
+                return redirect('operacoes')
 
         
         if form_entradas:
@@ -282,7 +316,16 @@ def home(request):
             nota_fiscal = request.POST.get('NF')
             valor_litro = request.POST.get('valor_litro')
             quantidade_litros = request.POST.get('quantidade')
-            valor_total = float(valor_litro) * int(quantidade_litros)
+            try:
+                valor_litro = Decimal(valor_litro.strip().replace('.', '').replace(',', '.') if ',' in valor_litro else valor_litro.strip())
+                quantidade_litros = Decimal(quantidade_litros.strip().replace('.', '').replace(',', '.') if ',' in quantidade_litros else quantidade_litros.strip())
+                if not valor_litro.is_finite() or not quantidade_litros.is_finite() or valor_litro <= 0 or quantidade_litros <= 0:
+                    raise ValueError
+                valor_total = (valor_litro * quantidade_litros).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            except (InvalidOperation, ValueError, AttributeError, TypeError):
+                messages.error(request, 'Informe valor do litro e quantidade válidos, maiores que zero.')
+                return redirect('operacoes')
+            descricao = request.POST.get('descricao', '').strip()
             num_entrada = Entrada.objects.aggregate(Max('numero'))
             num_entrada = num_entrada['numero__max']+1
 
@@ -297,7 +340,8 @@ def home(request):
                               preco_unitario=valor_litro,
                               preco_total=valor_total,
                               colaborador=request.user,
-                              numero=num_entrada
+                              numero=num_entrada,
+                              descricao=descricao
                               )
             entrada.save()
 
@@ -313,7 +357,15 @@ def home(request):
             total_saidas = nonetest(Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum'])
             obra.saldo = total_entradas - total_saidas
             obra.save()
-            return HttpResponse(f"{tanque}, {obra_id}, {type(data_emissao)}, {type(data_entrega)}, {fornecedor}, {nota_fiscal},{valor_litro}, {quantidade_litros}")
+            messages.success(
+                request,
+                f"Entrada realizada — NF {nota_fiscal}: "
+                f"{number_format(quantidade_litros, 2, force_grouping=True)} L × "
+                f"R$ {number_format(valor_litro, 4, force_grouping=True)} = "
+                f"R$ {number_format(valor_total, 2, force_grouping=True)}. "
+                f"Saldo da obra {obra.nome}: {number_format(obra.saldo, 2, force_grouping=True)} L."
+            )
+            return redirect('operacoes')
 
         
         if form_transferencias:
@@ -324,32 +376,45 @@ def home(request):
 
             contador_inicial = request.POST.get('contador_inicio')
             contador_final = request.POST.get('contador_fim')
-            litros = float(contador_final) - float(contador_inicial)
-            contador_comboio = request.POST.get('contador_comboio')
-            data = date.today()
+            try:
+                contador_inicial = _numero_operacao(contador_inicial)
+                contador_final = _numero_operacao(contador_final)
+                contador_comboio = _numero_operacao(request.POST.get('contador_comboio'))
+                data = date.fromisoformat(request.POST.get('data', ''))
+                litros = contador_final - contador_inicial
+                if litros <= 0:
+                    raise ValueError
+            except (InvalidOperation, ValueError, TypeError):
+                messages.error(request, 'Informe data e contadores válidos. O contador final deve ser maior que o inicial.')
+                return redirect('operacoes')
 
             #lançamento transferências:
-            transferencia = Transferencia(fixo=tanque_fixo,
-                                          movel=tanque_movel,
-                                          contador_inicio=float(contador_inicial),
-                                          contador_fim=float(contador_final),
-                                          litros=litros,
-                                          contador_comboio=float(contador_comboio),
-                                          colaborador=request.user,
-                                          data=date.today())
+            with transaction.atomic():
+                transferencia = Transferencia(fixo=tanque_fixo,
+                                              movel=tanque_movel,
+                                              contador_inicio=float(contador_inicial),
+                                              contador_fim=float(contador_final),
+                                              litros=litros,
+                                              contador_comboio=float(contador_comboio),
+                                              colaborador=request.user,
+                                              data=data)
             
-            transferencia.save()
-            #Método para atualizar saldo dos tanques.
-            tanque_fixo.estoque = nonetest(Entrada.objects.filter(tanque=tanque_fixo).aggregate(Sum('quantidade'))['quantidade__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_fixo).aggregate(Sum('litros'))['litros__sum']) - nonetest(Transferencia.objects.filter(fixo=tanque_fixo).aggregate(Sum('litros'))['litros__sum'])
-            tanque_movel.estoque = nonetest(Transferencia.objects.filter(movel=tanque_movel).aggregate(Sum('litros'))['litros__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_movel).aggregate(Sum('litros'))['litros__sum'])
+                transferencia.save()
+                #Método para atualizar saldo dos tanques.
+                tanque_fixo.estoque = nonetest(Entrada.objects.filter(tanque=tanque_fixo).aggregate(Sum('quantidade'))['quantidade__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_fixo).aggregate(Sum('litros'))['litros__sum']) - nonetest(Transferencia.objects.filter(fixo=tanque_fixo).aggregate(Sum('litros'))['litros__sum'])
+                tanque_movel.estoque = nonetest(Transferencia.objects.filter(movel=tanque_movel).aggregate(Sum('litros'))['litros__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_movel).aggregate(Sum('litros'))['litros__sum'])
                 
             
-            tanque_fixo.contador = float(contador_final)
-            tanque_movel.contador = float(contador_comboio)
-            tanque_fixo.save()
-            tanque_movel.save()
+                tanque_fixo.contador = float(contador_final)
+                tanque_movel.contador = float(contador_comboio)
+                tanque_fixo.save()
+                tanque_movel.save()
 
-            return HttpResponse(f"{tanque_fixo}, {tanque_movel}, {type(contador_inicial)}, {contador_final}, {contador_comboio}, LITROS:{litros}")
+            messages.success(request,
+                f"Transferência realizada em {data:%d/%m/%Y}: {number_format(litros, 2, force_grouping=True)} L de {tanque_fixo} para {tanque_movel}. "
+                f"Saldo do tanque {tanque_fixo}: {number_format(tanque_fixo.estoque, 2, force_grouping=True)} L. "
+                f"Saldo do tanque {tanque_movel}: {number_format(tanque_movel.estoque, 2, force_grouping=True)} L.")
+            return redirect('operacoes')
 
     else: return HttpResponse('<h1>Acesso negado</h1>')
 
@@ -396,7 +461,18 @@ def operacoes(request):
             operador = request.POST.get('operador')
             data = request.POST.get('data')
             num_saida = Abastecimento.objects.aggregate(Max('numero'))
-            num_saida = (num_saida['numero__max'] + 1)
+            num_saida = (num_saida['numero__max'] or 0) + 1
+            try:
+                contador_inicial = _numero_operacao(contador_inicial)
+                contador_final = _numero_operacao(contador_final)
+                litros = contador_final - contador_inicial
+                horimetro = _numero_operacao(horimetro)
+                data = date.fromisoformat(data)
+                if contador_final < contador_inicial or litros <= 0:
+                    raise ValueError
+            except (InvalidOperation, ValueError, TypeError):
+                messages.error(request, 'Informe data e valores válidos: litros maiores que zero e contador final não menor que o inicial.')
+                return redirect('operacoes')
 
             #lançamento abastecimentos:
             abastecimento = Abastecimento(litros=litros,
@@ -409,15 +485,26 @@ def operacoes(request):
                                           equipamento=equipamento,
                                           operador=operador,
                                           colaborador= request.user,
-                                          numero=num_saida)
+                                          numero=num_saida,
+                                          lubrificacao=request.POST.get('lubrificacao') == '1',
+                                          observacao=request.POST.get('observacao', '').strip())
             try:
-                abastecimento.save()
+                with transaction.atomic():
+                    abastecimento.save()
 
-                messages.add_message(request, constants.SUCCESS, "Abastecimento laçado com sucesso!" )
-                return redirect("/ceq/home")
+                    obra.saldo = nonetest(Entrada.objects.filter(obra=obra).aggregate(Sum('quantidade'))['quantidade__sum']) - nonetest(Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum'])
+                    obra.save(update_fields=['saldo'])
+                    tanque.estoque = nonetest(Entrada.objects.filter(tanque=tanque).aggregate(Sum('quantidade'))['quantidade__sum']) + nonetest(Transferencia.objects.filter(movel=tanque).aggregate(Sum('litros'))['litros__sum']) - nonetest(Transferencia.objects.filter(fixo=tanque).aggregate(Sum('litros'))['litros__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque).aggregate(Sum('litros'))['litros__sum'])
+                    tanque.contador = contador_final
+                    tanque.save(update_fields=['estoque', 'contador'])
+                    messages.success(request,
+                        f"Abastecimento realizado em {data:%d/%m/%Y}: {number_format(litros, 2, force_grouping=True)} L em {equipamento}, obra {obra.nome}. "
+                        f"Saldo da obra: {number_format(obra.saldo, 2, force_grouping=True)} L. "
+                        f"Saldo do tanque {tanque}: {number_format(tanque.estoque, 2, force_grouping=True)} L.")
+                    return redirect('operacoes')
             except:
                 messages.add_message(request, constants.ERROR, "ERRO AO LANÇAR O ABASTECIMENTO" )
-                return redirect("/ceq/home")
+                return redirect('operacoes')
 
         
         if form_entradas:
@@ -432,7 +519,16 @@ def operacoes(request):
             nota_fiscal = request.POST.get('NF')
             valor_litro = request.POST.get('valor_litro')
             quantidade_litros = request.POST.get('quantidade')
-            valor_total = float(valor_litro) * int(quantidade_litros)
+            try:
+                valor_litro = Decimal(valor_litro.strip().replace('.', '').replace(',', '.') if ',' in valor_litro else valor_litro.strip())
+                quantidade_litros = Decimal(quantidade_litros.strip().replace('.', '').replace(',', '.') if ',' in quantidade_litros else quantidade_litros.strip())
+                if not valor_litro.is_finite() or not quantidade_litros.is_finite() or valor_litro <= 0 or quantidade_litros <= 0:
+                    raise ValueError
+                valor_total = (valor_litro * quantidade_litros).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+            except (InvalidOperation, ValueError, AttributeError, TypeError):
+                messages.error(request, 'Informe valor do litro e quantidade válidos, maiores que zero.')
+                return redirect('operacoes')
+            descricao = request.POST.get('descricao', '').strip()
             num_entrada = Entrada.objects.aggregate(Max('numero'))
             num_entrada = num_entrada['numero__max']+1
 
@@ -447,7 +543,8 @@ def operacoes(request):
                               preco_unitario=valor_litro,
                               preco_total=valor_total,
                               colaborador=request.user,
-                              numero=num_entrada
+                              numero=num_entrada,
+                              descricao=descricao
                               )
             entrada.save()
 
@@ -463,7 +560,15 @@ def operacoes(request):
             total_saidas = nonetest(Abastecimento.objects.filter(obra=obra).aggregate(Sum('litros'))['litros__sum'])
             obra.saldo = total_entradas - total_saidas
             obra.save()
-            return HttpResponse(f"{tanque}, {obra_id}, {type(data_emissao)}, {type(data_entrega)}, {fornecedor}, {nota_fiscal},{valor_litro}, {quantidade_litros}")
+            messages.success(
+                request,
+                f"Entrada realizada — NF {nota_fiscal}: "
+                f"{number_format(quantidade_litros, 2, force_grouping=True)} L × "
+                f"R$ {number_format(valor_litro, 4, force_grouping=True)} = "
+                f"R$ {number_format(valor_total, 2, force_grouping=True)}. "
+                f"Saldo da obra {obra.nome}: {number_format(obra.saldo, 2, force_grouping=True)} L."
+            )
+            return redirect('operacoes')
 
         
         if form_transferencias:
@@ -474,32 +579,45 @@ def operacoes(request):
 
             contador_inicial = request.POST.get('contador_inicio')
             contador_final = request.POST.get('contador_fim')
-            litros = float(contador_final) - float(contador_inicial)
-            contador_comboio = request.POST.get('contador_comboio')
-            data = date.today()
+            try:
+                contador_inicial = _numero_operacao(contador_inicial)
+                contador_final = _numero_operacao(contador_final)
+                contador_comboio = _numero_operacao(request.POST.get('contador_comboio'))
+                data = date.fromisoformat(request.POST.get('data', ''))
+                litros = contador_final - contador_inicial
+                if litros <= 0:
+                    raise ValueError
+            except (InvalidOperation, ValueError, TypeError):
+                messages.error(request, 'Informe data e contadores válidos. O contador final deve ser maior que o inicial.')
+                return redirect('operacoes')
 
             #lançamento transferências:
-            transferencia = Transferencia(fixo=tanque_fixo,
-                                          movel=tanque_movel,
-                                          contador_inicio=float(contador_inicial),
-                                          contador_fim=float(contador_final),
-                                          litros=litros,
-                                          contador_comboio=float(contador_comboio),
-                                          colaborador=request.user,
-                                          data=date.today())
+            with transaction.atomic():
+                transferencia = Transferencia(fixo=tanque_fixo,
+                                              movel=tanque_movel,
+                                              contador_inicio=float(contador_inicial),
+                                              contador_fim=float(contador_final),
+                                              litros=litros,
+                                              contador_comboio=float(contador_comboio),
+                                              colaborador=request.user,
+                                              data=data)
             
-            transferencia.save()
-            #Método para atualizar saldo dos tanques.
-            tanque_fixo.estoque = nonetest(Entrada.objects.filter(tanque=tanque_fixo).aggregate(Sum('quantidade'))['quantidade__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_fixo).aggregate(Sum('litros'))['litros__sum']) - nonetest(Transferencia.objects.filter(fixo=tanque_fixo).aggregate(Sum('litros'))['litros__sum'])
-            tanque_movel.estoque = nonetest(Transferencia.objects.filter(movel=tanque_movel).aggregate(Sum('litros'))['litros__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_movel).aggregate(Sum('litros'))['litros__sum'])
+                transferencia.save()
+                #Método para atualizar saldo dos tanques.
+                tanque_fixo.estoque = nonetest(Entrada.objects.filter(tanque=tanque_fixo).aggregate(Sum('quantidade'))['quantidade__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_fixo).aggregate(Sum('litros'))['litros__sum']) - nonetest(Transferencia.objects.filter(fixo=tanque_fixo).aggregate(Sum('litros'))['litros__sum'])
+                tanque_movel.estoque = nonetest(Transferencia.objects.filter(movel=tanque_movel).aggregate(Sum('litros'))['litros__sum']) - nonetest(Abastecimento.objects.filter(tanque=tanque_movel).aggregate(Sum('litros'))['litros__sum'])
                 
             
-            tanque_fixo.contador = float(contador_final)
-            tanque_movel.contador = float(contador_comboio)
-            tanque_fixo.save()
-            tanque_movel.save()
+                tanque_fixo.contador = float(contador_final)
+                tanque_movel.contador = float(contador_comboio)
+                tanque_fixo.save()
+                tanque_movel.save()
 
-            return HttpResponse(f"{tanque_fixo}, {tanque_movel}, {type(contador_inicial)}, {contador_final}, {contador_comboio}, LITROS:{litros}")
+            messages.success(request,
+                f"Transferência realizada em {data:%d/%m/%Y}: {number_format(litros, 2, force_grouping=True)} L de {tanque_fixo} para {tanque_movel}. "
+                f"Saldo do tanque {tanque_fixo}: {number_format(tanque_fixo.estoque, 2, force_grouping=True)} L. "
+                f"Saldo do tanque {tanque_movel}: {number_format(tanque_movel.estoque, 2, force_grouping=True)} L.")
+            return redirect('operacoes')
 
     else: return HttpResponse('<h1>Acesso negado</h1>')
 

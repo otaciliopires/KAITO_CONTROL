@@ -94,3 +94,9 @@ class FechamentoMedicaoCaminhao(models.Model):
 
     def __str__(self):
         return f"{self.contrato} - {self.mes:02d}/{self.ano}"
+
+
+# Módulo de medição de equipamentos (dias/rateio por obra) — models próprios,
+# fluxo separado do de caminhão acima. Import só para o Django registrar as
+# tabelas; nenhuma classe deste arquivo é usada por elas.
+from .models_equipamento import *  # noqa: F401,F403

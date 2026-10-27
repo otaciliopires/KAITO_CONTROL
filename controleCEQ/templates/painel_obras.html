@@ -1,110 +1,27 @@
 {% extends 'base.html' %}
-
 {% load static %}
-{% block 'head' %}
-    <link rel="stylesheet" href="{% static 'autenticacao/css/login.css' %}">
-{%endblock%}
-{% block 'titulo' %}painel_obras{% endblock %}
-
-{%block 'body'%}
-
-
-<main id="main" class="main">
-  <div class="pagetitle">
-     <h1 style="font-size: 50px;">Saldo Obras</h1>
-     <nav>
-        
-     </nav>
-    
-
-
-
-  <section class="section dashboard">
-     <div class="row">
-        <div class="col-lg-12">
-           <div class="row">
-
-              <div class="col-xxl-4 col-xl-12">
-                <h2 style='color: red'> Abastecimentos</h2>
-                 <table class="table table-striped table-bordered">
-                    <thead style="font-size:10px" >
-                      <tr>
-                        <th class='okok' scope='col'>Nº</th>
-                        <th class='okok' scope="col">TANQUE</th>
-                        <th class='okok' scope="col">DATA</th>
-                        <th class='okok' scope="col">OBRA</th>
-                        <th class='okok' scope="col">EQUIPAMENTO</th>
-                        <th class='okok' scope="col">DESCRIÇÃO</th>
-                        <th class='okok' scope="col">PROPRIEDADE</th>
-                        <th class='okok' scope="col">QUANTIDADE</th>
-                        <th class='okok' scope="col">HORÍMETRO/KM</th>
-                        <th class='okok' scope="col">OPERADOR/MOTORISTA</th>
-                        <th class='okok' scope="col">AÇÃO</th>
-                        <th class='okok' scope='col'>ADICIONAR COMENTÁRIO</th>
-                        <th class='okok' scope='col'>COMENTÁRIO
-
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {%for saida in saidas%}    
-                        <tr>
-                          <th scope="row">{{saida.id}}</th>
-                          <td class='okok'>{{saida.tanque}}</td>
-                          <td class='okok'>{{saida.data}}</td>
-                          <td class='okok'>{{saida.obra}}</td>
-                          <td class='okok'>{{saida.equipamento}}</td>
-                          <td class='okok'>{{saida.equipamento.descricao}}</td>
-                          <td class='okok'>{{saida.equipamento.proprietario}}</td>
-                          <td class='okok'>{{saida.litros}}</td>
-                          <td class='okok'>{{saida.horimetro}}</td>
-                          <td class='okok'>{{saida.operador}}</td>
-                          <td class='okok'><a href="{% url 'status' saida.id %}" class="btn btn-sm btn-success">Resolvido</a></td>
-                          {%if not saida.status%}
-                          <td class='okok'><form action="{% url 'comentario' saida.id%}" method="POST"> {% csrf_token %}
-                                <input style='width:92px; height:50px' type='text' name='comentario'>  
-                                <br>
-                                <input style="width: 92px; " type="submit" class="botao-principal" value="Adicionar">
-                          </form>
-                          </td>
-                          <td class='okok'>{{saida.observacao}}</td>
-                          {%else%}
-                          <td class='okok'></td>
-                          <td class='okok'></td>
-                          {%endif%}                                                              
-                  
-                        {%endfor%}
-                         </tbody>
-                  </table>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-        
-             
+{% block 'titulo' %}Painel Obras{% endblock %}
+{% block 'head' %}<link rel="stylesheet" href="{% static 'ceq/css/obras.css' %}"><link rel="stylesheet" href="{% static 'ceq/css/painel_obras.css' %}">{% endblock %}
+{% block 'body' %}
+<main id="main" class="main obras-page painel-page">
+ <header class="obras-heading"><div><span class="obras-eyebrow">ACOMPANHAMENTO DAS OBRAS</span><h1>Painel Obras</h1><p>Revise os abastecimentos reportados, acompanhe os comentários e resolva as pendências.</p></div><span class="painel-count"><i class="bi bi-exclamation-circle" aria-hidden="true"></i> {{saidas|length}} pendência{{saidas|length|pluralize:"s"}}</span></header>
+ {% if messages %}{% for message in messages %}<div class="{{message.tags}}" role="alert">{{message}}</div>{% endfor %}{% endif %}
+ <div class="obras-search"><i class="bi bi-search" aria-hidden="true"></i><label class="visually-hidden" for="painel-busca">Buscar por obra, equipamento ou número</label><input id="painel-busca" type="search" class="form-control" placeholder="Buscar obra, equipamento ou número…" autocomplete="off"></div>
+ <section class="painel-grid" aria-label="Abastecimentos com pendências">
+ {% for saida in saidas %}
+  <article class="painel-card" data-busca="{{saida.id}} {{saida.numero}} {{saida.obra}} {{saida.equipamento}} {{saida.operador}}">
+   <header class="painel-card-head"><div><span class="painel-ref">ABASTECIMENTO #{{saida.id}}</span><h2>{{saida.obra|default:"Obra não informada"}}</h2></div><span class="painel-pendente">Pendente</span></header>
+   <div class="painel-facts"><div><span>Equipamento</span><strong>{{saida.equipamento}}</strong></div><div><span>Data</span><strong>{{saida.data|date:"d/m/Y"}}</strong></div><div><span>Quantidade</span><strong>{{saida.litros|floatformat:"2g"}} L</strong></div><div><span>Tanque</span><strong>{{saida.tanque}}</strong></div></div>
+   <details class="painel-details"><summary>Detalhes do abastecimento</summary><dl><div><dt>Descrição</dt><dd>{{saida.equipamento.descricao|default:"—"}}</dd></div><div><dt>Proprietário</dt><dd>{{saida.equipamento.proprietario|default:"—"}}</dd></div><div><dt>Horímetro / km</dt><dd>{{saida.horimetro|floatformat:"2g"}}</dd></div><div><dt>Operador / motorista</dt><dd>{{saida.operador|default:"—"}}</dd></div></dl></details>
+   <div class="painel-observacao"><h3><i class="bi bi-chat-left-text" aria-hidden="true"></i> Relato e comentários</h3><p>{{saida.observacao|default:"Nenhum comentário registrado."}}</p></div>
+   <form class="painel-comment" action="{% url 'comentario' saida.id %}" method="POST">{% csrf_token %}<label for="comentario-{{saida.id}}">Adicionar comentário</label><textarea id="comentario-{{saida.id}}" name="comentario" rows="2" required placeholder="Registre uma atualização sobre esta pendência…"></textarea><div class="painel-actions"><button type="submit" class="btn btn-outline-secondary">Adicionar comentário</button><a href="{% url 'status' saida.id %}" class="btn btn-success"><i class="bi bi-check2" aria-hidden="true"></i> Marcar como resolvido</a></div></form>
+  </article>
+ {% empty %}
+  <div class="painel-empty"><i class="bi bi-check-circle" aria-hidden="true"></i><h2>Nenhuma pendência</h2><p>Não há abastecimentos reportados aguardando resolução.</p></div>
+ {% endfor %}
+ </section>
+ <div id="painel-sem-resultados" class="painel-empty" hidden><i class="bi bi-search" aria-hidden="true"></i><h2>Nenhuma pendência encontrada</h2><p>Tente outro nome de obra, equipamento ou número.</p></div>
 </main>
-<footer id="footer" class="footer">
-  <div class="copyright"> &copy; Copyright <strong><span>Kaito Control</span></strong>. All Rights Reserved</div>
-  
-</footer>
-<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>  
-
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="assets/js/apexcharts.min.js"></script>
-<script src="assets/js/bootstrap.bundle.min.js"></script>
-<script src="assets/js/chart.min.js"></script>
-<script src="assets/js/echarts.min.js"></script>
-<script src="assets/js/quill.min.js"></script>
-<script src="assets/js/simple-datatables.js"></script>
-<script src="assets/js/tinymce.min.js"></script>
-<script src="assets/js/validate.js"></script>
-<script src="assets/js/main.js"></script> 
-
-
-
-<script src="{% static 'ceq/javascript/js.js' %}"></script>
-
-  {%endblock%}
+<footer id="footer" class="footer"><div class="copyright">&copy; Kaito Control. All Rights Reserved</div></footer>
+<script>(()=>{const busca=document.getElementById('painel-busca'),cards=[...document.querySelectorAll('.painel-card')],empty=document.getElementById('painel-sem-resultados');const normalizar=v=>v.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');busca.addEventListener('input',()=>{const termo=normalizar(busca.value.trim());let n=0;cards.forEach(c=>{c.hidden=!normalizar(c.dataset.busca).includes(termo);if(!c.hidden)n++;});empty.hidden=cards.length===0||n>0;});})();</script>
+{% endblock %}

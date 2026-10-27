@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block 'titulo' %}{{ obra.nome }} - {{ periodo }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+<link rel="stylesheet" href="{% static 'medicao/css/medicao_equip.css' %}">
+{% endblock %}
+
+{% block 'body' %}
+<main id="main" class="main">
+  <div class="med-page" style="padding-top:0">
+
+    <div class="med-topbar">
+      <div>
+        <div class="med-eyebrow">Central de Equipamentos · Visão por obra · {{ periodo }}</div>
+        <h1 class="med-title">{{ obra.nome }}</h1>
+        <div class="med-subtitle">Equipamentos com dias apurados para esta obra neste período.</div>
+      </div>
+      <a class="med-back" href="{% url 'medicao_equip_ceq_painel' %}?periodo={{ periodo.ano }}-{{ periodo.mes }}"><i class="bi bi-arrow-left"></i> Voltar ao painel</a>
+    </div>
+
+    <div class="med-stat-grid">
+      <div class="med-stat med-highlight">
+        <div class="med-stat-label"><i class="bi bi-cash-coin"></i> Total da obra</div>
+        <div class="med-stat-value">R$ {{ total_valor|floatformat:2 }}</div>
+      </div>
+      <div class="med-stat">
+        <div class="med-stat-label"><i class="bi bi-gear-wide-connected"></i> Equipamentos</div>
+        <div class="med-stat-value">{{ linhas|length }}</div>
+      </div>
+    </div>
+
+    <div class="med-panel">
+      <div class="med-table-wrap">
+        <table class="med-table">
+          <thead>
+            <tr>
+              <th>Equipamento</th>
+              <th>Aluguel vigente</th>
+              <th>Dias apontados</th>
+              <th>Fator</th>
+              <th>Valor</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for linha in linhas %}
+            <tr>
+              <td><strong>{{ linha.medicao.equipamento.prefixo }}</strong> {{ linha.medicao.equipamento.descricao }}</td>
+              <td>R$ {{ linha.medicao.valor_aluguel_vigente }}</td>
+              <td>{{ linha.dias }}</td>
+              <td>{{ linha.fator|floatformat:4 }}</td>
+              <td>R$ {{ linha.valor|floatformat:2 }}</td>
+              <td><a class="btn btn-outline-primary btn-sm" href="{% url 'medicao_equip_ceq_ajuste' medicao_id=linha.medicao.id %}">Detalhe <i class="bi bi-chevron-right"></i></a></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted">Nenhum equipamento com dias apurados para esta obra neste período.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+{% load medicao_extras %}
+<style>
+  @page { size: A4 landscape; margin: 1.3cm; }
+  body { font-family: Helvetica, Arial, sans-serif; font-size: 9pt; color: #1a1a1a; }
+
+  table { border-collapse: collapse; }
+
+  .relatorio-titulo { font-size: 12pt; font-weight: bold; text-align: center; margin-bottom: 8px; }
+
+  table.relatorio { width: 100%; margin-bottom: 6px; }
+  table.relatorio th, table.relatorio td { border: 1px solid #888; padding: 3px 6px; font-size: 8pt; }
+  table.relatorio th { background: #eef0ff; text-transform: uppercase; font-size: 7pt; }
+  table.relatorio td.right { text-align: right; }
+  table.relatorio tr.total-row td { font-weight: bold; background: #f2f2f2; }
+
+  .quebra-pagina { page-break-before: always; }
+
+  .header-table { width: 100%; margin-bottom: 3px; }
+  .header-table td { border: 1px solid #888; padding: 5px 8px; vertical-align: top; }
+  .logo-cell { width: 8%; text-align: center; vertical-align: middle; }
+  .logo-cell img { width: 42px; }
+  .company-name { font-size: 11pt; font-weight: bold; }
+  .company-meta { font-size: 7.5pt; color: #444; margin-top: 2px; }
+  .doc-title { font-size: 14pt; font-weight: bold; text-align: center; }
+  .doc-subtitle { font-size: 8pt; text-align: center; color: #333; margin-top: 2px; }
+  .field-label { font-size: 7.5pt; color: #555; font-weight: bold; }
+  .field-value { font-size: 9pt; font-weight: bold; }
+
+  table.meta-fields { width: 100%; }
+  table.meta-fields td { border: none; padding: 1px 0; font-size: 8pt; }
+  table.meta-fields td.field-label { width: 42%; }
+
+  .obra-cell { font-size: 8.5pt; }
+  .obra-cell .field-label { display: inline; }
+  .obra-cell .field-value-inline { font-weight: bold; color: #1a3d8f; }
+  .obra-cell .equip-nome { font-weight: bold; }
+
+  table.items { width: 100%; margin-bottom: 4px; }
+  table.items th, table.items td { border: 1px solid #888; padding: 4px 5px; font-size: 8pt; }
+  table.items th { background: #eef0ff; text-transform: uppercase; font-size: 7pt; text-align: center; }
+  table.items td.right { text-align: right; }
+  table.items td.center { text-align: center; }
+
+  table.rodape-boletim { width: 27.1cm; margin-bottom: 2px; }
+  table.rodape-boletim td { padding: 3px 7px 0 7px; vertical-align: bottom; }
+  table.rodape-boletim td.txt8 { font-size: 8pt; }
+  table.rodape-boletim td.assin { text-align: center; }
+  table.rodape-boletim td.assin-marcada { border-top: 1px solid #333; padding-top: 4px; vertical-align: top; white-space: nowrap; }
+  table.rodape-boletim th.fin-head { border: 1px solid #888; background: #eef0ff; font-size: 8pt; text-transform: uppercase; padding: 5px 7px; }
+  table.rodape-boletim td.fin { border: 1px solid #888; }
+  table.rodape-boletim td.rotulo { text-align: left; }
+  table.rodape-boletim td.right { text-align: right; }
+
+  .observacoes { font-size: 8pt; margin-top: 0; }
+  .observacoes .nota { color: #555; font-size: 7.5pt; margin-top: 0; }
+</style>
+</head>
+<body>
+
+  <table class="header-table">
+    <tr>
+      <td class="logo-cell">
+        {% if empresa.logo %}<img src="{{ empresa.logo }}">{% endif %}
+      </td>
+      <td style="width: 26%">
+        <div class="company-name">{{ empresa.nome }}</div>
+        <div class="company-meta">CNPJ: {{ empresa.cnpj }}</div>
+        <div class="company-meta">END.: {{ empresa.endereco }}</div>
+      </td>
+      <td style="width: 42%">
+        <div class="doc-title">BOLETIM DE MEDIÇÃO DE EQUIPAMENTO</div>
+        <div class="doc-subtitle">RATEIO DE LOCAÇÃO POR OBRA, MANUTENÇÃO E DISPOSIÇÃO</div>
+      </td>
+      <td style="width: 24%">
+        <table class="meta-fields">
+          <tr><td class="field-label">EQUIPAMENTO:</td><td class="field-value">{{ equipamento.prefixo }}</td></tr>
+          <tr><td class="field-label">PERÍODO:</td><td class="field-value">{{ periodo.data_inicio|date:"d/m/Y" }} A {{ periodo.data_fim|date:"d/m/Y" }}</td></tr>
+          <tr><td class="field-label">DIAS DO MÊS:</td><td class="field-value">{{ periodo.dias_do_mes }}</td></tr>
+          <tr><td class="field-label">DATA:</td><td class="field-value">{{ data_emissao|date:"d/m/Y" }}</td></tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td class="obra-cell" colspan="4">
+        <span class="field-label">EQUIPAMENTO:</span> <span class="equip-nome">{{ equipamento.prefixo }} — {{ equipamento.descricao }}</span><br>
+        <span class="field-label">OBRA RESPONSÁVEL:</span> <span class="field-value-inline">{{ medicao.obra.nome|default:"Central (sem obra)" }}</span> &nbsp;
+        <span class="field-label">ALUGUEL VIGENTE:</span> <span class="field-value-inline">R$ {{ medicao.valor_aluguel_vigente|moeda:2 }}</span>
+      </td>
+    </tr>
+  </table>
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th style="width:4%">Item</th>
+        <th style="width:34%">Destino</th>
+        <th style="width:12%">Dias apurados</th>
+        <th style="width:12%">Fator</th>
+        <th style="width:19%">Aluguel mensal</th>
+        <th style="width:19%">Valor (R$)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for linha in dias_por_obra %}
+      <tr>
+        <td class="center">{{ forloop.counter }}</td>
+        <td>Obra: {{ linha.obra.nome }}</td>
+        <td class="right">{{ linha.dias }}</td>
+        <td class="right">{{ linha.fator|floatformat:4 }}</td>
+        <td class="right">{{ medicao.valor_aluguel_vigente|moeda:2 }}</td>
+        <td class="right">{{ linha.valor|moeda:2 }}</td>
+      </tr>
+      {% endfor %}
+      <tr>
+        <td class="center">M</td>
+        <td>Manutenção</td>
+        <td class="right">{{ consolidado.dias_manutencao }}</td>
+        <td class="right">—</td>
+        <td class="right">{{ medicao.valor_aluguel_vigente|moeda:2 }}</td>
+        <td class="right">{{ valor_manutencao|moeda:2 }}</td>
+      </tr>
+      <tr>
+        <td class="center">D</td>
+        <td>À disposição (Central de Equipamentos)</td>
+        <td class="right">{{ consolidado.dias_disposicao }}</td>
+        <td class="right">—</td>
+        <td class="right">{{ medicao.valor_aluguel_vigente|moeda:2 }}</td>
+        <td class="right">{{ valor_disposicao|moeda:2 }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="rodape-boletim">
+    <colgroup>
+      <col style="width:8.2cm"><col style="width:0.5cm"><col style="width:8.2cm"><col style="width:0.5cm">
+      <col style="width:3.5cm"><col style="width:2.1cm"><col style="width:2.1cm"><col style="width:2.1cm">
+    </colgroup>
+    <tr>
+      <td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+      <th class="fin-head rotulo">&nbsp;</th><th class="fin-head" colspan="3">Total apurado</th>
+    </tr>
+    <tr>
+      <td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+      <td class="fin rotulo" style="background:#fff3a3; padding:5px 7px; white-space:nowrap;"><span style="font-size:11pt; font-weight:bold;">TOTAL LÍQUIDO</span></td>
+      <td class="fin right" colspan="3" style="background:#fff3a3; padding:5px 7px;"><span style="font-size:11pt; font-weight:bold;">R$ {{ valor_total|moeda:2 }}</span></td>
+    </tr>
+    <tr>
+      <td class="assin assin-marcada txt8">Apontador da Obra</td><td class="txt8">&nbsp;</td><td class="assin assin-marcada txt8">Encarregado</td><td class="txt8">&nbsp;</td>
+      <td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="assin txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+      <td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="assin assin-marcada txt8">Central de Equipamentos</td><td class="txt8">&nbsp;</td><td class="assin assin-marcada txt8">Engº Gerente da Obra</td><td class="txt8">&nbsp;</td>
+      <td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td><td class="txt8">&nbsp;</td>
+    </tr>
+  </table>
+
+  <div class="observacoes">
+    {% if ajustes %}
+    Ajustes da Central neste período: {% for a in ajustes %}{{ a.obra.nome }} ({{ a.dias_apontados_obra }}→{{ a.dias_aplicados_admin }} dias){% if not forloop.last %}; {% endif %}{% endfor %}.
+    {% endif %}
+    <div class="nota">1 - Esta medição só possui valor interno, não podendo assim ser negociada em banco ou qualquer instituição financeira.</div>
+  </div>
+
+  <div class="quebra-pagina"></div>
+
+  <div class="relatorio-titulo">{{ equipamento.prefixo }} — {{ medicao.obra.nome|default:"Central (sem obra)" }} — DETALHE DIÁRIO — {{ periodo }} — FOLHA 02/02</div>
+
+  <table class="relatorio">
+    <thead>
+      <tr>
+        <th style="width:8%">Data</th>
+        <th style="width:11%">Contador inicial</th>
+        <th style="width:11%">Contador final</th>
+        <th style="width:9%">Parada (h)</th>
+        <th style="width:20%">Motivo</th>
+        <th style="width:18%">Obra do dia</th>
+        <th style="width:8%">Fração</th>
+        <th style="width:15%">Tipo</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ap in apontamentos %}
+      <tr>
+        <td>{{ ap.data|date:"d/m" }}</td>
+        <td class="right">{{ ap.contador_inicial|default_if_none:'—' }}</td>
+        <td class="right">{{ ap.contador_final|default_if_none:'—' }}</td>
+        <td class="right">{{ ap.tempo_parada_horas }}</td>
+        <td>{{ ap.motivo_parada.descricao|default:'—' }}</td>
+        <td>{{ ap.obra_do_dia.nome }}</td>
+        <td class="right">{{ ap.fracao|default_if_none:'—' }}</td>
+        <td>{{ ap.get_tipo_dia_display|default:'—' }}</td>
+      </tr>
+      {% endfor %}
+      <tr class="total-row">
+        <td colspan="7">TOTAL APURADO NO MÊS</td>
+        <td class="right">{{ consolidado.total_dias }} / {{ periodo.dias_do_mes }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>

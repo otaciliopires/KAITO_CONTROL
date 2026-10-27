@@ -1,0 +1,51 @@
+{% extends 'base_obra.html' %}
+{% load static %}
+
+{% block 'titulo' %}Nova medição - {{ obra.nome }}{% endblock %}
+
+{% block 'head' %}
+<link rel="stylesheet" href="{% static 'medicao/css/medicao.css' %}">
+{% endblock %}
+
+{% block 'plataforma' %}
+<main class="med-page">
+
+  <div class="med-topbar">
+    <div>
+      <div class="med-eyebrow">Medição · Equipamentos · {{ periodo }}</div>
+      <h1 class="med-title">Nova medição</h1>
+      <div class="med-subtitle">Selecione o equipamento que esta obra vai medir neste mês.</div>
+    </div>
+    <a class="med-back" href="{% url 'medicao_equip_obra_periodo' obra_id=obra.id periodo_id=periodo.id %}"><i class="bi bi-arrow-left"></i> Voltar</a>
+  </div>
+
+  {% if messages %}
+    {% for m in messages %}<div class="{{ m.tags }}" role="alert">{{ m }}</div>{% endfor %}
+  {% endif %}
+
+  <div class="med-panel" style="max-width:520px">
+    {% if equipamentos %}
+    <form method="POST">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label fw-bold">Equipamento</label>
+        <select name="equipamento" class="form-select" required>
+          <option value="" disabled selected>Selecione...</option>
+          {% for equipamento in equipamentos %}
+          <option value="{{ equipamento.id }}">{{ equipamento.prefixo }} — {{ equipamento.descricao }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Abrir medição</button>
+    </form>
+    {% else %}
+    <div class="med-empty">
+      <i class="bi bi-exclamation-circle"></i>
+      <strong>Nenhum equipamento disponível.</strong>
+      <p style="margin-top:6px">Ou todos já estão sendo medidos neste mês, ou nenhum equipamento está marcado como elegível para medição no cadastro.</p>
+    </div>
+    {% endif %}
+  </div>
+
+</main>
+{% endblock %}
