@@ -51,6 +51,7 @@ class Abastecimento(models.Model):
     operador = models.CharField(max_length=50)
     colaborador = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING)
     status = models.BooleanField(default=True)
+    assinatura = models.JSONField(default=dict, blank=True, verbose_name='Assinatura do motorista / operador')
     observacao = models.CharField(max_length=100, default="", null="")
 
     def __str__(self):
@@ -73,3 +74,16 @@ class Saldo(models.Model):
 
     def __int__(self):
         return self.ano
+
+
+class ReciboAbastecimentoCampo(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
+    usuario = models.ForeignKey(Usuario, on_delete=models.PROTECT)
+    abastecimento = models.OneToOneField(Abastecimento, on_delete=models.PROTECT, related_name='recibo_campo')
+    hash_conteudo = models.CharField(max_length=64)
+    registrado_no_aparelho = models.DateTimeField()
+    recebido_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Recibo de abastecimento em campo'
+        verbose_name_plural = 'Recibos de abastecimento em campo'

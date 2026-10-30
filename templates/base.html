@@ -94,6 +94,7 @@
          </li>
          {% endif %}
 
+         {% if user.is_superuser %}<li class="nav-item"><a class="nav-link collapsed" href="{% url 'campo' %}"><i class="bi bi-phone"></i><span>Abastecimento em campo</span></a></li>{% endif %}
    </aside>
         {%endif%}
 

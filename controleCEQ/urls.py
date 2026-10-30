@@ -1,8 +1,14 @@
 from django.urls import path
 from . import views
+from . import views_campo
 from .api import api
 
 urlpatterns = [
+    path('campo/', views_campo.app_campo, name='campo'),
+    path('campo/sw.js', views_campo.service_worker, name='campo_sw'),
+    path('campo/manifest.webmanifest', views_campo.manifest, name='campo_manifest'),
+    path('campo/api/cadastros/', views_campo.cadastros, name='campo_cadastros'),
+    path('campo/api/enviar/', views_campo.enviar, name='campo_enviar'),
     path('home/', views.home, name='home'),
     path('operacoes/', views.operacoes, name='operacoes'),
     path('saidas/', views.saidas, name='saidas'),

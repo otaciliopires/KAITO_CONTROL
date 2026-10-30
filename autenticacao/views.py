@@ -1,15 +1,19 @@
 from django.shortcuts import render, redirect
+from django.conf import settings
 from django.contrib import auth
 from django.contrib import messages
 from django.contrib.messages import constants
 
 
 def login(request):
+    if request.user.is_authenticated and (request.user.status == 'a' or getattr(settings, 'AMBIENTE_HOMOLOGACAO', False)):
+        return redirect('campo')
+
     if request.method == 'GET':
         if request.user.is_authenticated and request.user.status == 'c':
-            return redirect('/ceq/home/')
+            return redirect('home')
         elif request.user.is_authenticated and request.user.status == 'o':
-            return redirect('/obra/lista_obras/')
+            return redirect('lista_obras')
         else:
             return render(request, 'login.html')
 
@@ -21,14 +25,16 @@ def login(request):
 
         if not user:
             messages.add_message(request, constants.ERROR, 'Usuário ou senha inválidos')
-            return redirect('/auth/login')
+            return redirect('login')
 
         auth.login(request, user)
+        if user.status == 'a' or getattr(settings, 'AMBIENTE_HOMOLOGACAO', False):
+            return redirect('campo')
         if request.user.status == 'c':
-            return redirect('/ceq/home')
-        return redirect('/obra/lista_obras')
+            return redirect('home')
+        return redirect('lista_obras')
 
 
 def sair(request):
     auth.logout(request)
-    return redirect('/auth/login')
+    return redirect('login')

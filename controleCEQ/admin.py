@@ -36,3 +36,17 @@ class TransferenciaAdmin(admin.ModelAdmin):
 class SaldoAdmin(admin.ModelAdmin):
     list_display = ('ano', 'quantidade')
     list_filter = ('ano',)
+
+
+from .models import ReciboAbastecimentoCampo
+
+@admin.register(ReciboAbastecimentoCampo)
+class ReciboAbastecimentoCampoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'usuario', 'abastecimento', 'recebido_em')
+    readonly_fields = ('id', 'usuario', 'abastecimento', 'hash_conteudo', 'recebido_em')
+    def has_add_permission(self, request):
+        return False
+    def has_delete_permission(self, request, obj=None):
+        return False
+    def has_change_permission(self, request, obj=None):
+        return False

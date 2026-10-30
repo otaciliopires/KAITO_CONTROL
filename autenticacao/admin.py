@@ -13,4 +13,7 @@ class UsuarioAdmin(admin_auth_django.UserAdmin):
     list_filter = admin_auth_django.UserAdmin.list_filter + ("status", "perfil_estoque")
     search_fields = admin_auth_django.UserAdmin.search_fields + ("funcao",)
 
-    fieldsets = admin_auth_django.UserAdmin.fieldsets + (('Qualificação', {"fields": ("status","funcao")}), ('Estoque', {"fields": ("perfil_estoque",)}), ('Imagem', {"fields": ("foto",)}))
+    fieldsets = admin_auth_django.UserAdmin.fieldsets + (('Qualificação', {"fields": ("status","funcao","tanque_abastecimento")}), ('Estoque', {"fields": ("perfil_estoque",)}), ('Imagem', {"fields": ("foto",)}))
+    add_fieldsets = admin_auth_django.UserAdmin.add_fieldsets + (
+        ('Acesso ao sistema', {'fields': ('status', 'tanque_abastecimento')}),
+    )
