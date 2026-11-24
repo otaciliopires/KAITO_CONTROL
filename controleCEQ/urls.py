@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from . import views_campo
+from . import views_campo, views_relatorios
 from .api import api
 
 urlpatterns = [
@@ -19,7 +19,8 @@ urlpatterns = [
     path('obras_ano/', views.obras_ano, name='obras_ano'),
     path('', views.importexcel, name='importexcel'),
     path('grafico_vunit/', views.grafico_vunit, name='grafico_vunit'),
-    path('relatorio/', views.relatorio, name='relatorio'),
+    path('relatorio/', views_relatorios.relatorio, name='relatorio'),
+    path('relatorio/pdf/', views_relatorios.relatorio_pdf, name='relatorio_pdf'),
     path('pdf_relatorio/<str:mes_atual>/', views.pdf_relatorio, name='pdf_relatorio'),
     path('saidas_pdf/', views.saidas_pdf, name='saidas_pdf'),
     path('entradas_pdf/', views.entradas_pdf, name='entradas_pdf'),

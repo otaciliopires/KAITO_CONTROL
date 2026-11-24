@@ -1,0 +1,21 @@
+{% load l10n %}
+<section class="r-panel r-weekly" aria-labelledby="weekly-title">
+  <div class="r-section-head"><div><p class="r-eyebrow">EVOLUÇÃO NO PERÍODO</p><h2 id="weekly-title">Comparativo por semana</h2><p>Entradas e abastecimentos, em litros.</p></div><div class="r-legend"><span><i class="r-dot r-in"></i>Entradas</span><span><i class="r-dot r-out"></i>Abastecimentos</span></div></div>
+  <div class="r-chart-scroll" tabindex="0" role="region" aria-label="Gráfico comparativo semanal. Valores disponíveis na tabela abaixo.">
+    <svg class="r-week-chart" viewBox="0 0 900 288" role="img" aria-labelledby="weekly-chart-title weekly-chart-desc">
+      <title id="weekly-chart-title">Entradas e abastecimentos por semana — {{ mes_rotulo }}</title>
+      <desc id="weekly-chart-desc">Cada semana mostra duas barras lado a lado. Verde representa entradas e coral representa abastecimentos. A tabela abaixo apresenta os valores exatos.</desc>
+      {% for tick in ticks %}<line x1="90" y1="{{ tick.y|unlocalize }}" x2="882" y2="{{ tick.y|unlocalize }}" class="r-gridline"/><text x="77" y="{{ tick.y|unlocalize }}" dy="4" text-anchor="end" class="r-axis">{{ tick.valor|floatformat:"0g" }}</text>{% endfor %}
+      {% for semana in semanas %}<g>
+        <title>Semana {{ semana.numero }} ({{ semana.intervalo }}): entradas {{ semana.entradas|floatformat:"2g" }} L; abastecimentos {{ semana.abastecimentos|floatformat:"2g" }} L.</title>
+        <rect x="{{ semana.entradas_barra.x|unlocalize }}" y="{{ semana.entradas_barra.y|unlocalize }}" width="{{ semana.entradas_barra.largura|unlocalize }}" height="{{ semana.entradas_barra.altura|unlocalize }}" rx="4" class="r-svg-in"/>
+        <rect x="{{ semana.abastecimentos_barra.x|unlocalize }}" y="{{ semana.abastecimentos_barra.y|unlocalize }}" width="{{ semana.abastecimentos_barra.largura|unlocalize }}" height="{{ semana.abastecimentos_barra.altura|unlocalize }}" rx="4" class="r-svg-out"/>
+        <text x="{{ semana.entradas_barra.texto_x|unlocalize }}" y="{{ semana.entradas_barra.texto_y|unlocalize }}" text-anchor="middle" class="r-bar-value r-text-in">{{ semana.entradas|floatformat:"0g" }}</text>
+        <text x="{{ semana.abastecimentos_barra.texto_x|unlocalize }}" y="{{ semana.abastecimentos_barra.texto_y|unlocalize }}" text-anchor="middle" class="r-bar-value r-text-out">{{ semana.abastecimentos|floatformat:"0g" }}</text>
+        <text x="{{ semana.centro|unlocalize }}" y="246" text-anchor="middle" class="r-week-label">Semana {{ semana.numero }}</text><text x="{{ semana.centro|unlocalize }}" y="265" text-anchor="middle" class="r-axis">{{ semana.intervalo }}</text>
+      </g>{% endfor %}
+    </svg>
+  </div>
+  <details class="r-week-details"><summary>Ver valores semanais detalhados</summary><div class="r-table-wrap"><table class="r-table"><caption class="r-sr">Comparativo semanal em litros</caption><thead><tr><th scope="col">Semana / datas</th><th scope="col" class="r-number">Entradas (L)</th><th scope="col" class="r-number">Abastecimentos (L)</th><th scope="col" class="r-number">Resultado (L)</th><th scope="col" class="r-number">Abastecimentos</th></tr></thead><tbody>{% for semana in semanas %}<tr><th scope="row">Semana {{ semana.numero }} <small>{{ semana.intervalo }}</small></th><td class="r-number r-text-in">{{ semana.entradas|floatformat:"2g" }}</td><td class="r-number r-text-out">{{ semana.abastecimentos|floatformat:"2g" }}</td><td class="r-number {% if semana.resultado < 0 %}r-negative{% endif %}">{{ semana.resultado|floatformat:"2g" }}</td><td class="r-number">{{ semana.registros }}</td></tr>{% endfor %}</tbody></table></div></details>
+  <p class="r-footnote">Semanas de segunda a domingo, limitadas ao primeiro e último dia do mês. As barras exibem litros arredondados; a tabela mantém duas casas decimais.</p>
+</section>

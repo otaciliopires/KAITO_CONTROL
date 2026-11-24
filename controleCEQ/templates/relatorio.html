@@ -1,146 +1,36 @@
-{%extends 'base.html'%}
-
-{%load static%}
-
-{%block 'head'%}
-<link rel='stylesheet' href="{% static 'ceq/css/home.css' %}">
-<link rel="stylesheet" href="{% static 'autenticacao/css/base.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-{%endblock%}
-
-{%block 'body'%}
-
-
-<main id="main" class="main">
-  <div class="pagetitle">
-    {% if messages %}
-      {%for i in messages%}
-        <div class="{{i.tags}}" role='alert'>
-            {{i}}
-        </div>
-      {%endfor%}
-    {%endif%}    
-
-    <div class='row' style="float: right;">
-      <form method='GET' id="monthform" action="{%url 'relatorio'%}">
-        <select id='monthselector' name='month' onchange="this.form.submit()">
-          <option value="" disable select>Selecione um mês</option>
-          {%for mes in meses%}
-            <option value="{{mes}}">{{mes}}</option>
-          {%endfor%}
-        </select>
-      </form>
-
-      
-    </div>
-    <a href="/ceq/pdf_relatorio/{{mes_atual}}/" class="btn btn-danger" role="button"><i class="bi bi-file-earmark-pdf-fill"></i> Gerar Relatório</a>
-    </div> 
-
-  <div class='row'>        
-     <div class="col-4">
-      <div class="card">
-
-         <div class="card-body">
-            <h5 class="card-title" style='font-size:25px'>Entradas e Saídas Obras - {{mes_atual}}</h5>
-            <div class="activity">
-
-
-             <table class="table table-striped table-bordered">
-               <thead style="font-size:10px" >
-                 <tr>
-                   <th scope='col-2'>Obra</th>
-                   <th scope="col-1">Saídas</th>
-                   <th scope="col-1">Entradas</th>
-
-                   
-                 </tr>
-               </thead>
-
-               <tbody style="font-size:10px" >
-               {%for value in sort_obras%}    
-                 <tr>
-                   <th style='font-size:8px;' scope="row">{{value.0}}</th>
-                   <td style='font-size:12px; font-weight:bold'>{{value.1|floatformat:"2g"}}</td>
-                   <td style='font-size:12px; font-weight:bold'>{{value.2|floatformat:"2g"}}</td>
-
-                 {%endfor%}
-                  </tbody>
-             </table>
-               
-            </div>
-         </div>
-      </div>
-    </div>
-
-
-    <div class="col">
-      <canvas id="reportsChart"></canvas>
-      <script>
-          var obras = {{ obras_grafico|safe }};
-          var values = {{ entradas|safe }};
-          var additionalValues = {{ saidas|safe }};
-          var ctx = document.getElementById('reportsChart').getContext('2d');
-          
-          var barChart = new Chart(ctx, {
-              type: 'bar',
-              data: {
-                  labels: obras,
-                  datasets: [
-                      {
-                          label: 'Diesel Recebido',
-                          data: values,
-                          backgroundColor: 'blue',
-                          borderColor: 'blue',
-                          borderWidth: 1
-                      },
-                      {
-                          label: 'Diesel Consumido',
-                          data: additionalValues,
-                          backgroundColor: 'red',
-                          borderColor: 'red',
-                          borderWidth: 1
-                      }
-                  ]
-              },
-              options: {
-                  scales: {
-                      y: { beginAtZero: true }
-                  }
-              }
-          });
-      </script>
-  </div>
-</div>
-
-
-  </div>
-</div>
-
-     
+{% extends 'base.html' %}
+{% load static l10n %}
+{% block 'titulo' %}Relatórios de diesel · KAITO{% endblock %}
+{% block 'head' %}<link rel="stylesheet" href="{% static 'ceq/css/relatorios.css' %}?v=1">{% endblock %}
+{% block 'body' %}
+<main id="main" class="main kaito-reports">
+  <header class="r-page-head"><div><p class="r-eyebrow">CONTROLE DE COMBUSTÍVEL</p><h1>Relatórios de diesel</h1><p>Uma visão clara das entradas, do consumo e do saldo de cada obra.</p></div><a class="r-button r-button-light r-print" href="{{ pdf_link }}" target="_blank" rel="noopener"><i class="bi bi-printer" aria-hidden="true"></i> Imprimir / PDF</a></header>
+  <nav class="r-tabs" aria-label="Tipos de relatório"><a href="{{ mensal_link }}" {% if visao == 'mensal' %}aria-current="page"{% endif %}><i class="bi bi-grid-1x2" aria-hidden="true"></i><span>Visão mensal <small>Todas as obras</small></span></a><a href="{{ obra_link }}" {% if visao == 'obra' %}aria-current="page"{% endif %}><i class="bi bi-building" aria-hidden="true"></i><span>Relatório por obra <small>Consumo e equipamentos</small></span></a></nav>
+  <form class="r-filters" method="get" action="{% url 'relatorio' %}"><input type="hidden" name="visao" value="{{ visao }}"><div class="r-filter"><label for="report-period">Mês de referência</label><input id="report-period" type="month" name="periodo" value="{{ periodo }}" min="1900-01" max="2100-12" required></div>{% if visao == 'obra' %}<div class="r-filter r-filter-site"><label for="report-site">Obra</label><select id="report-site" name="obra" required><option value="">Selecione uma obra</option>{% for obra in obras %}<option value="{{ obra.pk }}" {% if obra_selecionada.pk == obra.pk %}selected{% endif %}>{{ obra.nome }}</option>{% endfor %}</select></div>{% elif obra_selecionada %}<input type="hidden" name="obra" value="{{ obra_selecionada.pk }}">{% endif %}<button type="submit" class="r-button"><i class="bi bi-funnel" aria-hidden="true"></i> Atualizar relatório</button><div class="r-period-nav"><a href="{{ anterior_link }}" aria-label="Ver mês anterior">←</a><a href="{{ proximo_link }}" aria-label="Ver próximo mês">→</a></div></form>
+  {% if aviso %}<div class="r-notice" role="status">{{ aviso }}</div>{% endif %}
+  <section class="r-period-heading"><div><h2>{% if visao == 'obra' %}{{ obra_selecionada.nome|default:'Selecione uma obra' }}{% else %}Todas as obras{% endif %}</h2><p>{{ inicio|date:'d/m/Y' }} a {{ fim|date:'d/m/Y' }}{% if visao == 'mensal' %} · {{ obras_movimento }} obra{{ obras_movimento|pluralize }} com movimentação{% endif %}</p></div><span class="r-month-pill"><i class="bi bi-calendar3" aria-hidden="true"></i>{{ mes_rotulo }}</span></section>
+  {% if sem_dados %}<div class="r-empty-period"><i class="bi bi-calendar2-check" aria-hidden="true"></i><div><strong>Nenhum lançamento neste mês.</strong><p>Os gráficos e totais abaixo permanecem zerados.{% if ultimo_link %} <a href="{{ ultimo_link }}">Ver {{ ultimo_rotulo }}, último mês com lançamentos →</a>{% endif %}</p></div></div>{% endif %}
+  {% if visao == 'obra' and not obra_selecionada %}<div class="r-notice">Escolha uma obra e clique em Atualizar relatório para consultar os dados.</div>{% endif %}
+  <section class="r-metrics" aria-label="Resumo do período">
+    <article class="r-metric r-metric-in"><div class="r-metric-top"><span>Entradas no mês</span><i class="bi bi-arrow-down-left" aria-hidden="true"></i></div><p class="r-metric-value">{{ resumo.entradas|default_if_none:0|floatformat:'2g' }} <small>L</small></p><p>{{ resumo.notas|default:0 }} registro{{ resumo.notas|pluralize }} de entrada <span>· R$ {{ resumo.valor|default_if_none:0|floatformat:'2g' }}</span></p></article>
+    <article class="r-metric r-metric-out"><div class="r-metric-top"><span>Abastecimentos no mês</span><i class="bi bi-fuel-pump" aria-hidden="true"></i></div><p class="r-metric-value">{{ resumo.abastecimentos|default_if_none:0|floatformat:'2g' }} <small>L</small></p><p>{{ resumo.registros|default:0 }} lançamento{{ resumo.registros|pluralize }} no período</p></article>
+    <article class="r-metric"><div class="r-metric-top"><span>Resultado do mês</span><i class="bi bi-arrow-left-right" aria-hidden="true"></i></div><p class="r-metric-value {% if resumo.resultado < 0 %}r-negative{% endif %}">{{ resumo.resultado|default_if_none:0|floatformat:'2g' }} <small>L</small></p><p>Entradas − abastecimentos <span>· sem saldo anterior</span></p></article>
+    {% if visao == 'obra' %}<article class="r-metric r-metric-balance"><div class="r-metric-top"><span>Saldo atual da obra</span><i class="bi bi-wallet2" aria-hidden="true"></i></div><p class="r-metric-value {% if obra_selecionada.saldo < 0 %}r-negative{% endif %}">{{ obra_selecionada.saldo|default_if_none:0|floatformat:'2g' }} <small>L</small></p><p>Saldo cadastrado no KAITO <span>· todos os períodos</span></p></article>{% else %}<article class="r-metric r-metric-balance"><div class="r-metric-top"><span>Obras com movimentação</span><i class="bi bi-buildings" aria-hidden="true"></i></div><p class="r-metric-value">{{ obras_movimento }} <small>obras</small></p><p>{{ obras|length }} obra{{ obras|length|pluralize }} cadastrada{{ obras|length|pluralize }} no sistema</p></article>{% endif %}
   </section>
+  <div class="r-analysis-grid">{% include 'relatorios/semanas.html' %}
+    <section class="r-panel r-ranking"><div class="r-section-head"><div><p class="r-eyebrow">{% if visao == 'obra' %}NA OBRA SELECIONADA{% else %}DISTRIBUIÇÃO DO CONSUMO{% endif %}</p><h2>{% if visao == 'obra' %}Equipamentos em destaque{% else %}Obras em destaque{% endif %}</h2><p>Maiores volumes abastecidos no mês.</p></div></div>
+      {% if visao == 'obra' %}{% for equipamento in ranking_equipamentos %}<div class="r-rank-row"><div class="r-rank-heading"><span class="r-rank-name">{{ equipamento.equipamento__prefixo }}<small>{{ equipamento.equipamento__descricao|default:'Equipamento' }}</small></span><strong>{{ equipamento.total|floatformat:'2g' }} <small>L</small></strong></div><div class="r-progress"><span style="width:{{ equipamento.barra|unlocalize }}%"></span></div><p>{{ equipamento.participacao|floatformat:1 }}% do consumo da obra</p></div>{% empty %}<div class="r-empty-small"><i class="bi bi-truck" aria-hidden="true"></i><p>Nenhum equipamento abastecido nesta obra e neste mês.</p></div>{% endfor %}{% else %}{% for item in ranking_obras %}<div class="r-rank-row"><div class="r-rank-heading"><span class="r-rank-name">{% if item.link %}<a href="{{ item.link }}">{{ item.nome }}</a>{% else %}{{ item.nome }}{% endif %}</span><strong>{{ item.abastecimentos|floatformat:'2g' }} <small>L</small></strong></div><div class="r-progress"><span style="width:{{ item.barra|unlocalize }}%"></span></div><p>{{ item.participacao|floatformat:1 }}% do consumo total</p></div>{% empty %}<div class="r-empty-small"><i class="bi bi-bar-chart" aria-hidden="true"></i><p>A distribuição aparecerá quando houver abastecimentos no mês.</p></div>{% endfor %}{% endif %}
+      <p class="r-footnote">Até 6 destaques. A tabela abaixo contém todos os registros agrupados.</p>
+    </section>
+  </div>
+  {% if visao == 'mensal' %}
+  <section class="r-panel"><div class="r-section-head"><div><p class="r-eyebrow">CONSOLIDADO MENSAL</p><h2>Movimentação de todas as obras</h2><p>Compare o diesel recebido e abastecido, obra a obra.</p></div><span class="r-count">{{ linhas_obras|length }} linhas</span></div>{% if sem_obra %}<div class="r-notice r-notice-small">Há abastecimentos sem obra vinculada. Eles estão incluídos no total e destacados na última linha.</div>{% endif %}
+  <div class="r-table-wrap"><table class="r-table"><caption class="r-sr">Entradas e abastecimentos de todas as obras em {{ mes_rotulo }}</caption><thead><tr><th scope="col">Obra</th><th scope="col" class="r-number">Entradas (L)</th><th scope="col" class="r-number">Abastecimentos (L)</th><th scope="col" class="r-number">Resultado do mês (L)</th><th scope="col" class="r-number">Lançamentos</th><th scope="col"><span class="r-sr">Detalhes</span></th></tr></thead><tbody>{% for item in linhas_obras %}<tr{% if not item.obra %} class="r-row-warning"{% endif %}><th scope="row">{{ item.nome }}{% if item.obra %}<small>{{ item.obra.get_status_display }}</small>{% endif %}</th><td class="r-number r-text-in">{{ item.entradas|floatformat:'2g' }}</td><td class="r-number r-text-out">{{ item.abastecimentos|floatformat:'2g' }}</td><td class="r-number {% if item.resultado < 0 %}r-negative{% endif %}">{{ item.resultado|floatformat:'2g' }}</td><td class="r-number">{{ item.registros }}</td><td>{% if item.link %}<a class="r-table-link" href="{{ item.link }}" aria-label="Ver relatório da obra {{ item.nome }}">Ver obra <span aria-hidden="true">↗</span></a>{% endif %}</td></tr>{% empty %}<tr><td colspan="6" class="r-empty-cell">Nenhuma obra cadastrada.</td></tr>{% endfor %}</tbody><tfoot><tr><th scope="row">Total geral do mês</th><td class="r-number">{{ resumo.entradas|floatformat:'2g' }}</td><td class="r-number">{{ resumo.abastecimentos|floatformat:'2g' }}</td><td class="r-number">{{ resumo.resultado|floatformat:'2g' }}</td><td class="r-number">{{ resumo.registros }}</td><td></td></tr></tfoot></table></div></section>
+  {% else %}
+  <section class="r-panel"><div class="r-section-head"><div><p class="r-eyebrow">CONSUMO POR EQUIPAMENTO</p><h2>Abastecimentos na obra</h2><p>Total abastecido por equipamento em {{ mes_rotulo|lower }}.</p></div><span class="r-count">{{ equipamentos|length }} equipamento{{ equipamentos|length|pluralize }}</span></div><div class="r-table-wrap"><table class="r-table"><caption class="r-sr">Total mensal de abastecimentos por equipamento na obra selecionada</caption><thead><tr><th scope="col">Equipamento</th><th scope="col">Descrição</th><th scope="col" class="r-number">Abastecimentos</th><th scope="col" class="r-number">Quantidade (L)</th><th scope="col" class="r-number">Participação</th><th scope="col">Último no mês</th></tr></thead><tbody>{% for equipamento in equipamentos %}<tr><th scope="row"><span class="r-prefix">{{ equipamento.equipamento__prefixo }}</span></th><td>{{ equipamento.equipamento__descricao|default:'—' }}</td><td class="r-number">{{ equipamento.registros }}</td><td class="r-number r-text-out">{{ equipamento.total|floatformat:'2g' }}</td><td class="r-number">{{ equipamento.participacao|floatformat:1 }}%</td><td>{{ equipamento.ultimo|date:'d/m/Y' }}</td></tr>{% empty %}<tr><td colspan="6" class="r-empty-cell">Nenhum abastecimento para esta obra no mês selecionado.</td></tr>{% endfor %}</tbody><tfoot><tr><th scope="row" colspan="2">Total da obra no mês</th><td class="r-number">{{ resumo.registros|default:0 }}</td><td class="r-number">{{ resumo.abastecimentos|default_if_none:0|floatformat:'2g' }}</td><td></td><td></td></tr></tfoot></table></div></section>
+  <section class="r-panel"><div class="r-section-head"><div><p class="r-eyebrow">DIESEL RECEBIDO</p><h2>Entradas da obra no mês</h2><p>Notas recebidas pela obra, ordenadas pela data de entrega.</p></div><span class="r-count">{{ notas|length }} registro{{ notas|length|pluralize }}</span></div><div class="r-table-wrap"><table class="r-table"><caption class="r-sr">Notas de entrada da obra em {{ mes_rotulo }}</caption><thead><tr><th scope="col">Entrega</th><th scope="col">Nota fiscal</th><th scope="col">Fornecedor</th><th scope="col" class="r-number">Quantidade (L)</th><th scope="col" class="r-number">Valor da nota (R$)</th></tr></thead><tbody>{% for nota in notas %}<tr><td>{{ nota.data_entrega|date:'d/m/Y' }}</td><th scope="row">{{ nota.nota_fiscal|default:'—' }}</th><td>{{ nota.fornecedor|default:'—' }}</td><td class="r-number r-text-in">{{ nota.quantidade|floatformat:'2g' }}</td><td class="r-number">{{ nota.preco_total|floatformat:'2g' }}</td></tr>{% empty %}<tr><td colspan="5" class="r-empty-cell">Nenhuma entrada para esta obra no mês selecionado.</td></tr>{% endfor %}</tbody><tfoot><tr><th scope="row" colspan="3">Total de entradas no mês</th><td class="r-number">{{ resumo.entradas|default_if_none:0|floatformat:'2g' }}</td><td class="r-number">{{ resumo.valor|default_if_none:0|floatformat:'2g' }}</td></tr></tfoot></table></div></section>
+  {% endif %}
+  <footer class="r-report-footer"><p><strong>Como ler:</strong> entradas seguem a data de entrega; abastecimentos seguem a data do lançamento. O resultado mensal é a diferença entre os dois e não representa o estoque dos tanques.{% if visao == 'obra' %} O saldo atual é o valor cadastrado na obra e não varia com o filtro de mês.{% endif %}</p><span>KAITO · Consulta em {{ gerado_em|date:'d/m/Y H:i' }}</span></footer>
 </main>
-<footer id="footer" class="footer">
-  <div class="copyright"> &copy; Copyright <strong><span>KAITO Solutions</span></strong>. All Rights Reserved</div>
-  
-</footer>
-<a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>  
-
-
-
-      
-</body>
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-
-  
-<script src="{% static 'ceq/javascript/js.js' %}?v=2"></script>
-
-
-
-
-{%endblock%}
+<script>document.querySelectorAll('.sidebar-nav a').forEach(function(a){if(a.getAttribute('href')==="{% url 'relatorio' %}"){a.setAttribute('aria-current','page');a.classList.remove('collapsed');}});var reportDetails=[];window.addEventListener('beforeprint',function(){reportDetails=Array.from(document.querySelectorAll('.r-week-details')).map(function(d){var state={element:d,open:d.open};d.open=true;return state;});});window.addEventListener('afterprint',function(){reportDetails.forEach(function(state){state.element.open=state.open;});});</script>
+{% endblock %}
