@@ -1453,7 +1453,7 @@ def entradas_pdf(request):
     
     # # Criação do PDF
     response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="documento.pdf"'
+    response['Content-Disposition'] = 'inline; filename="entradas-diesel.pdf"'
 
     # # Converter HTML para PDF
     pisa_status = pisa.CreatePDF(html_index, dest=response)

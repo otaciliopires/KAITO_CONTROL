@@ -11,6 +11,7 @@ class TanqueAdmin(admin.ModelAdmin):
 
 @admin.register(Abastecimento)
 class AbastecimentoAdmin(admin.ModelAdmin):
+    readonly_fields = ('validacao_responsavel',)
     list_display = ('equipamento', 'obra', 'litros', 'data', 'operador', 'status', 'observacao')
     list_filter = ('obra', 'tanque', 'lubrificacao', 'status')
     search_fields = ('equipamento__prefixo', 'operador', 'observacao')
@@ -50,3 +51,15 @@ class ReciboAbastecimentoCampoAdmin(admin.ModelAdmin):
         return False
     def has_change_permission(self, request, obj=None):
         return False
+
+
+from .models import ValidacaoResponsavelCampo
+
+@admin.register(ValidacaoResponsavelCampo)
+class ValidacaoResponsavelCampoAdmin(admin.ModelAdmin):
+    list_display = ('id', 'obra', 'data', 'responsavel', 'usuario', 'recebido_em')
+    list_filter = ('obra', 'data')
+    readonly_fields = ('id', 'usuario', 'obra', 'data', 'responsavel', 'assinatura', 'hash_conteudo', 'registrado_no_aparelho', 'recebido_em')
+    def has_add_permission(self, request): return False
+    def has_change_permission(self, request, obj=None): return False
+    def has_delete_permission(self, request, obj=None): return False

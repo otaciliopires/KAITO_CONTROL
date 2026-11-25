@@ -51,6 +51,7 @@ class Abastecimento(models.Model):
     operador = models.CharField(max_length=50)
     colaborador = models.ForeignKey(Usuario, on_delete=models.DO_NOTHING)
     status = models.BooleanField(default=True)
+    validacao_responsavel = models.ForeignKey('ValidacaoResponsavelCampo', on_delete=models.PROTECT, null=True, blank=True, related_name='abastecimentos')
     assinatura = models.JSONField(default=dict, blank=True, verbose_name='Assinatura do motorista / operador')
     observacao = models.CharField(max_length=100, default="", null="")
 
@@ -87,3 +88,19 @@ class ReciboAbastecimentoCampo(models.Model):
     class Meta:
         verbose_name = 'Recibo de abastecimento em campo'
         verbose_name_plural = 'Recibos de abastecimento em campo'
+
+
+class ValidacaoResponsavelCampo(models.Model):
+    id = models.UUIDField(primary_key=True, editable=False)
+    usuario = models.ForeignKey(Usuario, on_delete=models.PROTECT)
+    obra = models.ForeignKey(Obras, on_delete=models.PROTECT)
+    data = models.DateField()
+    responsavel = models.CharField(max_length=100, blank=True)
+    assinatura = models.JSONField()
+    hash_conteudo = models.CharField(max_length=64)
+    registrado_no_aparelho = models.DateTimeField()
+    recebido_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Validação do responsável em campo'
+        verbose_name_plural = 'Validações do responsável em campo'
