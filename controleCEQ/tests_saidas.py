@@ -7,6 +7,7 @@ from django.test.utils import CaptureQueriesContext
 
 from autenticacao.models import Usuario
 from ativos.models import Obras, Equipamentos
+from .colunas_saidas import COLUNAS
 from .models import Abastecimento, Tanque
 
 
@@ -191,7 +192,7 @@ class SaidasFiltrosTests(TestCase):
         self.assertIn('120,00 L',text)
         self.assertIn(self.a.nome,text)
         self.assertIn('01/07/2026 a 31/07/2026',text)
-        self.assertIn('Lubr.',text)
+        self.assertIn('Lubrificação',text)
         self.assertNotIn('Bravo',text)
         self.assertGreater(float(reader.pages[0].mediabox.width),float(reader.pages[0].mediabox.height))
 
@@ -213,7 +214,7 @@ class SaidasFiltrosTests(TestCase):
         pages=[page.extract_text() for page in reader.pages]
         self.assertGreater(len(pages),2)
         for page in pages:
-            self.assertIn('Equipamento /',page)
+            self.assertIn('Equipamento',page)
             self.assertIn('Quantidade (L)',' '.join(page.split()))
         for i in range(180):
             self.assertTrue(any(str(900000+i) in page and 'OperadorTeste'+str(i) in page for page in pages))
@@ -248,3 +249,56 @@ class SaidasFiltrosTests(TestCase):
         self.assertEqual(self.client.get('/ceq/transferencias_pdf/',{'data_inicio':'invalid'}).status_code,400)
         self.client.force_login(self.obra_user)
         self.assertEqual(self.client.get('/ceq/transferencias_pdf/').status_code,403)
+
+    def test_colunas_selecionadas_preservadas_no_html_e_consulta(self):
+        params=dict(self.julho,coluna=['obra','quantidade'],personalizar_colunas='1')
+        response=self.client.get('/ceq/saidas/',params)
+        self.assertEqual(response.status_code,200)
+        self.assertEqual(response.context['colunas_visiveis'],['obra','quantidade'])
+        self.assertEqual(response.context['total_saidas'],390)
+        self.assertEqual(response.context['saidas'].paginator.count,5)
+        self.assertIn('coluna=obra',response.context['querystring'])
+        self.assertIn('coluna=quantidade',response.context['querystring'])
+        self.assertContains(response,'data-coluna="operador" hidden')
+        self.assertContains(response,'form="saidas-filtros"')
+        self.assertContains(response,'id="colunas-relatorio"')
+
+    def test_pdf_respeita_colunas_e_descricao_abaixo_do_equipamento(self):
+        from io import BytesIO
+        from pypdf import PdfReader
+        for selected in [['data','quantidade'],['descricao'],['equipamento'],['equipamento','descricao']]:
+            params=dict(self.julho,obra=self.a.pk,coluna=selected,personalizar_colunas='1')
+            response=self.client.get('/ceq/saidas_pdf/',params)
+            self.assertEqual(response.status_code,200)
+            text=' '.join(p.extract_text() for p in PdfReader(BytesIO(response.content)).pages)
+            self.assertNotIn('Operador / motorista',text)
+            self.assertNotIn('Lubrificação',text)
+            self.assertNotIn('Horímetro / km',text)
+            self.assertIn('120,00 L',text)
+            if set(selected)=={'equipamento','descricao'}:
+                self.assertIn('Equipamento / descrição',text)
+                self.assertEqual(text.count('Escavadeira'),1)
+                positions={}
+                def position(t,cm,tm,font,size):
+                    if t.strip() in ('EQ-01','Escavadeira'):
+                        positions[t.strip()]=(tm[4],tm[5])
+                PdfReader(BytesIO(response.content)).pages[0].extract_text(visitor_text=position)
+                self.assertEqual(positions['EQ-01'][0],positions['Escavadeira'][0])
+                self.assertGreater(positions['EQ-01'][1],positions['Escavadeira'][1])
+            elif 'descricao' in selected:
+                self.assertIn('Escavadeira',text)
+                self.assertNotIn('EQ-01',text)
+            elif 'equipamento' in selected:
+                self.assertIn('EQ-01',text)
+                self.assertNotIn('Escavadeira',text)
+            else:
+                self.assertNotIn('Escavadeira',text)
+                self.assertIn('Quantidade (L)',' '.join(text.split()))
+
+    def test_coluna_invalida_ou_nenhuma_selecao_da_erro_controlado(self):
+        for params in [{'personalizar_colunas':'1'},{'coluna':'inexistente'},{'coluna':['obra','<script>']}]:
+            self.assertEqual(self.client.get('/ceq/saidas/',params).status_code,400)
+            self.assertEqual(self.client.get('/ceq/saidas_pdf/',params).status_code,400)
+        response=self.client.get('/ceq/saidas/',{'coluna':['obra','obra']})
+        self.assertEqual(response.context['colunas_visiveis'],['obra'])
+        self.assertEqual(self.client.get('/ceq/saidas/').context['colunas_visiveis'],[c['id'] for c in COLUNAS])

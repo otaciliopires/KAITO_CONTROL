@@ -64,14 +64,14 @@ class RelatoriosTests(TestCase):
         self.assertEqual(resumo['registros'], 5)
         self.assertEqual(response.context['obras_movimento'], 2)
 
-    def test_todas_obras_incluem_zeradas_e_sem_vinculo(self):
+    def test_mensal_inclui_apenas_obras_com_registros_e_sem_vinculo(self):
         response = self.get()
         linhas = response.context['linhas_obras']
-        self.assertEqual(len(linhas), 4)
+        self.assertEqual(len(linhas), 3)
         self.assertEqual(linhas[0]['nome'], 'Água Branca')
         self.assertEqual(linhas[-1]['nome'], 'Sem obra vinculada')
         self.assertEqual(sum(r['abastecimentos'] for r in linhas), response.context['resumo']['abastecimentos'])
-        self.assertEqual(next(r for r in linhas if r['obra'] == self.vazia)['entradas'], 0)
+        self.assertFalse(any(r['obra'] == self.vazia for r in linhas))
 
     def test_semanas_nao_perdem_nem_duplicam_lancamentos(self):
         response = self.get()
@@ -225,3 +225,24 @@ class RelatoriosTests(TestCase):
             self.assertIn('Nota fiscal', encontradas[0])
         self.assertEqual(sum(texto.count('TOTAL DA OBRA') for texto in paginas), 1)
         self.assertEqual(sum(texto.count('TOTAL DE ENTRADAS') for texto in paginas), 1)
+
+    def test_mensal_inclui_entrada_zero_e_nao_inclui_saldo_sem_lancamento(self):
+        Entrada.objects.create(obra=self.vazia,tanque=self.tanque,data_entrega=date(2026,11,1),data_nf=date(2026,11,1),
+            quantidade=0,preco_unitario=0,preco_total=0,nota_fiscal='ZERO',fornecedor='Fornecedor',colaborador=self.ceq)
+        response=self.get()
+        linha=next(r for r in response.context['linhas_obras'] if r['obra']==self.vazia)
+        self.assertEqual(linha['entradas'],0)
+        self.assertEqual(linha['notas'],1)
+        self.assertEqual(response.context['obras_movimento'],3)
+        self.assertEqual(self.get(periodo='2024-01').context['linhas_obras'],[])
+
+    def test_mensal_pdf_exclui_obras_sem_registros_no_mes(self):
+        from io import BytesIO
+        from pypdf import PdfReader
+        response=self.client.get('/ceq/relatorio/pdf/',{'periodo':'2026-11','visao':'mensal'})
+        self.assertEqual(response.status_code,200)
+        text=' '.join(p.extract_text() for p in PdfReader(BytesIO(response.content)).pages)
+        self.assertNotIn(self.vazia.nome,text)
+        self.assertIn(self.a.nome,text)
+        self.assertIn(self.b.nome,text)
+        self.assertIn('Sem obra vinculada',text)

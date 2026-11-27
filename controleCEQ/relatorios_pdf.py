@@ -187,7 +187,7 @@ def gerar_pdf(dados):
         weekly.append(p('O saldo atual é o valor cadastrado no KAITO e abrange todos os períodos, independentemente do filtro de mês.',estilos['nota']))
     story += [KeepTogether(weekly),PageBreak()]
     if not por_obra:
-        story.append(p('Detalhamento de todas as obras',estilos['titulo']))
+        story.append(p('Obras com movimentação no mês',estilos['titulo']))
         story.append(p(dados['mes_rotulo']+' | '+str(dados['obras_movimento'])+' obras com movimentação',estilos['subtitulo']))
         if dados['ranking_obras']:
             story.append(KeepTogether([p('Maiores volumes abastecidos',estilos['secao']),ranking(dados['ranking_obras'],'nome','abastecimentos'),Spacer(1,14)]))

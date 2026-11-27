@@ -177,7 +177,7 @@ def dados_relatorio(request):
         'anterior_link': link_relatorio((inicio-timedelta(days=1)).strftime('%Y-%m'), visao, selecionada.pk if selecionada else None),
         'proximo_link': link_relatorio((fim+timedelta(days=1)).strftime('%Y-%m'), visao, selecionada.pk if selecionada else None),
         'obras': obras, 'obra_selecionada': selecionada, 'resumo': resumo, 'semanas': semanas, 'ticks': ticks,
-        'linhas_obras': linhas, 'obras_movimento': obras_movimento, 'ranking_obras': ranking[:6],
+        'linhas_obras': [r for r in linhas if r['notas'] or r['registros']], 'obras_movimento': obras_movimento, 'ranking_obras': ranking[:6],
         'equipamentos': equipamentos, 'ranking_equipamentos': equipamentos[:6], 'notas': notas,
         'aviso': aviso, 'sem_obra': sem_obra, 'sem_dados': not total_notas and not total_registros,
         'ultimo_link': ultimo_link, 'ultimo_rotulo': ultimo_rotulo, 'gerado_em': timezone.localtime(),
@@ -190,6 +190,9 @@ def dados_relatorio(request):
 def relatorio(request):
     if not (request.user.is_superuser or request.user.status == 'c'):
         return HttpResponseForbidden('Seu usuário não tem acesso aos relatórios gerais de diesel.')
+    if request.GET.get('visao') == 'historico':
+        from .relatorio_historico import dados_historico
+        return render(request, 'relatorios/historico.html', dados_historico(request))
     return render(request, 'relatorio.html', dados_relatorio(request))
 
 
@@ -199,6 +202,12 @@ def relatorio(request):
 def relatorio_pdf(request):
     if not (request.user.is_superuser or request.user.status == 'c'):
         return HttpResponseForbidden('Seu usuário não tem acesso aos relatórios gerais de diesel.')
+    if request.GET.get('visao') == 'historico':
+        from .relatorio_historico import dados_historico
+        from .relatorio_historico_pdf import gerar_historico_pdf
+        response = HttpResponse(gerar_historico_pdf(dados_historico(request)), content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="kaito-historico-mensal-obras.pdf"'
+        return response
     from .relatorios_pdf import gerar_pdf
     dados = dados_relatorio(request)
     response = HttpResponse(gerar_pdf(dados), content_type='application/pdf')

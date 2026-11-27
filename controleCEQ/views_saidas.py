@@ -15,6 +15,7 @@ from django.utils import timezone
 from .saidas_pdf import FIELDS, gerar_saidas_pdf
 
 from ativos.models import Equipamentos, Obras
+from .colunas_saidas import COLUNAS, selecionar_colunas
 from .models import Abastecimento
 
 
@@ -72,6 +73,7 @@ def equipamentos_do_recorte(qs):
 
 def consulta_saidas(params):
     base, inicio, fim, obras = filtros_primarios(params)
+    colunas = selecionar_colunas(params)
     equipamentos = ids_selecionados(params, 'equipamento')
     qs = base.filter(equipamento_id__in=equipamentos) if equipamentos else base
     qs = qs.select_related('obra', 'equipamento', 'tanque').order_by('-numero', '-pk')
@@ -82,7 +84,10 @@ def consulta_saidas(params):
         pares.append(('data_fim', fim.isoformat()))
     pares.extend(('obra', item) for item in obras)
     pares.extend(('equipamento', item) for item in equipamentos)
-    return {'base': base, 'saidas': qs, 'inicio': inicio, 'fim': fim,
+    if 'coluna' in params or params.get('personalizar_colunas') == '1':
+        pares.append(('personalizar_colunas','1'))
+        pares.extend(('coluna', c['id']) for c in colunas)
+    return {'colunas': colunas, 'base': base, 'saidas': qs, 'inicio': inicio, 'fim': fim,
             'obras': obras, 'equipamentos': equipamentos, 'querystring': urlencode(pares)}
 
 
@@ -117,6 +122,10 @@ def saidas(request):
         'obra_ids_selecionados': consulta['obras'], 'equipamento_ids_selecionados': consulta['equipamentos'],
         'data_inicio_raw': request.GET.get('data_inicio', ''), 'data_fim_raw': request.GET.get('data_fim', ''),
         'querystring': consulta['querystring'], 'erro_filtro': erro, 'aviso_filtro': aviso,
+        'tem_filtros': bool(consulta['inicio'] or consulta['fim'] or consulta['obras'] or consulta['equipamentos']),
+        'colunas_disponiveis': COLUNAS,
+        'colunas_visiveis': [c['id'] for c in consulta.get('colunas', COLUNAS)],
+        'largura_tabela': max(320,min(1250,len(consulta.get('colunas',COLUNAS))*114)),
         'obra_user': Obras.objects.filter(usuario=request.user),
     }, status=400 if erro else 200)
 

@@ -5,6 +5,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from .colunas_saidas import COLUNAS
 from .relatorios_pdf import fontes, n, NAVY, GREEN, MUTED, LINE, PALE
 
 FIELDS = ('numero', 'tanque__prefixo', 'data', 'obra__nome',
@@ -46,11 +47,20 @@ def gerar_saidas_pdf(registros, consulta, gerado_em, obras=(), equipamentos=()):
     total = sum((Decimal(str(r['litros'] or 0)) for r in registros), Decimal('0'))
     obras_mov = len({r['obra_id'] for r in registros if r['obra_id'] is not None})
     equipamentos_mov = len({r['equipamento_id'] for r in registros if r['equipamento_id'] is not None})
-    proporcoes = [.055, .065, .075, .18, .17, .085, .085, .085, .045, .155]
-    # Normalize to the exact printable width.
+    selecionadas = consulta.get('colunas') or COLUNAS
+    juntar_descricao = {'equipamento','descricao'}.issubset({c['id'] for c in selecionadas})
+    definicoes = []
+    for coluna in selecionadas:
+        if juntar_descricao and coluna['id']=='descricao':
+            continue
+        definicao = dict(coluna)
+        if juntar_descricao and coluna['id']=='equipamento':
+            definicao['titulo'] = 'Equipamento / descrição'
+            definicao['peso'] += next(c['peso'] for c in selecionadas if c['id']=='descricao')
+        definicoes.append(definicao)
+    proporcoes = [c['peso'] for c in definicoes]
     colunas = [util*v/sum(proporcoes) for v in proporcoes]
-    titulos = ['Nº', 'Tanque', 'Data', 'Obra', 'Equipamento / descrição',
-               'Propriedade', 'Quantidade (L)', 'Horímetro / km', 'Lubr.', 'Operador / motorista']
+    titulos = [c['titulo'] for c in definicoes]
     inicio = consulta['inicio'].strftime('%d/%m/%Y') if consulta['inicio'] else 'Sem limite inicial'
     fim = consulta['fim'].strftime('%d/%m/%Y') if consulta['fim'] else 'Sem limite final'
     periodo = inicio + ' a ' + fim
@@ -109,14 +119,16 @@ def gerar_saidas_pdf(registros, consulta, gerado_em, obras=(), equipamentos=()):
     y = cabecalho(True)
     limite = 24*mm
     for i,r in enumerate(registros):
-        equip = str(r['equipamento__prefixo'] or '-')
-        descricao = r['equipamento__descricao'] or ''
-        if descricao and descricao != equip:
-            equip += '\n'+descricao
-        cells = [r['numero'],r['tanque__prefixo'],r['data'].strftime('%d/%m/%Y') if r['data'] else '-',
-                 r['obra__nome'] or 'Sem obra vinculada',equip,r['equipamento__proprietario'],
-                 n(r['litros']),n(r['horimetro']),'Sim' if r['lubrificacao'] else 'Não',r['operador']]
-        linhas = [quebrar(c,w-10) for c,w in zip(cells,colunas)]
+        cells = {'numero':r['numero'], 'tanque':r['tanque__prefixo'],
+                 'data':r['data'].strftime('%d/%m/%Y') if r['data'] else '-',
+                 'obra':r['obra__nome'] or 'Sem obra vinculada',
+                 'equipamento':r['equipamento__prefixo'], 'descricao':r['equipamento__descricao'],
+                 'propriedade':r['equipamento__proprietario'], 'quantidade':n(r['litros']),
+                 'horimetro':n(r['horimetro']), 'lubrificacao':'Sim' if r['lubrificacao'] else 'Não',
+                 'operador':r['operador']}
+        if juntar_descricao and cells['descricao'] and cells['descricao'] != cells['equipamento']:
+            cells['equipamento'] = str(cells['equipamento'] or '-') + '\n' + cells['descricao']
+        linhas = [quebrar(cells[c['id']],w-10) for c,w in zip(definicoes,colunas)]
         h = max(29,10*max(map(len,linhas))+12)
         # Keep the final record and the total together.
         reserva = 34 if i==len(registros)-1 else 0
@@ -127,11 +139,12 @@ def gerar_saidas_pdf(registros, consulta, gerado_em, obras=(), equipamentos=()):
         x = margem
         for ci,(partes,cw) in enumerate(zip(linhas,colunas)):
             for j,linha in enumerate(partes):
-                if ci in (6,7):
-                    canvas.setFillColor(NAVY);canvas.setFont('KaitoBold' if ci==6 else 'Kaito',7)
+                key=definicoes[ci]['id']
+                if key in ('quantidade','horimetro'):
+                    canvas.setFillColor(NAVY);canvas.setFont('KaitoBold' if key=='quantidade' else 'Kaito',7)
                     canvas.drawRightString(x+cw-5,y-13-j*10,linha)
                 else:
-                    texto(x+5,y-13-j*10,linha,'KaitoBold' if ci in (0,4) and j==0 else 'Kaito')
+                    texto(x+5,y-13-j*10,linha,'KaitoBold' if key in ('numero','equipamento') and j==0 else 'Kaito')
             x += cw
         y -= h
         canvas.setStrokeColor(LINE);canvas.line(margem,y,largura-margem,y)
